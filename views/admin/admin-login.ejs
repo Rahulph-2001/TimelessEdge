@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/bootstrap.min.css" />
+  <style>
+    :root {
+        --primary-color: #00ff00;
+        --secondary-color: #1a1a1a;
+        --background-color: #000000;
+        --text-color: #00ff00;
+        --border-radius: 0;
+        --box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+    }
+
+    body, html {
+        height: 100%;
+        margin: 0;
+        font-family: 'Roboto Mono', monospace;
+        background-color: var(--background-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: var(--text-color);
+    }
+
+    .login-container {
+        width: 100%;
+        max-width: 450px;
+        background-color: rgba(0, 0, 0, 0.8);
+        border: 1px solid var(--primary-color);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 40px;
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+    }
+
+    .login-container:hover {
+        transform: translateY(-25px);
+        box-shadow: 0 0 30px rgba(0, 255, 0, 0.4);
+    }
+
+    h2 {
+        color: var(--primary-color);
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-control {
+        background-color: rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--primary-color);
+        border-radius: 0;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+        color: var(--text-color);
+        font-family: 'Roboto Mono', monospace;
+    }
+
+    .form-control:focus {
+        background-color: rgba(0, 0, 0, 0.7);
+        border-color: #00ff00;
+        box-shadow: 0 0 0 0.2rem rgba(0, 255, 0, 0.25);
+    }
+
+    .btn-primary {
+        background-color: transparent;
+        border: 1px solid var(--primary-color);
+        padding: 12px 20px;
+        border-radius: 0;
+        width: 100%;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        color: var(--primary-color);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-color);
+        color: var(--background-color);
+        transform: translateY(-2px);
+    }
+
+    .error-message {
+        color: #ff0000;
+        font-size: 0.8rem;
+        margin-top: 5px;
+        animation: glitch 0.3s infinite;
+    }
+
+    .alert-danger {
+        background-color: rgba(255, 0, 0, 0.1);
+        color: #ff0000;
+        border: 1px solid #ff0000;
+        border-radius: 0;
+        padding: 10px;
+        margin-bottom: 20px;
+        font-family: 'Roboto Mono', monospace;
+    }
+
+    @keyframes glitch {
+        0% { transform: translate(0) }
+        20% { transform: translate(-2px, 2px) }
+        40% { transform: translate(-2px, -2px) }
+        60% { transform: translate(2px, 2px) }
+        80% { transform: translate(2px, -2px) }
+        100% { transform: translate(0) }
+    }
+
+    label {
+        color: var(--primary-color);
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+
+    @media (max-width: 480px) {
+        .login-container {
+            width: 95%;
+            padding: 20px;
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Admin Login</h2>
+    <% if (message) { %>
+    <div class="alert alert-danger text-center"><%= message %></div>
+    <% } %>
+    <form id="adminLoginForm" method="post" action="/admin/login">
+      <div class="form-group">
+        <label for="adminEmail">Email address</label>
+        <input
+          type="email"
+          class="form-control"
+          id="adminEmail"
+          name="email"
+          required
+        />
+        <div id="emailError" class="error-message"></div>
+      </div>
+      <div class="form-group">
+        <label for="adminPassword">Password</label>
+        <input
+          type="password"
+          class="form-control"
+          id="adminPassword"
+          name="password"
+          required
+        />
+        <div id="passwordError" class="error-message"></div>
+      </div>
+      <button type="submit" class="btn btn-primary">Log In</button>
+    </form>
+  </div>
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const adminLoginForm = document.getElementById("adminLoginForm");
+    const emailField = document.getElementById("adminEmail");
+    const passwordField = document.getElementById("adminPassword");
+
+    adminLoginForm.addEventListener("submit", function (event) {
+      let errors = [];
+      const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+
+      if (!emailPattern.test(emailField.value)) {
+        errors.push("Invalid email format.");
+      }
+      if (passwordField.value.length < 8) {
+        errors.push("Password must be at least 8 characters long.");
+      }
+
+      if (errors.length > 0) {
+        event.preventDefault();
+        Swal.fire({
+          icon: "error",
+          title: "Validation Error",
+          html: errors.join("<br>"),
+          confirmButtonColor: "#00ff00"
+        });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,304 @@
+<%- include("../../views/partials/admin/header") %>
+
+
+
+
+<style>
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Center the content title */
+.content-header {
+    text-align: center;
+    margin: 20px 0;
+}
+
+/* Style the title */
+.content-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #f7f3f3;
+}
+
+/* Center the search bar */
+.card-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+/* Style the search bar */
+.input-group {
+    width: 500px;
+    max-width: 90%;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid #ccc;
+}
+
+.input-group input {
+    border: none;
+    padding: 10px;
+    width: 80%;
+    border-radius: 20px;
+}
+
+.input-group button {
+    border: none;
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 20px;
+}
+
+.input-group button:hover {
+    background-color: #0056b3;
+}
+
+/* Style the table container */
+.table-container {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Style the table */
+.table {
+    width: 90%;
+    max-width: 1200px;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Table header */
+.table thead th {
+    background-color: #007bff;
+    color: white;
+    padding: 12px;
+    text-align: center;
+}
+
+/* Table rows */
+.table tbody td {
+    text-align: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Button styles */
+.btn {
+    border-radius: 5px;
+    font-weight: bold;
+    padding: 8px 12px;
+    display: inline-block;
+    text-align: center;
+}
+
+/* Ensure anchor tags inside buttons inherit styles */
+.btn a {
+    text-decoration: none;
+    color: white;
+    display: block;
+}
+
+/* Button colors */
+.btn-info {
+    background-color: #17a2b8;
+    border: none;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border: none;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table {
+        width: 100%;
+    }
+
+    .input-group {
+        width: 100%;
+    }
+
+    .btn {
+        width: auto;
+    }
+}
+
+
+
+
+</style>
+
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<div class="content-header">
+    <h2 class="content-title">Products</h2>
+</div>
+
+<header class="card-header">
+    <form action="" method="get">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search products" name="search">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+</header>
+
+<div class="table-container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Brand</th>
+                <th>Category</th>
+                <th>Sale Price</th>
+                <th>Quantity</th>
+                <th>Image</th>
+                <th>Action</th>
+                <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody>
+           <%products.forEach((ele)=>{%>
+
+          
+            <tr>
+                <td><%= ele.productName %></td>
+                <td><%= ele.brand ? ele.brand.name : 'No Brand' %></td>
+                <td><%= ele.category ? ele.category.name : 'No Category' %></td>
+                <td>$<%= ele.salePrice.toLocaleString() %></td>
+                <td><%= ele.quantity %></td>
+                <td>
+                    <% if (ele.productImages && ele.productImages.length > 0) { %>
+                        <img src="<%= ele.productImages[0] %>" alt="Product Image" width="50">
+                    <% } else { %>
+                        No Image
+                    <% } %>
+                    
+                </td>
+                
+                <td>
+                    <% if(ele.isBlocked) { %>
+                        <button onclick="blockProduct('<%= ele._id%>', false)" class="btn btn-success">Unblock</button>
+                    <% } else { %>
+                        <button onclick="blockProduct('<%= ele._id%>', true)" class="btn btn-danger">Block</button>
+
+                    <% } %>
+
+                    
+                    
+                </td>
+                <td>
+                    <button onclick="editProduct('<%=ele._id%>')" class="btn btn-info">Edit</a></button>
+                </td>
+            </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<div class="container mt-3"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+
+    
+
+function editProduct(productId){
+    Swal.fire({
+        title:`Are you Sure?`,
+        text:`Do you really want to edit this Product`,
+        icon:"warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: `Yes, edit it!`
+    }).then((ele)=>{
+        if(ele.isConfirmed){
+          window.location.href=`/admin/editProduct/${productId}`
+        }
+    })
+}
+  
+  
+
+
+
+
+
+
+function blockProduct(productId, isBlocked) {
+    let action = isBlocked ? "Block" : "Unblock"; 
+    Swal.fire({
+        title: `Are you sure?`,
+        text: `Do you really want to ${action.toLowerCase()} this product?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: `Yes, ${action} it!`
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `/admin/blockProduct/${productId}`,
+                method: "PUT",
+                data: JSON.stringify({ isBlocked: isBlocked }),
+                contentType: "application/json",
+                dataType: "json",
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: `${action}ed!`,
+                            text: `The product has been ${action.toLowerCase()}ed.`,
+                            icon: "success",
+                            confirmButtonText: "OK"
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire("Error!", "Something went wrong.", "error");
+                    }
+                },
+                error: function () {
+                    Swal.fire("Error!", "An unexpected error occurred.", "error");
+                }
+            });
+        }
+    });
+}
+
+
+
+
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

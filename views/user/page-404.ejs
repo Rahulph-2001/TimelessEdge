@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f8f8f8;
+            margin: 0;
+            padding: 50px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            color: red;
+            font-size: 24px;
+        }
+        p {
+            font-size: 16px;
+            color: #555;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: blue;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 5px;
+            margin-top: 10px;
+            cursor: pointer;
+            border: none;
+        }
+        .btn:hover {
+            background-color: darkblue;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Error Page</h1>
+        <p>An error occurred. Please try again later.</p>
+        <button class="btn" onclick="goHome()">Go to Home Page</button>
+    </div>
+
+    <script>
+        function goHome() {
+            window.location.href = "/"; // Redirects to your Express.js home route
+        }
+    </script>
+
+</body>
+</html>

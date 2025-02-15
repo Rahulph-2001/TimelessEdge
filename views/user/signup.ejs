@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zxx">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Male_Fashion Template" />
+    <meta name="keywords" content="Male_Fashion, unica, creative, html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Male-Fashion</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="css/elegant-icons.css" type="text/css" />
+    <link rel="stylesheet" href="css/magnific-popup.css" type="text/css" />
+    <link rel="stylesheet" href="css/nice-select.css" type="text/css" />
+    <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css" />
+    <link rel="stylesheet" href="css/slicknav.min.css" type="text/css" />
+    <link rel="stylesheet" href="css/style.css" type="text/css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        font-family: 'Nunito Sans', sans-serif;
+      }
+
+      .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .card-body {
+        padding: 3rem;
+      }
+
+      .signup-section {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 2rem;
+      }
+
+      .signup-form {
+        flex: 1;
+        min-width: 300px;
+        max-width: 50%;
+      }
+
+      .card-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 2rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-control {
+        height: 48px;
+        border-radius: 8px;
+        border: 2px solid #e1e1e1;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-control:focus {
+        border-color: #ff7f50;
+        box-shadow: 0 0 0 0.2rem rgba(255, 127, 80, 0.25);
+      }
+
+      .btn-primary {
+        background-color: #ff7f50;
+        border: none;
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        background-color: #ff6b3d;
+        transform: translateY(-2px);
+      }
+
+      .signup-image {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        max-width: 40%;
+        min-width: 300px;
+      }
+
+      .signup-image img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .social-btns {
+        margin-top: 1rem;
+      }
+
+      .social-btns button {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: 2px solid #e1e1e1;
+        background: white;
+        transition: all 0.3s ease;
+      }
+
+      .social-btns button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .sign-in-link {
+        color: #666;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-top: 1.5rem;
+        display: inline-block;
+        transition: all 0.3s ease;
+      }
+
+      .sign-in-link:hover {
+        color: #ff7f50;
+      }
+
+      .mt-2px {
+        color: #666;
+        font-size: 0.9rem;
+      }
+      .error-message{
+        color:red;
+        font-size: 0.75rem;
+        display:none
+      }
+
+      @media (max-width: 768px) {
+        .signup-form,
+        .signup-image {
+          max-width: 100%;
+        }
+        
+        .card-body {
+          padding: 2rem;
+        }
+        
+        .signup-section {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5 mb-1">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-body signup-section">
+              <div class="signup-form">
+                <h3 class="card-title text-center">Sign Up</h3>
+
+                <form  id="signform"method="post"action="/signup">
+                  <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="name"
+                      name="name"
+                      placeholder="Enter Name"
+                    />
+                    <div id="error1"class="error-message"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      name="email"
+                      id="email"
+                      placeholder="Enter email"
+                    />
+                    <div id="error2"class="error-message"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input
+                      type="tel"
+                      class="form-control"
+                      name="phone"
+                      id="phone"
+                      placeholder="Enter phone number"
+                    />
+                    <div id="error3"class="error-message"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                      type="password"
+                      class="form-control"
+                      name="password"
+                      id="password"
+                      placeholder="Password"
+                    />
+                    <div id="error4"class="error-message"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input
+                      type="password"
+                      class="form-control"
+                      name="cPassword"
+                      id="confirm-password"
+                      placeholder="Confirm Password"
+                    />
+                    <div id="error5"class="error-message"></div>
+                  </div>
+                  <% if (locals.message && message.length > 0) { %>
+                    <div class="alert alert-danger text-center">
+                      <%= message %>
+                    </div>
+                  <% } %>
+                  
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <button type="submit" class="btn btn-primary">
+                      Sign Up
+                    </button>
+                    <div class="mt-2px">
+                      <p>or sign up with</p>
+                    </div>
+                    <div class="social-btns">
+                      <a href="/auth/google" class="btn btn-outline-danger">
+                        <img
+                          src="/img/googlesignup (1).png"
+                          alt="Google Logo"
+                          style="width: 24px; height: 24px"
+                        />
+                      </a>
+                    </div>
+                  </div>
+                </form>
+              </div>
+
+              <div class="signup-image">
+                <a href="/">
+                  <img src="/img/pexels-obi-onyeador-1787470-13009437.jpg" alt="Timeless Edge Watch" />
+                </a>
+                <div class="text-center mt-2">
+                  <a href="#" class="sign-in-link">Already registered? Log in</a>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <script>
+     
+     const nameid=document.getElementById('name')
+     const emailid=document.getElementById('email')
+     const phoneid=document.getElementById('phone')
+     const passid=document.getElementById('password')
+     const cPassid=document.getElementById('confirm-password')
+     const error1=document.getElementById('error1')
+     const error2=document.getElementById('error2')
+     const error3=document.getElementById('error3')
+     const error4=document.getElementById('error4')
+     const error5=document.getElementById('error5')
+     const signform=document.getElementById('signform')
+
+    function  nameValidateChecking(e){
+      const nameval=nameid.value;
+      const namepattern =/^[A-Za-z\s]+$/;
+      if(nameval.trim()===""){
+        error1.style.display="block"
+        error1.innerHTML="please enter valid Name"
+      }else if(!namepattern.test(nameval)){
+       error1.style.display="block"
+       error1.innerHTML="Name can only contain alphabets and spaces"
+      }else{
+        error1.style.display="none"
+        error1.innerHTML=""
+      }
+
+    }
+
+    function  emailValidateChecking(e){
+      const emailval=emailid.value;
+      const emailpattern=/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if(!emailpattern.test(emailval)){
+        error2.style.display="block"
+        error2.innerHTML="Please Enter Valid Email"
+      }else{
+        error2.style.display="none"
+        error2.innerHTML=""
+      }
+
+    }
+
+    function  phoneValidateChecking(e){
+      const phoneval=phoneid.value
+      if(phoneval.trim()===""){
+        error3.style.display="block"
+        error3.innerHTML=" Please Enter Valid Phone Number"
+      }else if(phoneval.length<10||phoneval.length>10){
+        error3.style.display="block"
+        error3.innerHTML=" Enter 10 Digits"
+      }else{
+        error3.style.display="none"
+        error3.innerHTML=""
+      }
+    }
+
+    function passValidateChecking(e){
+      const passval=passid.value
+      const cpassval=cpassid.value
+      const alpha=/[a-zA-Z]/
+      const digits=/\d/
+      if(passval.trim()===""){
+        error4.style.display="block"
+        error4.innerHTML="Please Enter Password"
+      }else if(passval.length<8){
+        error4.style.display="block"
+        error4.innerHTML="Password Must Contain Minimum 8 Characters"
+      }else if(!alpha.test(passval)||!digits.test(passval)){
+        error4.style.display="block"
+        error4.innerHTML="password Should contain numbers and alphabets"
+      }else{
+        error4.style.display="none"
+        error4.innerHTML=""
+      }
+
+      if(passval!==cpassval){
+        error5.style.display="block"
+        error5.innerHTML="Password do not match"
+      }else{
+        error5.style.display="none"
+        error5.innerHTML=""
+      }
+    }
+
+
+
+
+     document.addEventListener("DOMContentLoaded",function (){
+      signform.addEventListener('submit',function(e){
+        nameValidateChecking()
+        phoneValidateChecking()
+        emailValidateChecking()
+        passValidateChecking()
+
+        if(
+          !nameid||
+          !emailid||
+          !phoneid||
+          !passid||
+          !error1||
+          !error2||
+          !error3||
+          !error4||
+          !error5||
+          !signform
+        ){
+          console.error("One or More elements not Found")
+        }
+
+        if(
+          error1.innerHTML||
+          error2.innerHTML||
+          error3.innerHTML||
+          error4.innerHTML||
+          error5.innerHTML
+
+        ){
+          e.preventDefault()
+        }
+
+      })
+     })
+
+  nameid.addEventListener("input", nameValidateChecking);
+  emailid.addEventListener("input", emailValidateChecking);
+  phoneid.addEventListener("input", phoneValidateChecking);
+  passid.addEventListener("input", passValidateChecking);
+  cPassid.addEventListener("input", passValidateChecking);
+
+    </script>
+  </body>
+</html>

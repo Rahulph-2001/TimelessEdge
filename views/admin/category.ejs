@@ -1,0 +1,547 @@
+<%- include("../../views/partials/admin/header") %>
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css"/>
+  <style>
+    /* Reset and Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9fafb;
+      color: #1f2937;
+      line-height: 1.5;
+    }
+
+    /* Main Layout */
+    .content-main {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .content-header {
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .content-title {
+      font-size: 1.875rem;
+      font-weight: 600;
+      color: #edeff4;
+      margin: 0;
+    }
+
+    /* Card Styles */
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+    }
+
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* Search Bar */
+    .search-container {
+      max-width: 500px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 25px;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+    }
+
+    /* Grid Layout */
+    .row {
+      display: flex;
+      gap: 2rem;
+      margin: 0 1rem;
+    }
+
+    .col-md-3 {
+      flex: 0 0 30%;
+      max-width: 30%;
+    }
+
+    .col-md-9 {
+      flex: 0 0 70%;
+      max-width: 70%;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: #374151;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    textarea.form-control {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.625rem 1.25rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+      border-radius: 8px;
+      transition: all 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background-color: #2563eb;
+    }
+
+    .btn-info {
+      background-color: #0ea5e9;
+      color: white;
+      border: none;
+    }
+
+    .btn-info:hover {
+      background-color: #0284c7;
+    }
+
+    .btn-success {
+      background-color: #10b981;
+      color: white;
+      border: none;
+    }
+
+    .btn-success:hover {
+      background-color: #059669;
+    }
+
+    .btn-danger {
+      background-color: #ef4444;
+      color: white;
+      border: none;
+    }
+
+    .btn-danger:hover {
+      background-color: #dc2626;
+    }
+
+    /* Table Styles */
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .table th,
+    .table td {
+      padding: 1rem;
+      text-align: center;
+      vertical-align: middle;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table th {
+      font-weight: 600;
+      background-color: #f9fafb;
+      color: #374151;
+    }
+
+    .table tbody tr:hover {
+      background-color: #f9fafb;
+    }
+
+    /* Status Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border-radius: 9999px;
+    }
+
+    .badge-success {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge-danger {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Action Buttons Container */
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Error Messages */
+    .error-message {
+      color: #ef4444;
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 2rem;
+    }
+
+    .pagination-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2rem;
+      height: 2rem;
+      padding: 0 0.5rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      color: #374151;
+      background-color: white;
+      border: 1px solid #e5e7eb;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .pagination-link:hover {
+      background-color: #f9fafb;
+      border-color: #d1d5db;
+    }
+
+    .pagination-link.active {
+      background-color: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .row {
+        flex-direction: column;
+      }
+
+      .col-md-3,
+      .col-md-9 {
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .content-main {
+        padding: 1rem;
+      }
+
+      .table th,
+      .table td {
+        padding: 0.75rem 0.5rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="content-main">
+    <div class="content-header">
+      <h2 class="content-title">Category Management</h2>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="search-container">
+          <form action="/admin/category/" method="post">
+            <svg class="search-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input type="text" class="search-input" placeholder="Search categories..." name="search"/>
+          </form>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="row">
+          <!-- Add Category Form -->
+          <div class="col-md-3">
+            <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmit(event)">
+              <div class="form-group">
+                <label class="form-label">Category Name</label>
+                <input type="text" name="name" class="form-control" placeholder="Enter category name" required/>
+                <div id="name-error" class="error-message"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-control" placeholder="Enter category description" id="descriptionId" required></textarea>
+                <div id="description-error" class="error-message"></div>
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                Create Category
+              </button>
+            
+          </div>
+
+          <!-- Categories Table -->
+          <div class="col-md-9">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>No.</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Offer</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% cat.reverse().forEach((category, index) => { %>
+                  <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= category.name %></td>
+                    <td><%= category.description %></td>
+                    <td>
+                      <% if(category.categoryOffer) { %>
+                        <%= category.categoryOffer %>%
+                      <% } else { %>
+                        0%
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if(category.isListed) { %>
+                        <span class="badge badge-success">Listed</span>
+                      <% } else { %>
+                        <span class="badge badge-danger">Unlisted</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        <% if(category.isListed) { %>
+                          <a href="/admin/listCategory?id=<%= category._id %>" class="btn btn-danger">Unlist</a>
+                        <% } else { %>
+                          <a href="/admin/unlistCategory?id=<%= category._id %>" class="btn btn-success">List</a>
+                        <% } %>
+                        <a href="/admin/editCategory?id=<%= category._id %>" class="btn btn-info">Edit</a>
+                      </div>
+                    </td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </form>
+            <!-- Pagination -->
+            <div class="pagination">
+              <% if (currentPage > 1) { %>
+                <a href="?page=<%= currentPage - 1 %>" class="pagination-link">&laquo;</a>
+              <% } %>
+              
+              <% for (let i = 1; i <= totalPages; i++) { %>
+                <% if (i === currentPage) { %>
+                  <span class="pagination-link active"><%= i %></span>
+                <% } else { %>
+                  <a href="?page=<%= i %>" class="pagination-link"><%= i %></a>
+                <% } %>
+              <% } %>
+              
+              <% if (currentPage < totalPages) { %>
+                <a href="?page=<%= currentPage + 1 %>" class="pagination-link">&raquo;</a>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+  <script>
+    function handleFormSubmit(event) {
+      event.preventDefault();
+      if (!validateForm()) {
+        return;
+      }
+
+      const name = document.getElementsByName("name")[0].value;
+      const description = document.getElementById("descriptionId").value;
+
+      fetch("/admin/addCategory", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, description })
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => {
+            throw new Error(err.error);
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Category added successfully'
+        }).then(() => {
+          location.reload();
+        });
+      })
+      .catch(error => {
+        if (error.message === "category already exists") {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Category already exists'
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'An error occurred while adding the category'
+          });
+        }
+      });
+    }
+
+   
+
+        // Complete validateForm function
+function validateForm() {
+  clearErrorMessages();
+  const name = document.getElementsByName("name")[0].value.trim();
+  const description = document.getElementById("descriptionId").value.trim();
+  let isValid = true;
+
+  if (name === "") {
+    displayErrorMessage("name-error", "Please enter a category name");
+    isValid = false;
+  } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+    displayErrorMessage("name-error", "Category name should contain only letters and spaces");
+    isValid = false;
+  }
+
+  if (description === "") {
+    displayErrorMessage("description-error", "Please enter a category description");
+    isValid = false;
+  } else if (description.length < 10) {
+    displayErrorMessage("description-error", "Description should be at least 10 characters long");
+    isValid = false;
+  }
+
+  return isValid;
+}
+
+function displayErrorMessage(elementId, message) {
+  const errorElement = document.getElementById(elementId);
+  errorElement.textContent = message;
+  errorElement.style.display = "block";
+}
+
+function clearErrorMessages() {
+  const errorElements = document.getElementsByClassName("error-message");
+  Array.from(errorElements).forEach((element) => {
+    element.textContent = "";
+    element.style.display = "none";
+  });
+}
+
+
+
+document.querySelector('.search-input').addEventListener('input', function(e) {
+  const searchTerm = e.target.value.toLowerCase();
+  const tableRows = document.querySelectorAll('tbody tr');
+  
+  tableRows.forEach(row => {
+    const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+    const description = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+    
+    if (name.includes(searchTerm) || description.includes(searchTerm)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+});
+</script>

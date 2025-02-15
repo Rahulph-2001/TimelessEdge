@@ -1,0 +1,182 @@
+<%- include("../../views/partials/admin/header") %>
+
+<div class="container">
+    <div class="content-header row">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="content-title">Customers</h2>
+        </div>
+    </div>
+
+    <header class="search-container">
+        <form action="/admin/users/" method="get" class="search-input">
+            <input type="text" placeholder="Search customers..." name="search">
+            <button type="submit">Search</button>
+        </form>
+    </header>
+
+    <div class="table-responsive mt-4">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone No</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for (let i = 0; i < data.length; i++) { %>
+                    <tr>
+                        <td><%= data[i].name %></td>
+                        <td><%= data[i].email %></td>
+                        <td><%= data[i].phone %></td>
+                        <td>
+                            <% if (data[i].isBlocked === false) { %>
+                                <a href="/admin/blockCustomer?id=<%= data[i].id %>" class="btn btn-danger">Block</a>
+                            <% } else { %>
+                                <a href="/admin/unblockCustomer?id=<%= data[i].id %>" class="btn btn-success">Unblock</a>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-container">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-bg: #f4f6f9;
+        --table-header-bg: #e9ecef;
+        --text-color: #333;
+        --border-color: #dee2e6;
+        --btn-primary: #007bff;
+        --btn-danger: #dc3545;
+        --btn-success: #28a745;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: var(--primary-bg);
+    }
+
+    .content-header {
+        margin-bottom: 20px;
+        background-color: #16213e;
+    }
+
+    .search-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .search-input {
+        width: 500px;
+        display: flex;
+        border: 1px solid var(--border-color);
+        border-radius: 25px;
+        overflow: hidden;
+    }
+
+    .search-input input {
+        flex-grow: 1;
+        border: none;
+        padding: 10px 15px;
+        outline: none;
+    }
+
+    .search-input button {
+        background-color: transparent;
+        border: none;
+        padding: 0 15px;
+        cursor: pointer;
+    }
+
+    .table {
+        width: 100%;
+        background-color: white;
+        border-collapse: collapse;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .table thead {
+        background-color: var(--table-header-bg);
+    }
+
+    .table th, .table td {
+        padding: 12px 15px;
+        border: 1px solid var(--border-color);
+        text-align: left;
+    }
+
+    .table tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    .table tbody tr:hover {
+        background-color: #e9ecef;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 8px 15px;
+        border-radius: 4px;
+        text-decoration: none;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger {
+        background-color: var(--btn-danger);
+        color: white;
+    }
+
+    .btn-success {
+        background-color: var(--btn-success);
+        color: white;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        list-style: none;
+        padding: 0;
+    }
+
+    .pagination .page-item {
+        margin: 0 5px;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: var(--btn-primary);
+        color: white;
+    }
+
+    .pagination .page-link {
+        text-decoration: none;
+        padding: 8px 12px;
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        border-radius: 4px;
+    }
+    
+</style>
+
+<%- include("../../views/partials/admin/footer") %>

@@ -1,0 +1,468 @@
+<%- include("../../views/partials/admin/header") %>
+
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
+    <style>
+        .content-main {
+            padding: 20px;
+            color: #e2e8f0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .image-container {
+            position: relative;
+            aspect-ratio: 1;
+            text-align: center;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0.375rem;
+            cursor: pointer;
+        }
+
+        .btn-replace {
+            margin-top: 0.5rem;
+            background-color: #2563eb;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-replace:hover {
+            background-color: #1d4ed8;
+        }
+
+        .price-quantity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .btn-update {
+            background-color: #2563eb;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-update:hover {
+            background-color: #1d4ed8;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        /* Cropper Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 1000px;
+            border-radius: 8px;
+        }
+
+        .crop-container {
+            max-height: 80vh;
+            overflow: hidden;
+        }
+
+        .cropper-container {
+            width: 100%;
+            height: 600px;
+        }
+
+        .crop-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-crop {
+            background-color: #2563eb;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-cancel {
+            background-color: #dc2626;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Zoom Modal Styles */
+        .zoom-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+        }
+
+        .zoom-content {
+            margin: auto;
+            display: block;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .zoom-img {
+            width: 100%;
+            height: auto;
+        }
+
+        .close-zoom {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .close-zoom:hover,
+        .close-zoom:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="content-main">
+        <div class="row">
+            <div class="col-9">
+                <div class="content-header">
+                    <h2 class="content-title">Edit Product</h2>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form action="" enctype="multipart/form-data">
+                            <!-- Product Name -->
+                            <div class="form-group">
+                                <label for="product_name" class="form-label">Product Name</label>
+                                <input type="text" name="productName" class="form-control" id="product_name"
+                                    value="<%= product.productName %>">
+                                <div id="productName-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Brand -->
+                            <div class="form-group">
+                                <label class="form-label">Brand</label>
+                                <select class="form-control" name="brand">
+                                    <option value="">Select Brand</option>
+                                    <% brands.forEach((brand)=> { %>
+                                        <option value="<%= brand._id %>" 
+                                            <%= product.brand && product.brand._id.toString()===brand._id.toString() ? "selected" : "" %>>
+                                            <%= brand.name %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                                <div id="brand-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Category -->
+                            <div class="form-group">
+                                <label class="form-label">Category</label>
+                                <select class="form-control" name="category">
+                                    <option value="">Select Category</option>
+                                    <% categories.forEach((category)=> { %>
+                                        <option value="<%= category._id %>" 
+                                            <%= product.category && product.category._id.toString()===category._id.toString() ? "selected" : "" %>>
+                                            <%= category.name %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                                <div id="category-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="form-group">
+                                <label class="form-label">Full Description</label>
+                                <textarea name="descriptionData" class="form-control" rows="4"><%= product.description %></textarea>
+                                <div id="description-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Prices & Quantity -->
+                            <div class="price-quantity-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Regular Price ($)</label>
+                                    <input name="regularPrice" type="number" class="form-control" value="<%= product.regularPrice %>">
+                                    <div id="regularPrice-error" class="error-message"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Sale Price ($)</label>
+                                    <input name="salePrice" type="number" class="form-control" value="<%= product.salePrice %>">
+                                    <div id="salePrice-error" class="error-message"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Quantity</label>
+                                    <input name="quantity" type="number" class="form-control" value="<%= product.quantity %>">
+                                    <div id="quantity-error" class="error-message"></div>
+                                </div>
+                            </div>
+
+                            <!-- Color -->
+                            <div class="form-group">
+                                <label class="form-label">Color</label>
+                                <input name="color" type="text" class="form-control" value="<%= product.color %>">
+                                <div id="color-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Image Upload Section -->
+                            <div class="form-group">
+                                <label class="form-label">Product Images</label>
+                                <div class="image-grid">
+                                    <% product.productImages.forEach((image, index)=> { %>
+                                        <div class="image-container">
+                                            <img src="<%= image %>" class="image-preview" id="imgView<%= index + 1 %>">
+                                            <input class="form-control" type="file" name="images"
+                                                id="input<%= index + 1 %>" accept="image/png, image/jpeg, image/jpg"
+                                                style="display: none;">
+                                            <button type="button" class="btn-replace" 
+                                                onclick="triggerReplace('<%= index + 1 %>')">Replace</button>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                                <div id="images-error" class="error-message"></div>
+                            </div>
+
+                            <button onclick="updateProduct(event,'<%= product._id %>')" class="btn-update" type="submit">
+                                Update Product
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cropper Modal -->
+    <div id="cropperModal" class="modal">
+        <div class="modal-content">
+            <div class="crop-container">
+                <img id="cropperImage" src="/placeholder.svg" style="max-width: 100%;">
+            </div>
+            <div class="crop-buttons">
+                <button class="btn-cancel" onclick="cancelCrop()">Cancel</button>
+                <button class="btn-crop" onclick="cropImage()">Crop & Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zoom Modal -->
+    <div id="zoomModal" class="zoom-modal">
+        <span class="close-zoom" onclick="closeZoom()">&times;</span>
+        <img class="zoom-content" id="zoomImg">
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+// Add this to your existing script section
+let cropper = null;
+let currentImageId = null;
+
+// Trigger file input when "Replace" button is clicked
+function triggerReplace(id) {
+    document.getElementById(`input${id}`).click();
+}
+
+// Handle file selection and show Cropper modal
+document.querySelectorAll('input[type="file"]').forEach(input => {
+    input.addEventListener('change', function(event) {
+        replaceImage(event, this.id.replace('input', ''));
+    });
+});
+
+function replaceImage(event, id) {
+    const file = event.target.files[0];
+
+    if (file) {
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Image size should be less than 5MB');
+            return;
+        }
+
+        currentImageId = id;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const cropperImage = document.getElementById('cropperImage');
+            cropperImage.src = e.target.result;
+
+            // Destroy existing Cropper instance
+            if (cropper) {
+                cropper.destroy();
+            }
+
+            // Initialize Cropper
+            cropper = new Cropper(cropperImage, {
+                viewMode: 2,
+                dragMode: 'move',
+                aspectRatio: NaN,
+                autoCropArea: 1,
+                guides: true,
+                center: true,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: true,
+                zoomOnWheel: true,
+                zoomOnTouch: true,
+                ready: function() {
+                    this.cropper.zoomTo(0.5);
+                }
+            });
+
+            document.getElementById('cropperModal').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Crop Image and Replace Preview
+function cropImage() {
+    if (!cropper) return;
+
+    const canvas = cropper.getCroppedCanvas({
+        width: 800,
+        height: 800,
+        fillColor: '#fff',
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high'
+    });
+
+    canvas.toBlob(function(blob) {
+        const croppedFile = new File([blob], `cropped_${currentImageId}.jpg`, {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+        });
+
+        // Update image preview
+        const img = document.getElementById(`imgView${currentImageId}`);
+        img.src = URL.createObjectURL(croppedFile);
+
+        // Update input field with cropped image
+        const input = document.getElementById(`input${currentImageId}`);
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(croppedFile);
+        input.files = dataTransfer.files;
+
+        // Close modal and cleanup
+        document.getElementById('cropperModal').style.display = 'none';
+        cropper.destroy();
+        cropper = null;
+    }, 'image/jpeg', 0.95);
+}
+
+// Close Cropper Modal
+function cancelCrop() {
+    document.getElementById('cropperModal').style.display = 'none';
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+}
+
+// Update the updateProduct function to handle image upload better
+function updateProduct(event, productId) {
+    event.preventDefault();
+
+    // if (!validateForm()) {
+    //     return;
+    // }
+
+    const form = document.querySelector("form");
+    const formData = new FormData(form);
+
+    // Add loading state
+    const submitButton = event.target;
+    submitButton.disabled = true;
+    submitButton.textContent = 'Updating...';
+
+    $.ajax({
+        url: `/admin/editProduct/${productId}`,
+        method: "PUT",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            alert("Product updated successfully!");
+            window.location.reload();
+        },
+        error: function(xhr, status, error) {
+            console.error("Error updating product:", error);
+            alert("Failed to update product. Please try again.");
+            submitButton.disabled = false;
+            submitButton.textContent = 'Update Product';
+        }
+    });
+}
+    </script>
+
+    <%- include("../../views/partials/admin/footer") %>
+</body>
+</html>

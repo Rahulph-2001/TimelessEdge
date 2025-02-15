@@ -1,0 +1,363 @@
+<%- include("../../views/partials/user/header") %>
+
+<style>
+  body {
+    background-color: #f4f7fc;
+    font-family: Arial, sans-serif;
+  }
+
+  .otp-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 25px;
+    border-radius: 12px;
+    background: #fff;
+    width: 100%;
+    max-width: 400px;
+    margin: 40px auto;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  .otp-timer-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    width: 100%;
+  }
+
+  .otp-timer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: #007bff;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease;
+  }
+
+  .form-group {
+    width: 100%;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .form-control {
+    width: 100%;
+    height: 45px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    text-align: center;
+    font-size: 18px;
+    letter-spacing: 2px;
+    transition: border-color 0.3s ease;
+  }
+
+  .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+  }
+
+  .btn-primary {
+    background: #007bff;
+    border: none;
+    padding: 12px 25px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .resend-button {
+    color: #007bff;
+    font-weight: 500;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+
+  .resend-button:not(:disabled):hover {
+    color: #0056b3;
+    text-decoration: underline;
+  }
+
+  .resend-button:disabled {
+    color: #6c757d;
+    cursor: not-allowed;
+  }
+
+  .alert {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+
+  .alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+  }
+
+  .alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+  }
+
+  .text-muted {
+    color: #6c757d;
+    font-size: 14px;
+  }
+
+  .loading-spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+
+<div class="container">
+  <div class="padding_eight_all bg-white">
+    <div class="heading_s1">
+      <h3 class="mb-30 text-center">Email Verification</h3>
+    </div>
+    <div class="otp-container">
+      <form id="otpForm">
+        <div class="form-group">
+          <label for="otp">Enter OTP:</label>
+          <input type="text" id="otp" name="otp" class="form-control" maxlength="6" autocomplete="off" required>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary">
+            <span class="button-text">Verify OTP</span>
+            <div class="loading-spinner"></div>
+          </button>
+        </div>
+      </form>
+      
+      <div class="form-group otp-timer-wrapper">
+        <div class="otp-timer" id="otpTimer">60</div>
+      </div>
+      
+      <div class="form-group">
+        <button type="button" class="resend-button" id="resendOtp" disabled>
+          Resend OTP
+        </button>
+      </div>
+
+      <div id="alertContainer"></div>
+
+      <% if(locals.message && message.length > 0) { %>
+        <div class="alert alert-danger" id="errorAlert">
+          <%= message %>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="text-muted text-center pt-25">
+      Already verified? <a href="/login">Login now</a>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  let otpTimerInterval;
+  let timer = 60;
+
+  function showLoading(button) {
+    const buttonText = button.find('.button-text');
+    const spinner = button.find('.loading-spinner');
+    buttonText.hide();
+    spinner.show();
+    button.prop('disabled', true);
+  }
+
+  function hideLoading(button) {
+    const buttonText = button.find('.button-text');
+    const spinner = button.find('.loading-spinner');
+    spinner.hide();
+    buttonText.show();
+    button.prop('disabled', false);
+  }
+
+  function showAlert(message, type = 'danger') {
+    const alertContainer = $('#alertContainer');
+    alertContainer.html(`
+      <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+        ${message}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    `);
+
+    setTimeout(() => {
+      alertContainer.empty();
+    }, 5000);
+  }
+
+  function updateTimerColor(percentage) {
+    const timerElement = $('#otpTimer');
+    
+    if (percentage > 50) {
+      timerElement.css('backgroundColor', '#28a745');
+    } else if (percentage > 25) {
+      timerElement.css('backgroundColor', '#ffc107');
+    } else {
+      timerElement.css('backgroundColor', '#dc3545');
+    }
+  }
+
+  function startOtpTimer() {
+    const timerElement = $('#otpTimer');
+    const resendButton = $('#resendOtp');
+
+    resendButton.prop('disabled', true);
+
+    otpTimerInterval = setInterval(function() {
+      const minutes = Math.floor(timer / 60);
+      const seconds = timer % 60;
+      timerElement.text(`${minutes}:${seconds < 10 ? "0" : ""}${seconds}`);
+
+      updateTimerColor((timer / 60) * 100);
+
+      if (--timer < 0) {
+        clearInterval(otpTimerInterval);
+        timerElement.text('Expired');
+        timerElement.css('backgroundColor', '#dc3545');
+        resendButton.prop('disabled', false);
+      }
+    }, 1000);
+  }
+
+  function initializeOtpTimer() {
+    clearInterval(otpTimerInterval);
+    timer = 60;
+    startOtpTimer();
+  }
+
+  function handleOtpInput() {
+    $('#otp').on('input', function() {
+      this.value = this.value.replace(/[^0-9]/g, '');
+      if (this.value.length > 6) {
+        this.value = this.value.slice(0, 6);
+      }
+    });
+  }
+
+  $(document).ready(function() {
+    initializeOtpTimer();
+    handleOtpInput();
+
+    $('#otpForm').submit(function(e) {
+      e.preventDefault();
+      
+      const submitButton = $(this).find('button[type="submit"]');
+      const enteredOtp = $('#otp').val();
+
+      if (!enteredOtp || enteredOtp.length !== 6) {
+        showAlert('Please enter a valid 6-digit OTP');
+        return;
+      }
+
+      showLoading(submitButton);
+
+      $.ajax({
+        url: '/verify-passForgot-otp',
+        method: 'POST',
+        data: { otp: enteredOtp },
+        success: function(response) {
+          if (response.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'OTP Verified',
+              text: 'Redirecting to reset password page...',
+              timer: 2000,
+              showConfirmButton: false
+            }).then(() => {
+              window.location.href = '/reset-password';
+            });
+          } else {
+            showAlert(response.message);
+          }
+        },
+        error: function(xhr) {
+          showAlert(xhr.responseJSON?.message || 'Something went wrong. Please try again.');
+        },
+        complete: function() {
+          hideLoading(submitButton);
+        }
+      });
+    });
+
+    $('#resendOtp').click(function() {
+      const button = $(this);
+      showLoading(button);
+
+      $.ajax({
+        url: '/resend-forgot-otp',
+        method: 'POST',
+        success: function(response) {
+          if (response.success) {
+            initializeOtpTimer();
+            showAlert('New OTP has been sent to your email', 'success');
+          } else {
+            showAlert(response.message);
+          }
+        },
+        error: function(xhr) {
+          showAlert(xhr.responseJSON?.message || 'Failed to resend OTP. Please try again.');
+        },
+        complete: function() {
+          hideLoading(button);
+        }
+      });
+    });
+  });
+</script>
+
+<%- include("../../views/partials/user/footer") %>

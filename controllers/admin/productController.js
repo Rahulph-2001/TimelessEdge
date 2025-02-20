@@ -117,13 +117,37 @@ const addProduct = async (req, res) => {
 
 const getAllproduct = async (req, res) => {
     try {
-        const allProducts = await Product.find({quantity:{$lt:5}})
+        const totalCount = await Product.countDocuments({});        
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+        const searchQuery = (req.query.search || '').trim();
+
+
+        const filter = searchQuery 
+            ? { productName: { $regex: searchQuery, $options: 'i' } }
+            : {};
+        // Let's see all product names first
+        const allProductNames = await Product.find({}).select('productName');
+        const totalProducts = await Product.countDocuments(filter);
+
+        const allProducts = await Product.find(filter)
             .populate("category")
             .populate("brand")
+            .limit(limit)
+            .skip(skip)
             .exec();
-        res.render("product-list", { products: allProducts });
+
+        res.render("product-list", {
+            products: allProducts,
+            currentPage: page,
+            totalPages: Math.ceil(totalProducts/limit),
+            searchQuery: searchQuery,
+            hasNextPage: page < Math.ceil(totalProducts/limit),
+            hasPrevPage: page > 1
+        });
     } catch (error) {
-        console.log(error);
+        console.log('Error in getAllproduct:', error);
         res.status(500).send("Error retrieving products");
     }
 };
@@ -254,29 +278,24 @@ const submittProduct = async (req, res) => {
             return res.status(400).json({ success: false, errors: validationErrors });
         }
 
-        // Get existing product
         const existingProduct = await Product.findById(req.params.id);
         if (!existingProduct) {
             return res.status(404).json({ success: false, error: "Product not found" });
         }
 
-        // Keep existing images
         let updatedImages = [...existingProduct.productImages];
 
-        // Upload new images to Cloudinary
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
                 try {
                     const result = await cloudinary.uploader.upload(file.path, { folder: "products" });
 
-                    // Delete old image from Cloudinary
-                    const oldImageUrl = updatedImages.shift(); // Remove the oldest image if limit exceeded
+                    const oldImageUrl = updatedImages.shift(); 
                     if (oldImageUrl) {
                         const publicId = oldImageUrl.split('/').pop().split('.')[0]; // Extract public ID
                         await cloudinary.uploader.destroy(`products/${publicId}`);
                     }
 
-                    // Add new Cloudinary image URL
                     updatedImages.push(result.secure_url);
                 } catch (err) {
                     console.error("Cloudinary upload error:", err);
@@ -284,7 +303,6 @@ const submittProduct = async (req, res) => {
             }
         }
 
-        // Update product details
         const updatedProduct = await Product.findByIdAndUpdate(
             req.params.id,
             {

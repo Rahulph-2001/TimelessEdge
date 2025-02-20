@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,7 +47,7 @@
         }
 
         .logo {
-            max-height: 40px;
+            max-height: 73px;
         }
 
         .menu-aside {
@@ -80,7 +81,7 @@
 
         .navbar {
             background-color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 0.5rem 2rem;
             display: flex;
             justify-content: space-between;
@@ -99,10 +100,17 @@
         .content-main {
             background-color: #ffffff;
             border-radius: 0.25rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 2rem;
             margin-top: 2rem;
         }
+        .row {
+    display: flex
+;
+    flex-wrap: wrap;
+    margin: -0.5rem;
+    color: #050506;
+}
 
         .content-header {
             margin-bottom: 1.5rem;
@@ -110,6 +118,17 @@
             font-weight: bold;
         }
 
+        .content-title {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: #080808;
+    margin: 0;
+}
+.logoutadmin{
+    background-color: rgb(126, 126, 249);
+    color:black ;
+}
+        
         @media (max-width: 768px) {
             .navbar-aside {
                 width: 100%;
@@ -126,17 +145,18 @@
         }
     </style>
 </head>
+
 <body>
     <aside class="navbar-aside" id="offcanvas_aside">
         <div class="aside-top">
             <a href="#" class="brand-wrap">
-                <img src="/img/New Project (28).png" class="logo" alt="Timeless Edge">
+                <img src="/img/Timeless_Edge__3_-removebg-preview.png" class="logo" alt="Timeless Edge">
             </a>
         </div>
         <nav>
             <ul class="menu-aside">
                 <li class="menu-item">
-                    <a class="active" href="/admin"><i class="fas fa-home"></i>Dashboard</a>
+                    <a class="active" href="/admin/dashboard"><i class="fas fa-home"></i>Dashboard</a>
                 </li>
                 <li class="menu-item">
                     <a href="/admin/users"><i class="fas fa-users"></i>Customers</a>
@@ -173,10 +193,11 @@
             </button>
             <div class="navbar-nav">
                 <div class="nav-item">
-                    <a href="#" class="btn-notify"><i class="fas fa-bell"></i></a>
+                    <a href="/admin/logout"><button class="logoutadmin">Logout</button></a>
                 </div>
                 <div class="nav-item">
                     <a href="#" class="btn-user"><i class="fas fa-user"></i></a>
                 </div>
             </div>
         </header>
+       

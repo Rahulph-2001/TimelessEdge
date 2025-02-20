@@ -2,7 +2,6 @@ const User=require('../../models/userSchema')
 const Brand=require('../../models/brandSchema')
 const Category=require('../../models/categorySchema')
 const Product=require('../../models/productSchema')
-const { validateProduct, validateSearchQuery } = require('../../config/validation');
 const Review = require('../../models/reviewSchema')
 
 const productDetails = async (req, res) => {

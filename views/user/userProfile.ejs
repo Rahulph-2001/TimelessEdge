@@ -1,0 +1,672 @@
+<%- include("../../views/partials/user/header") %>
+
+<style>
+/* Base styles */
+body {
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  line-height: 1.6;
+}
+
+.card-green {
+  background-color: #e6f7ff;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.main {
+  padding: 30px 0;
+}
+
+/* Dashboard menu styling */
+.dashboard-menu {
+  background-color: #ddeef2;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 25px;
+  position: sticky;
+  top: 20px;
+}
+
+.dashboard-menu .nav-link {
+  font-weight: 600;
+  color: #30683c;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 3px 8px rgba(123, 131, 112, 0.2), 0 3px 15px rgba(0, 191, 255, 0.15);
+  transition: all 0.3s ease;
+}
+
+.dashboard-menu .nav-link i {
+  margin-right: 12px;
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
+}
+
+.dashboard-menu .nav-link:hover {
+  color: #00bfff;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(173, 255, 47, 0.3), 0 7px 20px rgba(0, 191, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+.dashboard-menu .nav-link.active {
+  background-color: #30683c;
+  color: white;
+  box-shadow: 0 4px 12px rgba(48, 104, 60, 0.4);
+}
+
+/* Card styling */
+.card {
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+  background-color: #487379;
+  color: white;
+  border-radius: 12px 12px 0 0;
+  padding: 18px 22px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.card-body {
+  padding: 25px;
+  background-color: #fff;
+}
+
+/* Button styling */
+.btn-success {
+  background-color: #577194;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(87, 113, 148, 0.3);
+}
+
+.btn-success:hover {
+  background-color: #506955;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(80, 105, 85, 0.4);
+}
+
+.btn-primary {
+  background-color: #1a73e8;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(26, 115, 232, 0.3);
+}
+
+.btn-primary:hover {
+  background-color: #0d5bcd;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(13, 91, 205, 0.4);
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 5px;
+  text-decoration: none;
+  color: #577194;
+  background-color: #f0f3f6;
+  display: inline-block;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: none;
+  font-weight: 500;
+}
+
+.btn-small:hover {
+  background-color: #e1e7ed;
+  color: #30683c;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.15);
+}
+
+.btn-sm {
+  padding: 8px 15px;
+  font-size: 14px;
+  margin: 0 5px;
+}
+
+/* Form elements */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 500;
+  color: #444;
+}
+
+.form-control {
+  height: auto;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+
+.form-control:focus {
+  border-color: #577194;
+  box-shadow: 0 0 0 3px rgba(87, 113, 148, 0.2);
+}
+
+.required {
+  color: #e53935;
+  margin-left: 4px;
+}
+
+/* Table styling */
+.table {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table th {
+  padding: 15px;
+  background-color: #f5f7fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+  color: #444;
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.table td {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+  color: #555;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Breadcrumb styling */
+.page-header.breadcrumb-wrap {
+  background-color: #f2f6f9;
+  padding: 18px 0;
+  margin-bottom: 35px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  color: #121311;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breadcrumb a {
+  color: #0077cc;
+  text-decoration: none;
+  position: relative;
+  margin: 0 8px;
+  transition: color 0.3s ease;
+  font-weight: 500;
+}
+
+.breadcrumb a:hover {
+  color: #0056b3;
+}
+
+.breadcrumb span {
+  margin: 0 8px;
+  color: #888;
+}
+
+.breadcrumb a::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: #6e6e3a;
+  left: 0;
+  bottom: -2px;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.breadcrumb a:hover::after {
+  transform: scaleX(1);
+}
+
+/* Specific section styling */
+.contact-from-area {
+  padding: 25px;
+  background-color: #fcfcfc;
+  border-radius: 10px;
+}
+
+.mt-90 {
+  margin-top: 90px;
+}
+
+.text-center .btn-sm {
+  margin: 5px;
+}
+
+.address address {
+  margin-bottom: 18px;
+  line-height: 1.7;
+  color: #555;
+}
+
+/* Profile card specifics */
+#dashboard .card-body.text-center {
+  padding: 30px;
+}
+
+#dashboard .card-title {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+#dashboard .card-text {
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+/* Wallet section specifics */
+#track-orders .h3, 
+#track-orders .h4 {
+  margin-bottom: 15px;
+  color: #30683c;
+}
+
+#track-orders form {
+  background-color: #f9f9f9;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .dashboard-menu {
+    margin-bottom: 30px;
+    position: static;
+  }
+  
+  .col-lg-10.m-auto {
+    padding: 0 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-menu {
+    padding: 15px;
+  }
+  
+  .dashboard-menu .nav-link {
+    padding: 12px 15px;
+  }
+
+  .card {
+    margin-bottom: 20px;
+  }
+
+  .breadcrumb {
+    font-size: 14px;
+  }
+
+  .card-header {
+    padding: 15px 18px;
+  }
+
+  .card-body {
+    padding: 18px;
+  }
+  
+  .btn-success, 
+  .btn-primary {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  
+  #dashboard .card-text {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .main {
+    padding: 20px 0;
+  }
+  
+  .page-header.breadcrumb-wrap {
+    padding: 12px 0;
+    margin-bottom: 20px;
+  }
+  
+  .dashboard-menu .nav-link i {
+    font-size: 18px;
+    margin-right: 8px;
+  }
+  
+  .card-header h5 {
+    font-size: 16px;
+  }
+  
+  .table th, .table td {
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  .mt-90 {
+    margin-top: 50px;
+  }
+}
+
+/* Fix for smaller devices layout */
+@media (max-width: 480px) {
+  .d-flex.justify-content-between {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .d-flex.justify-content-between .btn-small {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .btn-success, .btn-primary {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
+
+/* Active tab pane animation */
+.tab-pane.fade.show.active {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom colors */
+.w-70 {
+  width: 70%;
+}
+
+/* Better spacing for wallet and referral sections */
+#wallet-history .table,
+#referal .card-body {
+  margin-top: 10px;
+}
+
+#referal .card-body strong {
+  word-break: break-all;
+  background: #f5f5f5;
+  padding: 8px;
+  border-radius: 5px;
+  display: inline-block;
+  margin: 5px 0;
+}
+</style>
+
+<main class="main">
+  <div class="page-header breadcrumb-wrap mb-3">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="#" rel="nofollow">Home</a>
+        <span></span> Profile <span></span> Account
+      </div>
+    </div>
+  </div>
+  
+  <section class="pt-10 pb-10">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-10 m-auto">
+          <div class="row">
+            <!-- Dashboard Menu -->
+            <div class="col-md-4">
+              <div class="dashboard-menu">
+                <ul class="nav flex-column" role="tablist">
+                  <li class="nav-item">
+                    <a class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" href="#dashboard" role="tab" aria-controls="dashboard" aria-selected="false">
+                      <i class="fi-rs-settings-sliders mr-10"></i>Dashboard
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address" role="tab" aria-controls="address" aria-selected="true">
+                      <i class="fi-rs-marker mr-10"></i>My Address
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders" role="tab" aria-controls="orders" aria-selected="false">
+                      <i class="fi-rs-shopping-bag mr-10"></i>Orders
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#track-orders" role="tab" aria-controls="track-orders" aria-selected="false">
+                      <i class="fi-rs-shopping-cart-check mr-10"></i>Wallet Status
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="wallet-history-tab" data-bs-toggle="tab" href="#wallet-history" role="tab" aria-controls="wallet-history" aria-selected="false">
+                      <i class="fi-rs-shopping-cart-check mr-10"></i>Wallet History
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="referal-tab" data-bs-toggle="tab" href="#referal" role="tab" aria-controls="referal" aria-selected="false">
+                      <i class="fi-rs-shopping-cart-check mr-10"></i>Referals
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="/logout">
+                      <i class="fi-rs-sign-out mr-10"></i>Logout
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div class="col-md-8">
+              <div class="tab-content dashboard-content">
+                <!-- Profile Tab -->
+                <div class="tab-pane fade show active" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
+                  <div class="card card-green">
+                    <div class="card-header">
+                      <h5 class="mb-0 text-center">User Profile</h5>
+                    </div>
+                    <div class="card-body text-center">
+                      <h5 class="card-title"></h5>
+                      <p class="card-text">
+                        <strong>Phone:</strong> <%= user.phone %>
+                      </p>
+                      <p class="card-text">
+                        <strong>Email:</strong> <%= user.email %>
+                      </p>
+                      
+                      <a href="" class="btn btn-sm btn-success ml-2">Change Email</a>
+                      <a href="/forgot-password" class="btn btn-sm btn-success">Change Password</a>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Address Tab -->
+                <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <div class="card mb-3 mb-lg-0">
+                        <div class="card-header">
+                          <h5 class="mb-0"></h5>
+                        </div>
+                        <div class="card-body">
+                          <address></address>
+                          <p></p>
+                          <div class="d-flex justify-content-between">
+                            <a href="#" class="btn-small">Edit</a>
+                            <a href="#" class="btn-small" onclick="">Delete</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <div class="card mb-3 mb-lg-0">
+                        <div class="card-header">
+                          <h5 class="mb-0"></h5>
+                        </div>
+                        <div class="card-body">
+                          <address>No address</address>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12 mt-3">
+                      <a href="#">
+                        <button class="btn btn-primary w-70">Add address</button>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Orders Tab -->
+                <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
+                  <div class="card">
+                    <div class="card-header">
+                      <h5 class="mb-0">Your Orders</h5>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table class="table">
+                          <thead>
+                            <tr>
+                              <th>Order</th>
+                              <th>Status</th>
+                              <th>Total</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td>
+                                <a href="" class="btn-small d-block">View</a>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Wallet Status Tab -->
+                <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
+                  <div class="card">
+                    <div class="card-header">
+                      <h5 class="mb-0">Wallet</h5>
+                    </div>
+                    <div class="card-body contact-from-area">
+                      <div class="row">
+                        <div class="col-lg-8 mx-auto text-center mt-90">
+                          <form>
+                            <div class="form-group">
+                              <label for="walletAmount" class="h4">Amount</label>
+                              <div class="h3"></div>
+                            </div>
+                            <button type="button" class="btn btn-success" onclick="">Add Money</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Wallet History Tab -->
+                <div class="tab-pane fade" id="wallet-history" role="tabpanel" aria-labelledby="wallet-history-tab">
+                  <div class="card">
+                    <div class="card-header">
+                      <h5 class="mb-0">Wallet History</h5>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table class="table">
+                          <thead>
+                            <tr>
+                              <th>Date</th>
+                              <th>Status</th>
+                              <th>Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Referral Tab -->
+                <div class="tab-pane fade" id="referal" role="tabpanel" aria-labelledby="referal-tab">
+                  <div class="card">
+                    <div class="card-header">
+                      <h5 class="mb-0">Referal</h5>
+                    </div>
+                    <div class="card-body">
+                      <h6 class="mb-3">Refer your friends and earn money!</h6>
+                      <p>Share this link: <strong></strong></p>
+                      <p>Earned: ₹</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <%- include("../../views/partials/user/footer") %>

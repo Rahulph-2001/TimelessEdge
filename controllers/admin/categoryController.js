@@ -1,30 +1,37 @@
 
 const Category=require("../../models/categorySchema")
 const Product = require("../../models/productSchema")
+const httpStatus=require('../../utils/httpStatus')
 
 
 
-const categoryInfo=async(req,res)=>{
-    try {
-        const page=parseInt(req.query.page)||1;
-        const limit=4
-        const skip=(page-1)*limit
-        const categoryData=await Category.find({})
-        .sort({createdAt:-1})
-        .limit(limit)
-
-        const totalCategories=await Category.countDocuments()
-        const totalPages=Math.ceil(totalCategories/limit)
-        res.render("category",{
-            cat:categoryData,
-            currentPage:page,
-            totalPages:totalPages,
-            totalCategories:totalCategories
-        });
-    } catch (error) {
-       console.error(error)
-       res.redirect("/pageerror")
-    }
+const categoryInfo = async(req,res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 4
+    const skip = (page-1) * limit
+    
+    const categoryData = await Category.find({})
+      .skip(skip)  // You were missing the skip
+      .sort({createdAt: -1})
+      .limit(limit)
+    
+    const totalCategories = await Category.countDocuments()
+    const totalPages = Math.ceil(totalCategories/limit)
+    
+    res.render("category", {
+      cat: categoryData,
+      currentPage: page,
+      totalPages,
+      totalCategories
+    });
+  } catch (error) {
+    console.error('Category info error:', error);
+    res.status(500).render('error', {
+      message: 'Error loading categories',
+      error: process.env.NODE_ENV === 'development' ? error : {}
+    });
+  }
 }
 
 const addCategory=async(req,res)=>{
@@ -32,7 +39,7 @@ const addCategory=async(req,res)=>{
     try {
         const existingcategory=await Category.findOne({name})
         if(existingcategory){
-            return res.status(400).json({error:"category already exists"})
+            return res.status(httpStatus.BAD_REQUEST).json({error:"category already exists"})
         }
         const newCategory=new Category({
             name,
@@ -41,7 +48,7 @@ const addCategory=async(req,res)=>{
         await newCategory.save()
         return res.json({message:"category added successfully"})
     } catch (error) {
-        return res.status(500).json({error:"Internal Server error"})
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error:"Internal Server error"})
     }
 }
 
@@ -74,31 +81,33 @@ const geteditCategory=async(req,res)=>{
   }
 }
 
-const editCategory=async(req,res)=>{
+const editCategory = async(req,res) => {
   try {
-    const id=req.params.id;
-    const {categoryName,description}=req.body;
-    const existingCategory=await Category.findOne({name:categoryName})
-    if(existingCategory.name){
-      return res.status(400).json({error:"Category exists,please choose another name"})
+    const id = req.params.id;
+    const {categoryName, description} = req.body;
+    const existingCategory = await Category.findOne({name: categoryName})
+    
+    // This could throw an error if existingCategory is null
+    if(existingCategory && existingCategory._id.toString() !== id) {
+      return res.status(httpStatus.BAD_REQUEST).json({
+        error: "Category exists, please choose another name"
+      })
     }
 
-    const updateCategory =await Category.findByIdAndUpdate(id,{
-      name:categoryName,
-      description:description
-    },{new:true})
+    const updateCategory = await Category.findByIdAndUpdate(id, {
+      name: categoryName,
+      description: description
+    }, {new: true})
 
-    if(updateCategory){
+    if(updateCategory) {
       res.redirect("/admin/category");
-    }else{
-      res.status(404).json({error:"Category not found"})
+    } else {
+      res.status(httpStatus.NOT_FOUND).json({error: "Category not found"})
     }
-
   } catch (error) {
-    res.status(500).json({error:"Internal server error"})
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: "Internal server error"})
   }
 }
-
 
 
 

@@ -2,20 +2,23 @@ const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/admin/adminController");
 const { adminAuth, userAuth } = require("../middlewares/auth");
+const {redirectIfadminLoggedIn}=require('../middlewares/auth')
 const customerController = require("../controllers/admin/customerController");
 const categoryController = require("../controllers/admin/categoryController");
 const { upload } = require("../helpers/multer"); // Remove processImages
 const brandController = require("../controllers/admin/brandController");
 const productController = require("../controllers/admin/productController");
 
+
+
 // Admin routes
 router.get("/pageerror", adminController.pageerror);
 router.get("/login", adminController.loadLogin);
-router.post("/login", adminController.login);
-router.get("/", adminAuth, adminController.loadDashboard);
+router.post("/login", redirectIfadminLoggedIn,adminController.login);
+router.get("/dashboard", adminAuth, adminController.loadDashboard);
 router.get("/logout", adminController.logout);
 
-// Customer management
+// Customer management  
 router.get("/users", adminAuth, customerController.customerInfo);
 router.get("/blockCustomer", adminAuth, customerController.customerBlocked);
 router.get("/unblockCustomer", adminAuth, customerController.customerunBlocked);

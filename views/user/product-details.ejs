@@ -539,7 +539,7 @@
             <div class="breadcrumb">
                 <a href="/" rel="nofollow">Home</a>
                 <span>/</span> 
-                <a href="/fashion">Fashion</a>
+                <a href="/shop">Shop</a>
                 <span>/</span> 
                 Product Details
             </div>
@@ -583,7 +583,7 @@
                                     <h2 class="title-detail"><%= product.name %></h2>
                                     <div class="product-detail-rating">
                                         <div class="pro-details-brand">
-                                            <span>Brands: <a href="/brand"><%= product.brand || 'Unknown' %></a></span>
+                                            <span>Brand: <a href="/brand"><%= product.brand || 'Unknown' %></a></span>
                                         </div>
                                         <div class="product-rate-cover">
                                             <div class="product-rate">
@@ -595,12 +595,10 @@
 
                                     <div class="clearfix product-price-cover">
                                         <div class="product-price primary-color float-left">
-                                            <ins><span class="text-brand">$<%= product.price %></span></ins>
+                                            <ins><span class="text-brand">RS :<%= product.price %></span></ins>
                                             <% if (product.regularPrice && product.regularPrice > product.price) { %>
-                                                <ins><span class="old-price font-md ml-15">$<%= product.regularPrice %></span></ins>
-                                                <!-- <span class="save-price font-md color3 ml-15">
-                                                    <%= Math.round((1 - product.price / product.regularPrice) * 100) %>% Off
-                                                </span> -->
+                                                <ins><span class="old-price font-md ml-15">RS :<%= product.regularPrice %></span></ins>
+                                               
                                             <% } %>
                                         </div>
                                     </div>
@@ -617,7 +615,7 @@
                                         </div>
                                         <div class="product-extra-link2">
                                             <button type="button" class="button button-add-to-cart">Add to cart</button>
-                                            <a aria-label="Add To Wishlist" class="action-btn hover-up" href="#">
+                                            <!-- <a aria-label="Add To Wishlist" class="action-btn hover-up" href="#"> -->
                                                 <i class="fi-rs-heart"></i>
                                             </a>
                                         </div>

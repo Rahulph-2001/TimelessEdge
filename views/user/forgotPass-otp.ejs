@@ -177,7 +177,7 @@
       </form>
       
       <div class="form-group otp-timer-wrapper">
-        <div class="otp-timer" id="otpTimer">60</div>
+        <div class="otp-timer" id="otpTimer"></div>
       </div>
       
       <div class="form-group">
@@ -200,13 +200,13 @@
     </div>
   </div>
 </div>
-
+<input type="hidden" id="serverTimeRemaining" value="<%= locals.remainingTime || 60 %>">
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-  let otpTimerInterval;
-  let timer = 60;
+ let otpTimerInterval;
+ let timer = parseInt(document.getElementById('serverTimeRemaining').value);
 
   function showLoading(button) {
     const buttonText = button.find('.button-text');
@@ -256,6 +256,17 @@
     const timerElement = $('#otpTimer');
     const resendButton = $('#resendOtp');
 
+    // Clear any existing interval
+    clearInterval(otpTimerInterval);
+    
+    // If timer is already expired
+    if (timer <= 0) {
+      timerElement.text('Expired');
+      timerElement.css('backgroundColor', '#dc3545');
+      resendButton.prop('disabled', false);
+      return;
+    }
+
     resendButton.prop('disabled', true);
 
     otpTimerInterval = setInterval(function() {
@@ -274,12 +285,6 @@
     }, 1000);
   }
 
-  function initializeOtpTimer() {
-    clearInterval(otpTimerInterval);
-    timer = 60;
-    startOtpTimer();
-  }
-
   function handleOtpInput() {
     $('#otp').on('input', function() {
       this.value = this.value.replace(/[^0-9]/g, '');
@@ -290,7 +295,7 @@
   }
 
   $(document).ready(function() {
-    initializeOtpTimer();
+    startOtpTimer(); // Start timer directly with the server-provided value
     handleOtpInput();
 
     $('#otpForm').submit(function(e) {
@@ -343,7 +348,8 @@
         method: 'POST',
         success: function(response) {
           if (response.success) {
-            initializeOtpTimer();
+            timer = 60; // Reset timer
+            startOtpTimer(); // Restart timer
             showAlert('New OTP has been sent to your email', 'success');
           } else {
             showAlert(response.message);

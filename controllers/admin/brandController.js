@@ -1,26 +1,34 @@
 const Brand = require("../../models/brandSchema");
 const Product = require("../../models/productSchema");
 const monggose=require('mongoose')
-
+const httpStatus=require('../../utils/httpStatus')
 const getBrandPage = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = 4;
         const skip = (page - 1) * limit;
+        const search=req.query.search|| "";
 
-        const brandData = await Brand.find({})
+
+        let query={}
+        if(search){
+            query={name:{$regex:search,$options:'i'}}
+        }
+
+        const brandData = await Brand.find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
-        const totalBrands = await Brand.countDocuments();
+        const totalBrands = await Brand.countDocuments(query);
         const totalPages = Math.ceil(totalBrands / limit);
         
-        res.render("brands", {
+        res.status(httpStatus.OK).render("brands", {
             data: brandData,
             currentPage: page,
             totalPages: totalPages,
-            totalBrands: totalBrands
+            totalBrands: totalBrands,
+            search:search
         });
 
     } catch (error) {
@@ -101,7 +109,7 @@ const deleteBrand=async(req,res)=>{
         res.redirect("/admin/brands")
     } catch (error) {
         console.error("Error deleting brand:",error)
-        res.status(500).redirect("/pageerror")
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).redirect("/pageerror")
     }
 }
 

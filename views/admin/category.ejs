@@ -28,12 +28,13 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      
     }
 
     .content-title {
       font-size: 1.875rem;
       font-weight: 600;
-      color: #edeff4;
+      color: #111111;
       margin: 0;
     }
 
@@ -356,6 +357,7 @@
               <button type="submit" class="btn btn-primary">
                 Create Category
               </button>
+            </form>
             
           </div>
 
@@ -488,25 +490,30 @@
    
 
         // Complete validateForm function
-function validateForm() {
+        function validateForm() {
   clearErrorMessages();
   const name = document.getElementsByName("name")[0].value.trim();
   const description = document.getElementById("descriptionId").value.trim();
   let isValid = true;
 
-  if (name === "") {
+  // Name validation
+  if (!name) {
     displayErrorMessage("name-error", "Please enter a category name");
+    isValid = false;
+  } else if (name.length < 2) {
+    displayErrorMessage("name-error", "Category name must be at least 2 characters");
     isValid = false;
   } else if (!/^[a-zA-Z\s]+$/.test(name)) {
     displayErrorMessage("name-error", "Category name should contain only letters and spaces");
     isValid = false;
   }
 
-  if (description === "") {
+  // Description validation
+  if (!description) {
     displayErrorMessage("description-error", "Please enter a category description");
     isValid = false;
   } else if (description.length < 10) {
-    displayErrorMessage("description-error", "Description should be at least 10 characters long");
+    displayErrorMessage("description-error", "Description should be at least 10 characters");
     isValid = false;
   }
 

@@ -1,11 +1,17 @@
+
 const express=require('express')
 const router=express.Router()
 const userController=require('../controllers/user/userController')
 const passport = require('passport')
-const  userAuth = require("../middlewares/auth");
+const  {userAuth} = require("../middlewares/auth");
+const {redirectIfUserLoggedIn,redirectIfadminLoggedIn} = require('../middlewares/auth')
 const profileController=require('../controllers/user/profileController')
 const productController=require('../controllers/user/productController')
 
+
+router.use(redirectIfUserLoggedIn)
+
+router.use(redirectIfadminLoggedIn)
 
 
 router.get("/pageNotFound",userController.pageNotFound)
@@ -24,6 +30,7 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
         res.redirect("/")
     }
 );
+
 router.get("/login",userController.loadLogin)
 router.post("/login",userController.login)
 
@@ -31,7 +38,8 @@ router.get("/",userController.loadHomepage)
 router.get("/shop",userController.loadShopping)
 router.get("/logout",userController.logout)
 router.get('/filter',userController.filterProduct)
-router.get('/search',profileController.searchProducts)
+router.get('/search',userAuth,profileController.searchProducts)
+router.get('/userProfile',profileController.userProfile)
 
 router.get("/forgot-password",profileController.getForgotPassPage)
 router.post('/verify-email',profileController.verifyForgotOtp)

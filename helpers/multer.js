@@ -8,7 +8,7 @@ const storage = new CloudinaryStorage({
   params: {
     folder: "watch-images", 
     format: async (req, file) => "jpg",
-    transformation: [{ width: 500, height: 500, crop: "fill" }], 
+    transformation: [{ width: 1000, height: 1000, crop: "limit" }], 
   },
 });
 

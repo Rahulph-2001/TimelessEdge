@@ -1,8 +1,5 @@
 <%- include("../../views/partials/admin/header") %>
 
-
-
-
 <style>
 /* General Styles */
 body {
@@ -134,6 +131,53 @@ body {
     background-color: #218838;
 }
 
+/* Pagination styles */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.pagination {
+    display: inline-flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.pagination li {
+    display: inline-block;
+}
+
+.pagination li a,
+.pagination li span {
+    color: #007bff;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    padding: 8px 12px;
+    text-decoration: none;
+    display: block;
+}
+
+.pagination li.active a,
+.pagination li.active span {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.pagination li a:hover {
+    background-color: #e9ecef;
+}
+
+.pagination li.disabled span {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .table {
@@ -147,11 +191,12 @@ body {
     .btn {
         width: auto;
     }
+    
+    .pagination li a,
+    .pagination li span {
+        padding: 6px 8px;
+    }
 }
-
-
-
-
 </style>
 
 <head>
@@ -166,7 +211,7 @@ body {
 <header class="card-header">
     <form action="" method="get">
         <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search products" name="search">
+            <input type="text" class="form-control" placeholder="Search products" name="search" value="<%= searchQuery %>">
             <button class="btn btn-primary" type="submit">Search</button>
         </div>
     </form>
@@ -187,14 +232,12 @@ body {
             </tr>
         </thead>
         <tbody>
-           <%products.forEach((ele)=>{%>
-
-          
+           <% products.forEach((ele) => { %>
             <tr>
                 <td><%= ele.productName %></td>
                 <td><%= ele.brand ? ele.brand.name : 'No Brand' %></td>
                 <td><%= ele.category ? ele.category.name : 'No Category' %></td>
-                <td>$<%= ele.salePrice.toLocaleString() %></td>
+                <td>Rs :<%= ele.salePrice.toLocaleString() %></td>
                 <td><%= ele.quantity %></td>
                 <td>
                     <% if (ele.productImages && ele.productImages.length > 0) { %>
@@ -202,27 +245,46 @@ body {
                     <% } else { %>
                         No Image
                     <% } %>
-                    
                 </td>
-                
                 <td>
                     <% if(ele.isBlocked) { %>
                         <button onclick="blockProduct('<%= ele._id%>', false)" class="btn btn-success">Unblock</button>
                     <% } else { %>
                         <button onclick="blockProduct('<%= ele._id%>', true)" class="btn btn-danger">Block</button>
-
                     <% } %>
-
-                    
-                    
                 </td>
                 <td>
-                    <button onclick="editProduct('<%=ele._id%>')" class="btn btn-info">Edit</a></button>
+                    <button onclick="editProduct('<%=ele._id%>')" class="btn btn-info">Edit</button>
                 </td>
             </tr>
-            <% }) %>
+            <% }); %>
         </tbody>
     </table>
+</div>
+
+<!-- Pagination Controls -->
+<div class="pagination-container">
+    <ul class="pagination">
+        <% if (hasPrevPage) { %>
+            <li><a href="?page=<%= currentPage - 1 %><%= searchQuery ? '&search=' + searchQuery : '' %>">Previous</a></li>
+        <% } else { %>
+            <li class="disabled"><span>Previous</span></li>
+        <% } %>
+        
+        <% for (let i = 1; i <= totalPages; i++) { %>
+            <% if (i === currentPage) { %>
+                <li class="active"><span><%= i %></span></li>
+            <% } else { %>
+                <li><a href="?page=<%= i %><%= searchQuery ? '&search=' + searchQuery : '' %>"><%= i %></a></li>
+            <% } %>
+        <% } %>
+        
+        <% if (hasNextPage) { %>
+            <li><a href="?page=<%= currentPage + 1 %><%= searchQuery ? '&search=' + searchQuery : '' %>">Next</a></li>
+        <% } else { %>
+            <li class="disabled"><span>Next</span></li>
+        <% } %>
+    </ul>
 </div>
 
 <div class="container mt-3"></div>
@@ -230,75 +292,61 @@ body {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
-
+    function editProduct(productId){
+        Swal.fire({
+            title:`Are you Sure?`,
+            text:`Do you really want to edit this Product`,
+            icon:"warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: `Yes, edit it!`
+        }).then((ele)=>{
+            if(ele.isConfirmed){
+              window.location.href=`/admin/editProduct/${productId}`
+            }
+        })
+    }
     
-
-function editProduct(productId){
-    Swal.fire({
-        title:`Are you Sure?`,
-        text:`Do you really want to edit this Product`,
-        icon:"warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: `Yes, edit it!`
-    }).then((ele)=>{
-        if(ele.isConfirmed){
-          window.location.href=`/admin/editProduct/${productId}`
-        }
-    })
-}
-  
-  
-
-
-
-
-
-
-function blockProduct(productId, isBlocked) {
-    let action = isBlocked ? "Block" : "Unblock"; 
-    Swal.fire({
-        title: `Are you sure?`,
-        text: `Do you really want to ${action.toLowerCase()} this product?`,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: `Yes, ${action} it!`
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: `/admin/blockProduct/${productId}`,
-                method: "PUT",
-                data: JSON.stringify({ isBlocked: isBlocked }),
-                contentType: "application/json",
-                dataType: "json",
-                success: function (response) {
-                    if (response.success) {
-                        Swal.fire({
-                            title: `${action}ed!`,
-                            text: `The product has been ${action.toLowerCase()}ed.`,
-                            icon: "success",
-                            confirmButtonText: "OK"
-                        }).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire("Error!", "Something went wrong.", "error");
+    function blockProduct(productId, isBlocked) {
+        let action = isBlocked ? "Block" : "Unblock"; 
+        Swal.fire({
+            title: `Are you sure?`,
+            text: `Do you really want to ${action.toLowerCase()} this product?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: `Yes, ${action} it!`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/admin/blockProduct/${productId}`,
+                    method: "PUT",
+                    data: JSON.stringify({ isBlocked: isBlocked }),
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                title: `${action}ed!`,
+                                text: `The product has been ${action.toLowerCase()}ed.`,
+                                icon: "success",
+                                confirmButtonText: "OK"
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire("Error!", "Something went wrong.", "error");
+                        }
+                    },
+                    error: function () {
+                        Swal.fire("Error!", "An unexpected error occurred.", "error");
                     }
-                },
-                error: function () {
-                    Swal.fire("Error!", "An unexpected error occurred.", "error");
-                }
-            });
-        }
-    });
-}
-
-
-
-
+                });
+            }
+        });
+    }
 </script>
 
 <%- include("../../views/partials/admin/footer") %>

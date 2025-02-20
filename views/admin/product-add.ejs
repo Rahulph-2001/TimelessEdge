@@ -210,14 +210,14 @@
                                 <div class="col-lg-4">
                                     <div class="mb-4">
                                         <label class="form-label">Regular price</label>
-                                        <input placeholder="$" name="regularPrice" type="text" class="form-control">
+                                        <input placeholder="RS :" name="regularPrice" type="text" class="form-control">
                                         <div id="regularPrice-error" class="error-message"></div>
                                     </div>
                                 </div>
                                 <div class="col-lg-4">
                                     <div class="mb-4">
                                         <label class="form-label">Sale price</label>
-                                        <input placeholder="$" name="salePrice" type="text" class="form-control">
+                                        <input placeholder="RS :" name="salePrice" type="text" class="form-control">
                                         <div id="salePrice-error" class="error-message"></div>
                                     </div>
                                 </div>
@@ -388,8 +388,8 @@ function viewImage(event, index) {
             }
 
             croppers[index] = new Cropper(cropperImg, {
-                aspectRatio: 1,
-                viewMode: 0,
+                aspectRatio: NaN,
+                viewMode: 1,
                 dragMode: 'move',
                 autoCropArea: 1,
                 responsive: true,
@@ -423,7 +423,7 @@ function handleImageCrop(index) {
 
             croppedCanvas.toBlob(function(blob) {
                 croppedImageBlobs[index] = blob;
-            }, 'image/jpeg', 0.8);
+            }, 'image/jpeg', 1.0);
         }
     }
 }
@@ -490,9 +490,9 @@ function handleFormSubmission(form) {
         return false;
     }
 
-    const submitButton = form.querySelector('button[type="submit"]');
-    submitButton.disabled = true;
-    showLoadingState(submitButton);
+    // const submitButton = form.querySelector('button[type="submit"]');
+    // submitButton.disabled = true;
+    // showLoadingState(submitButton);
 
     const formData = new FormData(form);
     formData.delete('images'); // Remove existing file inputs

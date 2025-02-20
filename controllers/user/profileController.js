@@ -81,10 +81,19 @@ const verifyForgotOtp = async (req, res) => {
         }
 
         // Check if OTP was recently sent
+        // const currentTime = Date.now();
+        // if (req.session.otpExpiresAt && currentTime < req.session.otpExpiresAt) {
+        //     return res.render("forgotPass-otp", {
+        //         message: "Please use the OTP already sent to your email"
+        //     });
+        // }
+
         const currentTime = Date.now();
         if (req.session.otpExpiresAt && currentTime < req.session.otpExpiresAt) {
+            const remainingTime = Math.ceil((req.session.otpExpiresAt - Date.now()) / 1000);
             return res.render("forgotPass-otp", {
-                message: "Please use the OTP already sent to your email"
+                message: "Please use the OTP already sent to your email",
+                remainingTime: remainingTime
             });
         }
 
@@ -99,7 +108,9 @@ const verifyForgotOtp = async (req, res) => {
             req.session.otpAttempts = 0; // Reset attempts counter
 
             console.log("OTP:", otp); // For development only
-            return res.render('forgotPass-otp', { message: '' });
+            const remainingTime = Math.ceil((req.session.otpExpiresAt - Date.now()) / 1000);
+
+            return res.render('forgotPass-otp', { message: '',remainingtime:remainingTime });
         } else {
             return res.render("forgot-password", { 
                 message: "Failed to send OTP. Please try again later" 
@@ -192,7 +203,7 @@ const securePassword=async(password)=>{
         const passwordHash=await bcrypt.hash(password,10)
           return passwordHash
     } catch (error) {
-        
+        console.error("Error hashing password:", error);
     }
 }
 
@@ -308,7 +319,19 @@ const searchProducts=async (req,res)=>{
 
 }
 
-
+const userProfile=async(req,res)=>{
+    try {
+        const user=await User.findById(req.user._id)
+        console.log('userdata fetched')
+        if(!user){
+            res.redirect('/pageNotFound')
+        }
+        res.render('userProfile',{user})
+        
+    } catch (error) {
+        console.log(error,{message:"Internal server error"})
+    }
+}
 
 module.exports = {
     getForgotPassPage,
@@ -317,5 +340,6 @@ module.exports = {
     getResetPasspage,
     resendOtp,
     postNewPassword,
-    searchProducts
+    searchProducts,
+    userProfile
 };

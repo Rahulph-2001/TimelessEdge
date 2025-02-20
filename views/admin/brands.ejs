@@ -178,8 +178,77 @@
     justify-content: center;
   }
 
+  .justify-content-between {
+    justify-content: space-between;
+  }
+
   .mt-20 {
     margin-top: 1.25rem;
+  }
+
+  /* New search styles */
+  .search-box {
+    display: flex;
+    margin-bottom: 1.5rem;
+    width: 100%;
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #dee2e6;
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+  }
+
+  .search-button {
+    background-color: #0d6efd;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+  }
+
+  /* Pagination styles */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0 0;
+  }
+
+  .pagination li {
+    margin: 0 0.25rem;
+  }
+
+  .pagination a {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    text-decoration: none;
+    color: #0d6efd;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+  }
+
+  .pagination a:hover {
+    background-color: #e9ecef;
+  }
+
+  .pagination .active a {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+  }
+
+  .pagination .disabled a {
+    color: #6c757d;
+    pointer-events: none;
+    cursor: default;
+    background-color: #fff;
+    border-color: #dee2e6;
   }
 </style>
 
@@ -213,6 +282,20 @@
 
         <!-- Brand Table -->
         <div class="col-md-7">
+          <!-- Search Box -->
+          <form action="/admin/brands" method="GET" class="search-box">
+            <input 
+              type="text" 
+              name="search" 
+              placeholder="Search brands..." 
+              class="search-input"
+              value="<%= typeof search !== 'undefined' ? search : '' %>"
+            />
+            <button type="submit" class="search-button">
+              <i class="icon material-icons md-search"></i> Search
+            </button>
+          </form>
+
           <div class="table-responsive">
             <table class="table table-hover">
               <thead>
@@ -224,43 +307,99 @@
                 </tr>
               </thead>
               <tbody>
-                <%data.reverse().forEach((brand,index)=>{%>
-                <tr>
-                  <td class="text-start"><%=brand.name%></td>
-                  <td class="text-start">
-                    <div class="d-flex align-items-center justify-content-center"
-                      style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden;">
-                      <img src="<%= brand.brandImage %>" alt="<%= brand.name %>" 
-                        class="img-fluid rounded-circle" style="width: 100%; height: auto" />
-                    </div>
-                  </td>
-                  
-                  <td class="text-start">
-                    <%if(brand.isBlocked===true){%>
-                    <span class="badge rounded-pill alert-danger" style="width: 60px">Blocked</span>
-                    <%}else{%>
-                    <span class="badge rounded-pill alert-success" style="width: 60px">Active</span>
-                    <%}%>
-                  </td>
-                  <td class="text-start">
-                    <%if(brand.isBlocked===false){%>
-                    <button class="btn btn-danger">
-                      <a href="/admin/blockBrand?id=<%=brand._id%>" class="text-white">Block</a>
-                    </button>
-                    <%}else{%>
-                    <button class="btn btn-success">
-                      <a href="/admin/unblockBrand?id=<%=brand._id%>" class="text-white">Unblock</a>
-                    </button>
-                    <%}%>
-                    <button class="btn btn-warning">
-                      <a href="/admin/editBrand/<%=brand._id%>" class="text-white">Edit</a>
-                    </button>
-                  </td>
-                </tr>
-                <%})%>
+                <% if (typeof paginatedBrands !== 'undefined') { %>
+                  <% paginatedBrands.forEach((brand, index) => { %>
+                  <tr>
+                    <td class="text-start"><%=brand.name%></td>
+                    <td class="text-start">
+                      <div class="d-flex align-items-center justify-content-center"
+                        style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden;">
+                        <img src="<%= brand.brandImage %>" alt="<%= brand.name %>" 
+                          class="img-fluid rounded-circle" style="width: 100%; height: auto" />
+                      </div>
+                    </td>
+                    
+                    <td class="text-start">
+                      <%if(brand.isBlocked===true){%>
+                      <span class="badge rounded-pill alert-danger" style="width: 60px">Blocked</span>
+                      <%}else{%>
+                      <span class="badge rounded-pill alert-success" style="width: 60px">Active</span>
+                      <%}%>
+                    </td>
+                    <td class="text-start">
+                      <%if(brand.isBlocked===false){%>
+                      <button class="btn btn-danger">
+                        <a href="/admin/blockBrand?id=<%=brand._id%>" class="text-white">Block</a>
+                      </button>
+                      <%}else{%>
+                      <button class="btn btn-success">
+                        <a href="/admin/unblockBrand?id=<%=brand._id%>" class="text-white">Unblock</a>
+                      </button>
+                      <%}%>
+                      <button class="btn btn-warning">
+                        <a href="/admin/editBrand/<%=brand._id%>" class="text-white">Edit</a>
+                      </button>
+                    </td>
+                  </tr>
+                  <% }) %>
+                <% } else { %>
+                  <% data.forEach((brand, index) => { %>
+                  <tr>
+                    <td class="text-start"><%=brand.name%></td>
+                    <td class="text-start">
+                      <div class="d-flex align-items-center justify-content-center"
+                        style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden;">
+                        <img src="<%= brand.brandImage %>" alt="<%= brand.name %>" 
+                          class="img-fluid rounded-circle" style="width: 100%; height: auto" />
+                      </div>
+                    </td>
+                    
+                    <td class="text-start">
+                      <%if(brand.isBlocked===true){%>
+                      <span class="badge rounded-pill alert-danger" style="width: 60px">Blocked</span>
+                      <%}else{%>
+                      <span class="badge rounded-pill alert-success" style="width: 60px">Active</span>
+                      <%}%>
+                    </td>
+                    <td class="text-start">
+                      <%if(brand.isBlocked===false){%>
+                      <button class="btn btn-danger">
+                        <a href="/admin/blockBrand?id=<%=brand._id%>" class="text-white">Block</a>
+                      </button>
+                      <%}else{%>
+                      <button class="btn btn-success">
+                        <a href="/admin/unblockBrand?id=<%=brand._id%>" class="text-white">Unblock</a>
+                      </button>
+                      <%}%>
+                      <button class="btn btn-warning">
+                        <a href="/admin/editBrand/<%=brand._id%>" class="text-white">Edit</a>
+                      </button>
+                    </td>
+                  </tr>
+                  <% }) %>
+                <% } %>
               </tbody>
             </table>
           </div>
+
+          <!-- Pagination -->
+          <% if (totalPages > 1) { %>
+          <ul class="pagination">
+            <li class="<%= currentPage === 1 ? 'disabled' : '' %>">
+              <a href="?page=<%= currentPage - 1 %><%= search ? '&search=' + search : '' %>">Prev</a>
+            </li>
+            
+            <% for(let i = 1; i <= totalPages; i++) { %>
+              <li class="<%= i === currentPage ? 'active' : '' %>">
+                <a href="?page=<%= i %><%= search ? '&search=' + search : '' %>"><%= i %></a>
+              </li>
+            <% } %>
+            
+            <li class="<%= currentPage === totalPages ? 'disabled' : '' %>">
+              <a href="?page=<%= currentPage + 1 %><%= search ? '&search=' + search : '' %>">Next</a>
+            </li>
+          </ul>
+          <% } %>
         </div>
       </div>
     </div>

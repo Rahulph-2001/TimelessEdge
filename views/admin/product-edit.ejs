@@ -4,8 +4,44 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
     <style>
         .content-main {
-            padding: 20px;
-            color: #e2e8f0;
+            padding: 2rem;
+            color: #2d3748;
+        }
+
+        .content-header {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .content-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .edit-container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .card-body {
+            padding: 2rem;
         }
 
         .form-group {
@@ -16,6 +52,7 @@
             font-weight: 600;
             margin-bottom: 0.5rem;
             display: block;
+            color: #2d3748;
         }
 
         .form-control {
@@ -23,6 +60,7 @@
             padding: 0.5rem;
             border: 1px solid #e2e8f0;
             border-radius: 0.375rem;
+            font-size: 1rem;
         }
 
         .image-grid {
@@ -44,6 +82,7 @@
             object-fit: cover;
             border-radius: 0.375rem;
             cursor: pointer;
+            border: 1px solid #e2e8f0;
         }
 
         .btn-replace {
@@ -54,6 +93,7 @@
             border-radius: 0.375rem;
             border: none;
             cursor: pointer;
+            font-size: 0.875rem;
         }
 
         .btn-replace:hover {
@@ -74,6 +114,9 @@
             border: none;
             cursor: pointer;
             transition: background-color 0.2s;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 1rem;
         }
 
         .btn-update:hover {
@@ -185,19 +228,33 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        @media (max-width: 768px) {
+            .price-quantity-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-body {
+                padding: 1.5rem;
+            }
+        }
     </style>
 </head>
 
 <body>
     <section class="content-main">
-        <div class="row">
-            <div class="col-9">
-                <div class="content-header">
-                    <h2 class="content-title">Edit Product</h2>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card mb-4">
+        <div class="content-header">
+            <h2 class="content-title">Edit Product</h2>
+        </div>
+        
+        <div class="main-container">
+            <div class="edit-container">
+                <div class="card">
                     <div class="card-body">
                         <form action="" enctype="multipart/form-data">
                             <!-- Product Name -->
@@ -248,12 +305,12 @@
                             <!-- Prices & Quantity -->
                             <div class="price-quantity-grid">
                                 <div class="form-group">
-                                    <label class="form-label">Regular Price ($)</label>
+                                    <label class="form-label">Regular Price (RS :)</label>
                                     <input name="regularPrice" type="number" class="form-control" value="<%= product.regularPrice %>">
                                     <div id="regularPrice-error" class="error-message"></div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Sale Price ($)</label>
+                                    <label class="form-label">Sale Price (RS :)</label>
                                     <input name="salePrice" type="number" class="form-control" value="<%= product.salePrice %>">
                                     <div id="salePrice-error" class="error-message"></div>
                                 </div>
@@ -277,7 +334,8 @@
                                 <div class="image-grid">
                                     <% product.productImages.forEach((image, index)=> { %>
                                         <div class="image-container">
-                                            <img src="<%= image %>" class="image-preview" id="imgView<%= index + 1 %>">
+                                            <img src="<%= image %>" class="image-preview" id="imgView<%= index + 1 %>"
+                                                onclick="showZoom('<%= image %>')">
                                             <input class="form-control" type="file" name="images"
                                                 id="input<%= index + 1 %>" accept="image/png, image/jpeg, image/jpg"
                                                 style="display: none;">
@@ -322,145 +380,157 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-// Add this to your existing script section
-let cropper = null;
-let currentImageId = null;
+        let cropper = null;
+        let currentImageId = null;
 
-// Trigger file input when "Replace" button is clicked
-function triggerReplace(id) {
-    document.getElementById(`input${id}`).click();
-}
-
-// Handle file selection and show Cropper modal
-document.querySelectorAll('input[type="file"]').forEach(input => {
-    input.addEventListener('change', function(event) {
-        replaceImage(event, this.id.replace('input', ''));
-    });
-});
-
-function replaceImage(event, id) {
-    const file = event.target.files[0];
-
-    if (file) {
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            alert('Image size should be less than 5MB');
-            return;
+        // Trigger file input when "Replace" button is clicked
+        function triggerReplace(id) {
+            document.getElementById(`input${id}`).click();
         }
 
-        currentImageId = id;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const cropperImage = document.getElementById('cropperImage');
-            cropperImage.src = e.target.result;
-
-            // Destroy existing Cropper instance
-            if (cropper) {
-                cropper.destroy();
-            }
-
-            // Initialize Cropper
-            cropper = new Cropper(cropperImage, {
-                viewMode: 2,
-                dragMode: 'move',
-                aspectRatio: NaN,
-                autoCropArea: 1,
-                guides: true,
-                center: true,
-                cropBoxMovable: true,
-                cropBoxResizable: true,
-                toggleDragModeOnDblclick: true,
-                zoomOnWheel: true,
-                zoomOnTouch: true,
-                ready: function() {
-                    this.cropper.zoomTo(0.5);
-                }
+        // Handle file selection and show Cropper modal
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function(event) {
+                replaceImage(event, this.id.replace('input', ''));
             });
-
-            document.getElementById('cropperModal').style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-// Crop Image and Replace Preview
-function cropImage() {
-    if (!cropper) return;
-
-    const canvas = cropper.getCroppedCanvas({
-        width: 800,
-        height: 800,
-        fillColor: '#fff',
-        imageSmoothingEnabled: true,
-        imageSmoothingQuality: 'high'
-    });
-
-    canvas.toBlob(function(blob) {
-        const croppedFile = new File([blob], `cropped_${currentImageId}.jpg`, {
-            type: 'image/jpeg',
-            lastModified: Date.now()
         });
 
-        // Update image preview
-        const img = document.getElementById(`imgView${currentImageId}`);
-        img.src = URL.createObjectURL(croppedFile);
+        function replaceImage(event, id) {
+            const file = event.target.files[0];
 
-        // Update input field with cropped image
-        const input = document.getElementById(`input${currentImageId}`);
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(croppedFile);
-        input.files = dataTransfer.files;
+            if (file) {
+                // Validate file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Image size should be less than 5MB');
+                    return;
+                }
 
-        // Close modal and cleanup
-        document.getElementById('cropperModal').style.display = 'none';
-        cropper.destroy();
-        cropper = null;
-    }, 'image/jpeg', 0.95);
-}
+                currentImageId = id;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const cropperImage = document.getElementById('cropperImage');
+                    cropperImage.src = e.target.result;
 
-// Close Cropper Modal
-function cancelCrop() {
-    document.getElementById('cropperModal').style.display = 'none';
-    if (cropper) {
-        cropper.destroy();
-        cropper = null;
-    }
-}
+                    // Destroy existing Cropper instance
+                    if (cropper) {
+                        cropper.destroy();
+                    }
 
-// Update the updateProduct function to handle image upload better
-function updateProduct(event, productId) {
-    event.preventDefault();
+                    // Initialize Cropper
+                    cropper = new Cropper(cropperImage, {
+                        viewMode: 2,
+                        dragMode: 'move',
+                        aspectRatio: NaN,
+                        autoCropArea: 1,
+                        guides: true,
+                        center: true,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true,
+                        toggleDragModeOnDblclick: true,
+                        zoomOnWheel: true,
+                        zoomOnTouch: true,
+                        ready: function() {
+                            this.cropper.zoomTo(0.5);
+                        }
+                    });
 
-    // if (!validateForm()) {
-    //     return;
-    // }
-
-    const form = document.querySelector("form");
-    const formData = new FormData(form);
-
-    // Add loading state
-    const submitButton = event.target;
-    submitButton.disabled = true;
-    submitButton.textContent = 'Updating...';
-
-    $.ajax({
-        url: `/admin/editProduct/${productId}`,
-        method: "PUT",
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function(response) {
-            alert("Product updated successfully!");
-            window.location.reload();
-        },
-        error: function(xhr, status, error) {
-            console.error("Error updating product:", error);
-            alert("Failed to update product. Please try again.");
-            submitButton.disabled = false;
-            submitButton.textContent = 'Update Product';
+                    document.getElementById('cropperModal').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
         }
-    });
-}
+
+        // Crop Image and Replace Preview
+        function cropImage() {
+            if (!cropper) return;
+
+            const canvas = cropper.getCroppedCanvas({
+                width: 200,
+                height: 1400,
+                fillColor: '#fff',
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high'
+            });
+
+            canvas.toBlob(function(blob) {
+                const croppedFile = new File([blob], `cropped_${currentImageId}.jpg`, {
+                    type: 'image/jpeg',
+                    lastModified: Date.now()
+                });
+
+                // Update image preview
+                const img = document.getElementById(`imgView${currentImageId}`);
+                img.src = URL.createObjectURL(croppedFile);
+
+                // Update input field with cropped image
+                const input = document.getElementById(`input${currentImageId}`);
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(croppedFile);
+                input.files = dataTransfer.files;
+
+                // Close modal and cleanup
+                document.getElementById('cropperModal').style.display = 'none';
+                cropper.destroy();
+                cropper = null;
+            }, 'image/jpeg', 0.95);
+        }
+
+        // Close Cropper Modal
+        function cancelCrop() {
+            document.getElementById('cropperModal').style.display = 'none';
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+        }
+
+        // Show zoom modal with larger image
+        function showZoom(imageSrc) {
+            const zoomImg = document.getElementById('zoomImg');
+            zoomImg.src = imageSrc;
+            document.getElementById('zoomModal').style.display = 'block';
+        }
+
+        // Close zoom modal
+        function closeZoom() {
+            document.getElementById('zoomModal').style.display = 'none';
+        }
+
+        // Update the updateProduct function to handle image upload better
+        function updateProduct(event, productId) {
+            event.preventDefault();
+
+            // You can uncomment and implement form validation as needed
+            // if (!validateForm()) {
+            //     return;
+            // }
+
+            const form = document.querySelector("form");
+            const formData = new FormData(form);
+
+            // Add loading state
+            const submitButton = event.target;
+            submitButton.disabled = true;
+            submitButton.textContent = 'Updating...';
+
+            $.ajax({
+                url: `/admin/editProduct/${productId}`,
+                method: "PUT",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    alert("Product updated successfully!");
+                    window.location.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error updating product:", error);
+                    alert("Failed to update product. Please try again.");
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Update Product';
+                }
+            });
+        }
     </script>
 
     <%- include("../../views/partials/admin/footer") %>

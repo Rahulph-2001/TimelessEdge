@@ -35,14 +35,14 @@ const productSchema = new Schema(
         },
         quantity: {
             type: Number,
-            default: 0, // Fix incorrect default type
+            default: 0, 
         },
         color: {
-            type: String, // Fix field name to lowercase
+            type: String, 
             required: true,
         },
         productImages: {
-            type: [String], // Ensure consistency with addProducts function
+            type: [String], 
             required: true,
         },
         isBlocked: {

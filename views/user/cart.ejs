@@ -1,0 +1,840 @@
+<%- include("../../views/partials/user/header") %>
+
+  <style>
+    /* Reset and base styles */
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Layout */
+    .section {
+      background-color: white;
+      padding: 32px 0;
+    }
+
+    @media (min-width: 768px) {
+      .section {
+        padding: 64px 0;
+      }
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    @media (min-width: 1536px) {
+      .container {
+        padding: 0;
+      }
+    }
+
+    .title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    @media (min-width: 640px) {
+      .title {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* Cart layout */
+    .cart-container {
+      margin-top: 24px;
+    }
+
+    @media (min-width: 640px) {
+      .cart-container {
+        margin-top: 32px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .cart-container {
+        display: flex;
+        align-items: flex-start;
+        gap: 24px;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .cart-container {
+        gap: 32px;
+      }
+    }
+
+    /* Cart items section */
+    .cart-items {
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 1024px) {
+      .cart-items {
+        flex: none;
+        max-width: 672px;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .cart-items {
+        max-width: 896px;
+      }
+    }
+
+    .cart-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .cart-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      background-color: white;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    @media (min-width: 768px) {
+      .cart-item {
+        padding: 24px;
+      }
+    }
+
+    .cart-item-content {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .cart-item-content {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+    }
+
+    /* Product image */
+    .product-image-link {
+      flex-shrink: 0;
+    }
+
+    @media (min-width: 768px) {
+      .product-image-link {
+        order: 1;
+      }
+    }
+
+    .product-image {
+      height: 80px;
+      width: 80px;
+      object-fit: cover;
+    }
+
+    /* Quantity controls */
+    .quantity-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    @media (min-width: 768px) {
+      .quantity-section {
+        order: 3;
+        justify-content: flex-end;
+      }
+    }
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+    }
+
+    .quantity-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 20px;
+      width: 20px;
+      flex-shrink: 0;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background-color: #f3f4f6;
+      cursor: pointer;
+    }
+
+    .quantity-button:hover {
+      background-color: #e5e7eb;
+    }
+
+    .quantity-button:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(209, 213, 219, 0.5);
+    }
+
+    .quantity-input {
+      width: 40px;
+      border: none;
+      background: transparent;
+      text-align: center;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #111827;
+    }
+
+    .quantity-input:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    /* Price display */
+    .price-display {
+      text-align: end;
+    }
+
+    @media (min-width: 768px) {
+      .price-display {
+        order: 4;
+        width: 128px;
+      }
+    }
+
+    .price {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    /* Product details */
+    .product-details {
+      width: 100%;
+      min-width: 0;
+      flex: 1;
+    }
+
+    @media (min-width: 768px) {
+      .product-details {
+        order: 2;
+        max-width: 384px;
+      }
+    }
+
+    .product-name {
+      display: block;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #111827;
+      text-decoration: none;
+    }
+
+    .product-name:hover {
+      text-decoration: underline;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .action-button {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #6b7280;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .action-button:hover {
+      text-decoration: underline;
+      color: #111827;
+    }
+
+    .action-button.remove {
+      color: #dc2626;
+    }
+
+    .action-button svg {
+      margin-right: 6px;
+    }
+
+    /* Order summary section */
+    .summary-section {
+      margin-top: 24px;
+      max-width: 896px;
+      margin-left: auto;
+      margin-right: auto;
+      flex: 1;
+    }
+
+    @media (min-width: 1024px) {
+      .summary-section {
+        margin-top: 0;
+        width: 100%;
+      }
+    }
+
+    .order-summary {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      background-color: white;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      margin-bottom: 24px;
+    }
+
+    @media (min-width: 640px) {
+      .order-summary {
+        padding: 24px;
+      }
+    }
+
+    .summary-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 16px;
+    }
+
+    .summary-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .summary-label {
+      font-size: 1rem;
+      color: #6b7280;
+    }
+
+    .summary-value {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #111827;
+    }
+
+    .summary-savings {
+      color: #059669;
+    }
+
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 8px;
+      margin-top: 8px;
+    }
+
+    .summary-total .summary-label,
+    .summary-total .summary-value {
+      font-weight: 700;
+      color: #111827;
+    }
+
+    /* Buttons */
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 10px 20px;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+    }
+
+    .button-primary {
+      background-color: #2563eb;
+      color: white;
+    }
+
+    .button-primary:hover {
+      background-color: #1d4ed8;
+    }
+
+    .button-primary:focus {
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25);
+    }
+
+    /* Continue shopping section */
+    .continue-shopping-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .continue-shopping-text {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+
+    .continue-shopping-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #2563eb;
+      text-decoration: underline;
+    }
+
+    .continue-shopping-link:hover {
+      text-decoration: none;
+    }
+
+    /* Voucher section */
+    .voucher-section {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      background-color: white;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    @media (min-width: 640px) {
+      .voucher-section {
+        padding: 24px;
+      }
+    }
+
+    .voucher-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .voucher-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #111827;
+    }
+
+    .voucher-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      background-color: #f9fafb;
+      font-size: 0.875rem;
+      color: #111827;
+    }
+
+    .voucher-input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+    }
+
+    /* Related products section */
+    .related-products {
+      margin-top: 32px;
+    }
+
+    @media (min-width: 1280px) {
+      .related-products {
+        margin-top: 32px;
+        display: block;
+      }
+    }
+
+    .related-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .related-grid {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    @media (min-width: 640px) {
+      .related-grid {
+        margin-top: 32px;
+      }
+    }
+
+    .product-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      background-color: white;
+      padding: 24px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+
+    .product-card-image {
+      display: block;
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    .product-card-image img {
+      height: 176px;
+      width: 176px;
+      margin: 0 auto;
+    }
+
+    .product-card-details {
+      margin-top: 24px;
+    }
+
+    .product-card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #111827;
+      text-decoration: none;
+    }
+
+    .product-card-title:hover {
+      text-decoration: underline;
+    }
+
+    .product-card-description {
+      margin-top: 8px;
+      font-size: 1rem;
+      color: #6b7280;
+    }
+
+    .product-card-price {
+      margin-top: 24px;
+    }
+
+    .original-price {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #111827;
+      text-decoration: line-through;
+    }
+
+    .sale-price {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #dc2626;
+    }
+
+    .product-card-actions {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tooltip {
+      position: relative;
+    }
+
+    .tooltip-text {
+      visibility: hidden;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #111827;
+      color: white;
+      text-align: center;
+      padding: 8px 12px;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      white-space: nowrap;
+    }
+
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+    }
+
+    /* Helper classes */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <section class="section">
+    <div class="container">
+      <h2 class="title">Shopping Cart</h2>
+      
+      <div class="cart-container">
+        <!-- Cart Items Section -->
+        <div class="cart-items">
+          <div class="cart-items-list">
+            <% if (cart.items && cart.items.length > 0) { %>
+              <% cart.items.forEach(function(item) { %>
+                <div class="cart-item">
+                  <div class="cart-item-content">
+                    <a href="#" class="product-image-link">
+                      <% if(item.productId.productImages && item.productId.productImages.length > 0) { %>
+                        <img class="product-image" src="<%= item.productId.productImages[0] %>" alt="<%= item.productId.productName %> image" />
+                      <% } else { %>
+                        <img class="product-image" src="https://via.placeholder.com/80" alt="placeholder image" />
+                      <% } %>
+                    </a>
+
+                    <div class="quantity-section">
+                      <label for="counter-input-<%= item._id %>" class="sr-only">Choose quantity:</label>
+                      <div class="quantity-controls">
+                        <button type="button" id="decrement-button-<%= item._id %>" data-input-counter-decrement="counter-input-<%= item._id %>" class="quantity-button">
+                          <svg class="h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
+                          </svg>
+                        </button>
+                        <input type="text" id="counter-input-<%= item._id %>" data-input-counter class="quantity-input" value="<%= item.quantity %>" required />
+                        <button type="button" id="increment-button-<%= item._id %>" data-input-counter-increment="counter-input-<%= item._id %>" class="quantity-button">
+                          <svg class="h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div class="price-display">
+                        <p class="price">RS:<%= item.price %></p>
+                      </div>
+                    </div>
+
+                    <div class="product-details">
+                      <a href="#" class="product-name">
+                        <%= item.productId.productName %>
+                      </a>
+
+                      <div class="action-buttons">
+                        <button type="button" class="action-button">
+                          <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.01 6.001C6.5 1 1 8 5.782 13.001L12.011 20l6.23-7C23 8 17.5 1 12.01 6.002Z" />
+                          </svg>
+                          Add to Favorites
+                        </button>
+
+                        <button type="button" class="action-button remove" data-id="<%= item._id %>">
+                          <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6" />
+                          </svg>
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% }); %>
+            <% } else { %>
+              <p>Your cart is empty.</p>
+            <% } %>
+          </div>
+
+          <!-- Related Products Section -->
+          <div class="related-products">
+            <h3 class="related-title">People also bought</h3>
+            <div class="related-grid">
+              <% if (relatedProduct && relatedProduct.length > 0) { %>
+                <% relatedProduct.forEach(function(product) { %>
+                  <div class="product-card">
+                    <a href="/product-details?id=<%= product._id %>" class="product-card-image">
+                      <% if (product.productImages && product.productImages.length > 0) { %>
+                        <img src="<%= product.productImages[0] %>" alt="<%= product.productName %> image" onerror="this.onerror=null; this.src='https://via.placeholder.com/176'" />
+                      <% } else { %>
+                        <img src="https://via.placeholder.com/176" alt="Placeholder image" />
+                      <% } %>
+                    </a>
+                    <div class="product-card-details">
+                      <a href="/product-details?id=<%= product._id %>" class="product-card-title"><%= product.productName %></a>
+                      <p class="product-card-description"><%= product.description %></p>
+                    </div>
+                    <div class="product-card-price">
+                      <% if (product.salePrice && product.salePrice < product.regularPrice) { %>
+                        <p class="original-price">RS:<%= product.regularPrice.toLocaleString() %></p>
+                        <p class="sale-price">RS:<%= product.salePrice.toLocaleString() %></p>
+                      <% } else { %>
+                        <p class="price">RS:<%= product.regularPrice.toLocaleString() %></p>
+                      <% } %>
+                    </div>
+                    <div class="product-card-actions">
+                      <button type="button" class="button button-primary">
+                        <svg class="h-5 w-5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7h-1M8 7h-.688M13 5v4m-2-2h4" />
+                        </svg>
+                        Add to cart
+                      </button>
+                    </div>
+                  </div>
+                <% }); %>
+              <% } else { %>
+                <p>No related products found.</p>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary Section -->
+        <div class="summary-section">
+          <div class="order-summary">
+            <p class="summary-title">Order summary</p>
+
+            <div class="summary-list">
+              <div class="summary-item">
+                <dt class="summary-label">Original price</dt>
+                <dd class="summary-value">RS:<%= summary.originalPrice.toFixed(2) %></dd>
+              </div>
+
+              <div class="summary-item">
+                <dt class="summary-label">Savings</dt>
+                <dd class="summary-value summary-savings">-RS:<%= summary.savings.toFixed(2) %></dd>
+              </div>
+
+              <div class="summary-item">
+                <dt class="summary-label">Store Pickup</dt>
+                <dd class="summary-value">RS:<%= summary.storePickup.toFixed(2) %></dd>
+              </div>
+
+              <div class="summary-item">
+                <dt class="summary-label">Tax</dt>
+                <dd class="summary-value">RS:<%= summary.tax.toFixed(2) %></dd>
+              </div>
+
+              <div class="summary-total">
+                <dt class="summary-label">Total</dt>
+                <dd class="summary-value">RS:<%= summary.total.toFixed(2) %></dd>
+              </div>
+            </div>
+
+            <a href="/checkout" class="button button-primary">Proceed to Checkout</a>
+
+            <div class="continue-shopping-section">
+              <span class="continue-shopping-text">or</span>
+              <a href="/shop" class="continue-shopping-link">
+                Continue Shopping
+                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4" />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- Voucher Section -->
+          <div class="voucher-section">
+            <form action="/apply-voucher" method="POST" class="voucher-form">
+              <div>
+                <label for="voucher" class="voucher-label">Do you have a voucher or gift card?</label>
+                <input type="text" id="voucher" name="voucher" class="voucher-input" required />
+              </div>
+              <button type="submit" class="button button-primary">Apply Code</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="/path/to/your/cart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/path/to/your/cart.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll("[data-input-counter-increment]").forEach(button => {
+        button.addEventListener("click", async () => {
+          const inputId = button.getAttribute("data-input-counter-increment");
+          const input = document.getElementById(inputId);
+          let newValue = parseInt(input.value, 10) + 1;
+          updateCart(inputId, newValue);
+        });
+      });
+
+      document.querySelectorAll("[data-input-counter-decrement]").forEach(button => {
+        button.addEventListener("click", async () => {
+          const inputId = button.getAttribute("data-input-counter-decrement");
+          const input = document.getElementById(inputId);
+          let newValue = parseInt(input.value, 10) - 1;
+          if (newValue > 0) {
+            updateCart(inputId, newValue);
+          }
+        });
+      });
+
+      async function updateCart(inputId, newQuantity) {
+        const itemId = inputId.replace("counter-input-", "");
+        const response = await fetch("/cart/update-cart", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ itemId, quantity: newQuantity })
+        });
+        if (response.ok) {
+          location.reload();
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Error updating cart. Try again.'
+          });
+        }
+      }
+    });
+
+    $(document).on('click', '.remove', function (){
+      const itemId = $(this).data('id');
+
+      $.ajax({
+        url: '/cart/remove',
+        type: 'POST',
+        data: { itemId },
+        success: function(response){
+          Swal.fire({
+            icon: 'success',
+            title: 'Removed',
+            text: response.message,
+          }).then(() => {
+            location.reload();
+          });
+        },
+        error: function(xhr){
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: xhr.responseJSON.error,
+          });
+        }
+      });
+    });
+  </script>
+  <%- include("../../views/partials/user/footer") %>
+
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Order Page</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .content-main {
+      padding: 30px 0;
+    }
+    .content-header {
+      margin-bottom: 30px;
+    }
+    .card-title {
+      margin-bottom: 0;
+    }
+    .table {
+      margin-bottom: 0;
+    }
+    .pagination-area {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <%- include("../../views/partials/admin/header") %>
+  <main class="ml-5">
+    <% if (message.success) { %>
+      <h2 class="alert alert-success"><%= message.success %></h2>
+    <% } %>
+    <% if (message.error) { %>
+      <h2 class="alert alert-danger"><%= message.error %></h2>
+    <% } %>
+    <section class="content-main">
+      <div class="content-header">
+        <div>
+          <h2 class="content-title card-title">Order List</h2>
+        </div>
+      </div>
+      
+      <div class="card mb-4">
+        <header class="card-header">
+          <div class="row gx-3">
+            <div class="col-lg-4 col-md-6 me-auto">
+              <input type="text" placeholder="Search by Order ID..." class="form-control" id="searchOrder" oninput="searchFilter()">
+            </div>
+            <div class="col-lg-2 col-md-3">
+              <select class="form-select" id="statusFilter" onchange="filterByStatus()">
+                <option value="All">All Statuses</option>
+                <option value="Processing">Processing</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+                <option value="Shipped">Shipped</option>
+                <option value="Dispatch">Dispatch</option>
+              </select>
+            </div>
+            <div class="col-lg-2 col-md-3">
+              <select class="form-select" id="paymentFilter" onchange="filterByPayment()">
+                <option value="All">All Payment Methods</option>
+                <option value="COD">COD</option>
+                <option value="Card payment">Card Payment</option>
+                <option value="Wallet">Wallet</option>
+                <option value="UPI">UPI</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Paypal">Paypal</option>
+              </select>
+            </div>
+          </div>
+        </header>
+  
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>User</th>
+                  <th>Total Amount</th>
+                  <th>Order Status</th>
+                  <th>Payment Method</th>
+                  <th>Date</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody">
+                <% orders.forEach(function(order) { %>
+                <tr class="order-row" 
+                    data-id="<%= order._id %>"
+                    data-status="<%= order.orderStatus %>"
+                    data-payment="<%= order.paymentMethod %>">
+                  <td>#<%= order._id %></td>
+                  <td><%= order.user.username %></td>
+                  <td>₹ <%= order.totalAmount %></td>
+                  <td>
+                    <span class="badge rounded-pill 
+                      <%= order.orderStatus === 'Processing' ? 'bg-warning' : 
+                          order.orderStatus === 'Delivered' ? 'bg-success' : 
+                          order.orderStatus === 'Cancelled' ? 'bg-danger' : 
+                          order.orderStatus === 'Shipped' ? 'bg-info' : 
+                          order.orderStatus === 'Return Request' ? 'bg-primary' :
+                          'bg-secondary' %>">
+                      <%= order.orderStatus %>
+                    </span>
+                  </td>
+                  <td><%= order.paymentMethod %></td>
+                  <td><%= new Date(order.createdAt).toLocaleDateString('en-GB') %></td>
+                  <td class="text-end">
+                    <a href="/admin/orders/<%= order._id %>" class="btn btn-sm btn-outline-primary">View</a>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+  
+          <!-- Pagination -->
+          <div class="pagination-area mt-30 mb-50">
+            <nav aria-label="Page navigation example">
+              <ul class="pagination justify-content-start">
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                  <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                  </li>
+                <% } %>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <%- include("../../views/partials/admin/footer") %>
+  
+  <script>
+    function searchFilter() {
+      const searchValue = document.getElementById('searchOrder').value.toLowerCase();
+      const orders = document.querySelectorAll('.order-row');
+      
+      orders.forEach((item) => {
+        if (item.dataset.id.toLowerCase().includes(searchValue)) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+  
+    function filterByStatus() {
+      const statusFilter = document.getElementById('statusFilter').value;
+      const orders = document.querySelectorAll('.order-row');
+      
+      orders.forEach((item) => {
+        if (statusFilter === 'All' || item.dataset.status === statusFilter) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+  
+    function filterByPayment() {
+      const paymentFilter = document.getElementById('paymentFilter').value;
+      const orders = document.querySelectorAll('.order-row');
+      
+      orders.forEach((item) => {
+        if (paymentFilter === 'All' || item.dataset.payment === paymentFilter) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+  </script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

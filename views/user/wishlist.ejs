@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist | Timeless Edge</title>
+    <%- include("../../views/partials/user/header") %>
+
+        <style>
+            .wishlist-container {
+                max-width: 1200px;
+                margin: 40px auto;
+                padding: 0 20px;
+            }
+
+            .page-title {
+                font-size: 28px;
+                font-weight: 600;
+                margin-bottom: 30px;
+                color: #333;
+                border-bottom: 2px solid #f3f3f3;
+                padding-bottom: 15px;
+            }
+
+            .wishlist-table {
+                width: 100%;
+                border-collapse: collapse;
+                background-color: white;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .wishlist-table th,
+            .wishlist-table td {
+                padding: 18px 15px;
+                text-align: left;
+                border-bottom: 1px solid #f3f3f3;
+                vertical-align: middle;
+            }
+
+            .wishlist-table th {
+                background-color: #fcfcfc;
+                font-weight: 600;
+                color: #333;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .product-image {
+                width: 80px;
+                height: 80px;
+                object-fit: cover;
+                border-radius: 4px;
+                transition: transform 0.2s;
+            }
+
+            .product-image:hover {
+                transform: scale(1.05);
+            }
+
+            .product-name {
+                font-weight: 500;
+                color: #333;
+                margin-bottom: 5px;
+                font-size: 16px;
+            }
+
+            .product-price {
+                font-weight: 600;
+                color: #111;
+                font-size: 18px;
+            }
+
+            .out-of-stock {
+                color: #e53e3e;
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+            .in-stock {
+                color: #38a169;
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+            .btn-view-product {
+                background-color: #4a5568;
+                color: white;
+                padding: 10px 18px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.2s;
+                margin-right: 8px;
+            }
+
+            .btn-view-product:hover {
+                background-color: #2d3748;
+                transform: translateY(-2px);
+            }
+
+            .btn-add-to-cart {
+                background-color: #f87171;
+                color: white;
+                padding: 10px 18px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.2s;
+            }
+
+            .btn-add-to-cart:hover {
+                background-color: #ef4444;
+                transform: translateY(-2px);
+            }
+
+            .btn-add-to-cart:disabled {
+                background-color: #cbd5e0;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .remove-btn {
+                color: #718096;
+                cursor: pointer;
+                border: none;
+                background: none;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                padding: 0;
+                transition: color 0.2s;
+            }
+
+            .remove-btn:hover {
+                color: #e53e3e;
+            }
+
+            .remove-btn svg {
+                margin-right: 6px;
+            }
+
+            .empty-state {
+                text-align: center;
+                background: white;
+                border-radius: 12px;
+                padding: 60px 40px;
+                max-width: 500px;
+                margin: 60px auto;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            }
+
+            .empty-state-icon {
+                width: 120px;
+                height: 120px;
+                margin-bottom: 24px;
+                color: #f87171;
+            }
+
+            .empty-state h2 {
+                color: #1a202c;
+                margin-bottom: 12px;
+                font-size: 24px;
+                font-weight: 600;
+            }
+
+            .empty-state p {
+                color: #718096;
+                margin-bottom: 32px;
+                font-size: 16px;
+                line-height: 1.5;
+            }
+
+            .start-shopping-btn {
+                background-color: #f87171;
+                color: white;
+                padding: 14px 28px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: 500;
+                transition: all 0.3s;
+                display: inline-block;
+                text-decoration: none;
+            }
+
+            .start-shopping-btn:hover {
+                background-color: #ef4444;
+                transform: translateY(-3px);
+                box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+            }
+
+            .action-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            @media (max-width: 768px) {
+
+                .wishlist-table th:nth-child(1),
+                .wishlist-table td:nth-child(1) {
+                    width: 60px;
+                }
+
+                .product-image {
+                    width: 60px;
+                    height: 60px;
+                }
+
+                .page-title {
+                    font-size: 24px;
+                }
+
+                .action-buttons {
+                    flex-direction: column;
+                }
+
+                .btn-view-product,
+                .btn-add-to-cart {
+                    width: 100%;
+                    margin-right: 0;
+                    margin-bottom: 8px;
+                    text-align: center;
+                }
+            }
+        </style>
+</head>
+
+<body>
+    <div class="wishlist-container">
+        <h1 class="page-title">My Wishlist</h1>
+
+        <% if (!wishlist || !wishlist.items || wishlist.items.length===0) { %>
+            <div class="empty-state">
+                <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                        fill="currentColor" />
+                </svg>
+                <h2>Your wishlist is empty!</h2>
+                <p>Browse our collection and add items to your wishlist to keep track of things you love.</p>
+                <a href="/shop">
+                    <button class="start-shopping-btn">EXPLORE COLLECTION</button>
+                </a>
+            </div>
+            <% } else { %>
+                <table class="wishlist-table">
+                    <thead>
+                        <tr>
+                            <th>REMOVE</th>
+                            <th>PRODUCT</th>
+                            <th>PRICE</th>
+                            <th>AVAILABILITY</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% wishlist.items.forEach(item => { 
+                            // Check if productId exists first
+                            if (item.productId) {
+                                // Handle both data structures 
+                                let productImage = 'default-product.png';
+                                
+                                if (item.productId.productImage && item.productId.productImage.length > 0) {
+                                    productImage = item.productId.productImage[0];
+                                } else if (item.productId.productImages && item.productId.productImages.length > 0) {
+                                    productImage = item.productId.productImages[0];
+                                }
+                                
+                                // Get product availability
+                                let isAvailable = true;
+                                let statusText = "In Stock";
+                                
+                                if (item.productId.colorStock && item.productId.colorStock.length > 0) {
+                                    // If using colorStock structure
+                                    const currentColorStock = item.productId.colorStock.find(color =>
+                                        color.color === (item.color || '')) || item.productId.colorStock[0];
+                                    isAvailable = currentColorStock.status !== 'Out_of_Stock';
+                                    statusText = isAvailable ? "In Stock" : "Out of Stock";
+                                } else if (item.productId.status) {
+                                    // If using status field directly
+                                    isAvailable = item.productId.status !== 'Out_of_Stock';
+                                    statusText = item.productId.status === 'Available' ? "In Stock" : "Out of Stock";
+                                }
+                        %>
+
+                                <tr>
+                                    <td>
+                                        <button class="remove-btn" data-product-id="<%= item.productId._id %>">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="3 6 5 6 21 6"></polyline>
+                                                <path
+                                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                                </path>
+                                            </svg>
+                                            Remove
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; align-items: center;">
+                                            <img src="<%= productImage %>" alt="<%= item.productId.productName %>"
+                                                class="product-image">
+                                            <div style="margin-left: 15px;">
+                                                <div class="product-name">
+                                                    <%= item.productId.productName %>
+                                                </div>
+                                                <% if (item.color) { %>
+                                                    <div style="color: #718096; font-size: 14px;">Color: <%= item.color
+                                                            %>
+                                                    </div>
+                                                    <% } %>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="product-price">₹<%= item.productId.salePrice.toLocaleString() %>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="<%= isAvailable ? 'in-stock' : 'out-of-stock' %>">
+                                            <%= statusText %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-view-product"
+                                                onclick="window.location.href='/productDetails?id=<%= item.productId._id %>'">
+                                                View Details
+                                            </button>
+                                            <button class="btn-add-to-cart" data-product-id="<%= item.productId._id %>"
+                                                data-product-name="<%= item.productId.productName %>" <% if
+                                                (!isAvailable) { %>disabled<% } %>
+                                                    >
+                                                    <% if (isAvailable) { %>Add to Cart<% } else { %>Out of Stock<% } %>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                        <% } %>
+                        <% }); %>
+                    </tbody>
+                </table>
+                <% } %>
+    </div>
+
+    <%- include("../../views/partials/user/footer") %>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script>
+            $(document).ready(function () {
+                // Handle remove from wishlist functionality
+                $('.remove-btn').click(function () {
+                    const productId = $(this).data('product-id');
+
+                    Swal.fire({
+                        title: 'Remove Item?',
+                        text: "Are you sure you want to remove this item from your wishlist?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#718096',
+                        confirmButtonText: 'Yes, remove it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Send AJAX request to remove item
+                            $.ajax({
+                                url: `/wishlist/remove/${productId}`,
+                                type: 'DELETE',
+                                success: function (response) {
+                                    Swal.fire(
+                                        'Removed!',
+                                        'Item has been removed from your wishlist.',
+                                        'success'
+                                    ).then(() => {
+                                        location.reload();
+                                    });
+                                },
+                                error: function (error) {
+                                    Swal.fire(
+                                        'Error!',
+                                        'Something went wrong.',
+                                        'error'
+                                    );
+                                }
+                            });
+                        }
+                    });
+                });
+
+                // Handle add to cart functionality
+                $('.btn-add-to-cart').click(function () {
+                    if ($(this).prop('disabled')) {
+                        return;
+                    }
+
+                    const productId = $(this).data('product-id');
+                    const productName = $(this).data('product-name');
+                    const currentRow = $(this).closest('tr'); // Get the current row for later removal
+
+                    // Send AJAX request to add item to cart and remove from wishlist
+                    $.ajax({
+                        url: '/cart/add-from-wishlist',  // New endpoint for this combined operation
+                        type: 'POST',
+                        data: {
+                            productId: productId,
+                            quantity: 1
+                        },
+                        success: function (response) {
+                            Swal.fire({
+                                title: 'Added to Cart!',
+                                text: `${productName} has been added to your cart and removed from your wishlist.`,
+                                icon: 'success',
+                                showCancelButton: true,
+                                confirmButtonColor: '#38a169',
+                                cancelButtonColor: '#4a5568',
+                                confirmButtonText: 'Go to Cart',
+                                cancelButtonText: 'Continue Shopping'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '/cart';
+                                } else {
+                                    // Remove the item from the wishlist UI
+                                    currentRow.fadeOut(300, function () {
+                                        $(this).remove();
+
+                                        // Check if wishlist is now empty and show empty state if needed
+                                        if ($('.wishlist-table tbody tr').length === 0) {
+                                            $('.wishlist-table').replaceWith(`
+                                <div class="empty-state">
+                                    <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
+                                    </svg>
+                                    <h2>Your wishlist is empty!</h2>
+                                    <p>Browse our collection and add items to your wishlist to keep track of things you love.</p>
+                                    <a href="/shop">
+                                        <button class="start-shopping-btn">EXPLORE COLLECTION</button>
+                                    </a>
+                                </div>
+                            `);
+                                        }
+                                    });
+                                }
+                            });
+                        },
+                        error: function (error) {
+                            const errorMessage = error.responseJSON && error.responseJSON.error
+                                ? error.responseJSON.error
+                                : 'Could not add the item to your cart. Please try again.';
+
+                            Swal.fire(
+                                'Error!',
+                                errorMessage,
+                                'error'
+                            );
+                        }
+                    });
+                });
+            });
+        </script>
+</body>
+
+</html>

@@ -1,10 +1,14 @@
 const User = require('../../models/userSchema');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
+const flash=require('flash')
 const dotenv = require('dotenv').config();
+const mongoose=require('mongoose')
 const session = require('express-session');
 const Brand=require('../../models/brandSchema')
+const Address=require('../../models/addressSchema')
 const Category=require('../../models/categorySchema')
+const Order=require('../../models/orderSchema')
 function generateOtp() {
     let otp = "";
     for (let i = 0; i < 6; i++) {
@@ -80,13 +84,6 @@ const verifyForgotOtp = async (req, res) => {
             });
         }
 
-        // Check if OTP was recently sent
-        // const currentTime = Date.now();
-        // if (req.session.otpExpiresAt && currentTime < req.session.otpExpiresAt) {
-        //     return res.render("forgotPass-otp", {
-        //         message: "Please use the OTP already sent to your email"
-        //     });
-        // }
 
         const currentTime = Date.now();
         if (req.session.otpExpiresAt && currentTime < req.session.otpExpiresAt) {
@@ -318,20 +315,171 @@ const searchProducts=async (req,res)=>{
     }
 
 }
-
-const userProfile=async(req,res)=>{
+const userProfile = async (req, res) => {
     try {
-        const user=await User.findById(req.user._id)
-        console.log('userdata fetched')
-        if(!user){
-            res.redirect('/pageNotFound')
+        if (!req.user) {
+            return res.redirect('/pageNotFound')
         }
-        res.render('userProfile',{user})
+        
+        const user = await User.findById(req.user._id)
+        if (!user) {
+            return res.redirect('/pageNotFound')
+        }
+        
+        const addresses = await Address.find({userId: user._id})
+        
+        // Collect all sub-address IDs
+        const allAddressIds = [];
+        addresses.forEach(doc => {
+            if (doc.address && doc.address.length > 0) {
+                doc.address.forEach(addr => {
+                    allAddressIds.push(addr._id);
+                });
+            }
+            // Also include the parent address ID
+            allAddressIds.push(doc._id);
+        });
+        
+        const orders = await Order.find({ address: { $in: allAddressIds } });
+        
+        console.log('Filtered Orders:', orders);
+        
+        res.render('userProfile', {user, orders, addresses})
+        console.log('userdata fetched')
         
     } catch (error) {
-        console.log(error,{message:"Internal server error"})
+        console.log(error, {message: "Internal server error"})
+        res.status(500).send('Internal Server Error')
     }
 }
+
+const getAddAddress= async(req,res)=>{
+   try {
+    if(!req.user){
+        return res.redirect('/login')
+       
+    }
+    res.render('addAddress',{user:req.user})
+    
+   } catch (error) {
+     console.error("Error rendering add render page :",error)
+     req.flash('error','something went wrong .please try again')
+     res.redirect('/profile#address')
+   }
+}
+
+
+const createAddress = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.redirect("/login");
+        }
+        const { adressType, name, city, landMark, state, pincode, phone, altPhone } = req.body;
+
+        const newAddress = {
+            userId: req.user._id,
+            address: [{
+                adressType,
+                name,
+                city,
+                landMark,
+                state,
+                pincode,
+                phone,
+                altPhone
+            }]
+        };
+
+ 
+
+        const address = new Address(newAddress);
+        await address.save();
+        res.redirect('/userProfile');
+    } catch (error) {
+        console.error("Error saving Address:", error);
+        res.status(500).send("Error saving Address");
+    }
+};
+const getEditAddress = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.redirect("/login");
+        }
+        const addressDoc = await Address.findOne({ 
+            userId: req.user._id, 
+            "address._id": req.params.id 
+        });
+        if (!addressDoc) {
+            return res.redirect('/userProfile');
+        }
+        const address = addressDoc.address.id(req.params.id);
+        if (!address) {
+            return res.redirect('/userProfile');
+        }
+        res.render('editAddress', { address, user: req.user });
+    } catch (error) {
+        console.error('Error fetching address for editing', error);
+        res.redirect("/userProfile");
+    }
+};
+const updateAddress = async (req, res) => {
+    try {
+      const { id } = req.params;
+      console.log("Updating address with id:", id);
+      const updateData = req.body;
+
+
+      const addressDoc=await Address.findOne({
+        userId:req.user._id,
+        'address._id':id
+      })
+      if(!addressDoc){
+        return res.status(404).json({message:"Address not found"})
+      }
+      const address=addressDoc.address.id(id)
+      if(!address){
+        return res.status(404).json({message:"Address not found"})
+
+      }
+      Object.keys(updateData).forEach(key=>{
+        address[key]=updateData[key]
+      })
+      await addressDoc.save()
+
+      res.status(200).json({message:"Address updated successfully",address:address})
+  
+    } catch (error) {
+      console.error("Error updating address", error);
+      res.status(500).json({ message: "Internal Server error" });
+    }
+  };
+  const deleteAddress = async (req, res) => {
+    try {
+      const { docId, addressId } = req.params;
+      
+      // Find the address document
+      const addressDoc = await Address.findById(docId);
+      
+      if (!addressDoc) {
+        return res.status(404).json({ success: false, message: 'Address document not found' });
+      }
+      
+      // Filter out the address to be deleted
+      addressDoc.address = addressDoc.address.filter(
+        addr => addr._id.toString() !== addressId
+      );
+      
+      // Save the updated document
+      await addressDoc.save();
+      
+      return res.status(200).json({ success: true, message: 'Address deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      return res.status(500).json({ success: false, message: 'Server error' });
+    }
+  };
+  
+
 
 module.exports = {
     getForgotPassPage,
@@ -341,5 +489,10 @@ module.exports = {
     resendOtp,
     postNewPassword,
     searchProducts,
-    userProfile
-};
+    userProfile,
+    getAddAddress,
+    createAddress,
+    getEditAddress,
+    updateAddress,
+    deleteAddress
+}

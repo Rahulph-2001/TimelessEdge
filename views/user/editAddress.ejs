@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeless Edge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <main class="container mx-auto px-4 py-8 pt-16">
+        <div class="max-w-3xl mx-auto">
+            <!-- Breadcrumb -->
+            <nav class="flex mb-6" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="/" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-indigo-600">
+                            <i data-lucide="home" class="w-4 h-4 mr-2"></i>
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                            <a href="/profile" class="ml-1 text-sm font-medium text-gray-700 hover:text-indigo-600 md:ml-2">Profile</a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                            <a href="#" class="ml-1 text-sm font-medium text-gray-700 hover:text-indigo-600 md:ml-2">Edit Address</a>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+            
+            <!-- Address Form Card -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-2xl font-semibold mb-6">Edit Address</h2>
+                <form id="editAddressForm">
+                    <div class="mb-6">
+                        <label for="addressType" class="block text-sm font-medium text-gray-700 mb-1">Address Type</label>
+                        <select id="addressType" name="addressType" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <option value="Home" <%= address.addressType === 'Home' ? 'selected' : '' %>>Home</option>
+                            <option value="Work" <%= address.addressType === 'Work' ? 'selected' : '' %>>Work</option>
+                            <option value="Other" <%= address.addressType === 'Other' ? 'selected' : '' %>>Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                            <input type="text" id="name" name="name" value="<%= address.name %>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        </div>
+                        
+                        <div>
+                            <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                            <input type="text" id="city" name="city" value="<%= address.city %>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        </div>
+                        
+                        <div>
+                            <label for="landMark" class="block text-sm font-medium text-gray-700 mb-1">Landmark</label>
+                            <input type="text" id="landMark" name="landMark" value="<%= address.landMark %>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        </div>
+                        
+                        <div>
+                            <label for="state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                            <input type="text" id="state" name="state" value="<%= address.state %>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        </div>
+                        
+                        <div>
+                            <label for="pincode" class="block text-sm font-medium text-gray-700 mb-1">ZIP/Postal Code</label>
+                            <input type="text" id="pincode" name="pincode" value="<%= address.pincode %>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        </div>
+                        
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" value="<%= address.phone %>" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        </div>
+                        
+                        <div>
+                            <label for="altPhone" class="block text-sm font-medium text-gray-700 mb-1">Alternate Phone Number</label>
+                            <input type="tel" id="altPhone" name="altPhone" value="<%= address.altPhone %>" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 flex items-center justify-between">
+                        <div>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="isDefault" <%= address.isDefault ? 'checked' : '' %> class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <span class="ml-2 text-sm text-gray-600">Set as default address</span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex space-x-4">
+                            <a href="/profile#addresses" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                Cancel
+                            </a>
+                            <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Form submission using fetch and PUT method
+        document.getElementById('editAddressForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Gather form data
+            const formData = {
+                addressType: document.getElementById('addressType').value,
+                name: document.getElementById('name').value,
+                city: document.getElementById('city').value,
+                landMark: document.getElementById('landMark').value,
+                state: document.getElementById('state').value,
+                pincode: document.getElementById('pincode').value,
+                phone: document.getElementById('phone').value,
+                altPhone: document.getElementById('altPhone').value,
+                isDefault: document.querySelector('input[name="isDefault"]').checked,
+            };
+
+            // Validate form data
+            const phonePattern = /^\d{10,12}$/;
+            const pincodePattern = /^\d{4,8}$/;
+
+            if (!phonePattern.test(formData.phone.replace(/[^0-9]/g, ''))) {
+                alert('Please enter a valid phone number (10-12 digits)');
+                return;
+            }
+
+            if (formData.altPhone && !phonePattern.test(formData.altPhone.replace(/[^0-9]/g, ''))) {
+                alert('Please enter a valid alternate phone number (10-12 digits)');
+                return;
+            }
+
+            if (!pincodePattern.test(formData.pincode.replace(/[^0-9]/g, ''))) {
+                alert('Please enter a valid postal/zip code (4-8 digits)');
+                return;
+            }
+
+            try {
+                // Send PUT request using fetch
+                const response = await fetch(`/profile/address/edit/<%= address._id %>`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                if (response.ok) {
+                    alert('Address updated successfully!');
+                    window.location.href = '/userProfile'; // Redirect to profile page
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error: ${errorData.message || 'Failed to update address'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating the address.');
+            }
+        });
+    </script>
+</body>
+</html>

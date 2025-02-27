@@ -1,672 +1,381 @@
-<%- include("../../views/partials/user/header") %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= user.first_name %>'s TimelessEdge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .sticky-sidebar {
+            position: sticky;
+            top: 20px;
+        }
+        .section-card {
+            transition: all 0.3s ease;
+        }
+        .section-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+        .nav-link.active {
+            background-color: #4F46E5;
+            color: white;
+        }
+        .address-card {
+            transition: all 0.2s ease;
+            border: 1px solid #e5e7eb;
+        }
+        .address-card:hover {
+            border-color: #4F46E5;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <%- include("../../views/partials/user/header") %>
 
-<style>
-/* Base styles */
-body {
-  font-family: 'Arial', sans-serif;
-  color: #333;
-  line-height: 1.6;
-}
-
-.card-green {
-  background-color: #e6f7ff;
-  border: none;
-  transition: all 0.3s ease;
-}
-
-.main {
-  padding: 30px 0;
-}
-
-/* Dashboard menu styling */
-.dashboard-menu {
-  background-color: #ddeef2;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  margin-bottom: 25px;
-  position: sticky;
-  top: 20px;
-}
-
-.dashboard-menu .nav-link {
-  font-weight: 600;
-  color: #30683c;
-  padding: 14px 18px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 3px 8px rgba(123, 131, 112, 0.2), 0 3px 15px rgba(0, 191, 255, 0.15);
-  transition: all 0.3s ease;
-}
-
-.dashboard-menu .nav-link i {
-  margin-right: 12px;
-  font-size: 20px;
-  width: 24px;
-  text-align: center;
-}
-
-.dashboard-menu .nav-link:hover {
-  color: #00bfff;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(173, 255, 47, 0.3), 0 7px 20px rgba(0, 191, 255, 0.25);
-  background-color: rgba(255, 255, 255, 0.7);
-}
-
-.dashboard-menu .nav-link.active {
-  background-color: #30683c;
-  color: white;
-  box-shadow: 0 4px 12px rgba(48, 104, 60, 0.4);
-}
-
-/* Card styling */
-.card {
-  border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  margin-bottom: 25px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  border: none;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-.card-header {
-  background-color: #487379;
-  color: white;
-  border-radius: 12px 12px 0 0;
-  padding: 18px 22px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-.card-body {
-  padding: 25px;
-  background-color: #fff;
-}
-
-/* Button styling */
-.btn-success {
-  background-color: #577194;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(87, 113, 148, 0.3);
-}
-
-.btn-success:hover {
-  background-color: #506955;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(80, 105, 85, 0.4);
-}
-
-.btn-primary {
-  background-color: #1a73e8;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(26, 115, 232, 0.3);
-}
-
-.btn-primary:hover {
-  background-color: #0d5bcd;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(13, 91, 205, 0.4);
-}
-
-.btn-small {
-  padding: 6px 12px;
-  font-size: 14px;
-  border-radius: 5px;
-  text-decoration: none;
-  color: #577194;
-  background-color: #f0f3f6;
-  display: inline-block;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  border: none;
-  font-weight: 500;
-}
-
-.btn-small:hover {
-  background-color: #e1e7ed;
-  color: #30683c;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.15);
-}
-
-.btn-sm {
-  padding: 8px 15px;
-  font-size: 14px;
-  margin: 0 5px;
-}
-
-/* Form elements */
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: 500;
-  color: #444;
-}
-
-.form-control {
-  height: auto;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  transition: all 0.3s;
-}
-
-.form-control:focus {
-  border-color: #577194;
-  box-shadow: 0 0 0 3px rgba(87, 113, 148, 0.2);
-}
-
-.required {
-  color: #e53935;
-  margin-left: 4px;
-}
-
-/* Table styling */
-.table {
-  width: 100%;
-  margin-bottom: 1.5rem;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.table th {
-  padding: 15px;
-  background-color: #f5f7fa;
-  border-bottom: 2px solid #dee2e6;
-  font-weight: 600;
-  color: #444;
-  text-transform: uppercase;
-  font-size: 14px;
-  letter-spacing: 0.5px;
-}
-
-.table td {
-  padding: 15px;
-  border-bottom: 1px solid #eee;
-  vertical-align: middle;
-  color: #555;
-}
-
-.table tr:last-child td {
-  border-bottom: none;
-}
-
-.table-responsive {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-/* Breadcrumb styling */
-.page-header.breadcrumb-wrap {
-  background-color: #f2f6f9;
-  padding: 18px 0;
-  margin-bottom: 35px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  font-family: 'Arial', sans-serif;
-  font-size: 16px;
-  color: #121311;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.breadcrumb a {
-  color: #0077cc;
-  text-decoration: none;
-  position: relative;
-  margin: 0 8px;
-  transition: color 0.3s ease;
-  font-weight: 500;
-}
-
-.breadcrumb a:hover {
-  color: #0056b3;
-}
-
-.breadcrumb span {
-  margin: 0 8px;
-  color: #888;
-}
-
-.breadcrumb a::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 2px;
-  background: #6e6e3a;
-  left: 0;
-  bottom: -2px;
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
-}
-
-.breadcrumb a:hover::after {
-  transform: scaleX(1);
-}
-
-/* Specific section styling */
-.contact-from-area {
-  padding: 25px;
-  background-color: #fcfcfc;
-  border-radius: 10px;
-}
-
-.mt-90 {
-  margin-top: 90px;
-}
-
-.text-center .btn-sm {
-  margin: 5px;
-}
-
-.address address {
-  margin-bottom: 18px;
-  line-height: 1.7;
-  color: #555;
-}
-
-/* Profile card specifics */
-#dashboard .card-body.text-center {
-  padding: 30px;
-}
-
-#dashboard .card-title {
-  margin-bottom: 20px;
-  font-size: 22px;
-  font-weight: 600;
-}
-
-#dashboard .card-text {
-  margin-bottom: 15px;
-  font-size: 16px;
-}
-
-/* Wallet section specifics */
-#track-orders .h3, 
-#track-orders .h4 {
-  margin-bottom: 15px;
-  color: #30683c;
-}
-
-#track-orders form {
-  background-color: #f9f9f9;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
-}
-
-/* Responsive adjustments */
-@media (max-width: 992px) {
-  .dashboard-menu {
-    margin-bottom: 30px;
-    position: static;
-  }
-  
-  .col-lg-10.m-auto {
-    padding: 0 15px;
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard-menu {
-    padding: 15px;
-  }
-  
-  .dashboard-menu .nav-link {
-    padding: 12px 15px;
-  }
-
-  .card {
-    margin-bottom: 20px;
-  }
-
-  .breadcrumb {
-    font-size: 14px;
-  }
-
-  .card-header {
-    padding: 15px 18px;
-  }
-
-  .card-body {
-    padding: 18px;
-  }
-  
-  .btn-success, 
-  .btn-primary {
-    padding: 8px 16px;
-    font-size: 14px;
-  }
-  
-  #dashboard .card-text {
-    font-size: 15px;
-  }
-}
-
-@media (max-width: 576px) {
-  .main {
-    padding: 20px 0;
-  }
-  
-  .page-header.breadcrumb-wrap {
-    padding: 12px 0;
-    margin-bottom: 20px;
-  }
-  
-  .dashboard-menu .nav-link i {
-    font-size: 18px;
-    margin-right: 8px;
-  }
-  
-  .card-header h5 {
-    font-size: 16px;
-  }
-  
-  .table th, .table td {
-    padding: 10px;
-    font-size: 14px;
-  }
-  
-  .mt-90 {
-    margin-top: 50px;
-  }
-}
-
-/* Fix for smaller devices layout */
-@media (max-width: 480px) {
-  .d-flex.justify-content-between {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .d-flex.justify-content-between .btn-small {
-    width: 100%;
-    text-align: center;
-  }
-  
-  .btn-success, .btn-primary {
-    width: 100%;
-    margin-bottom: 10px;
-  }
-}
-
-/* Active tab pane animation */
-.tab-pane.fade.show.active {
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Custom colors */
-.w-70 {
-  width: 70%;
-}
-
-/* Better spacing for wallet and referral sections */
-#wallet-history .table,
-#referal .card-body {
-  margin-top: 10px;
-}
-
-#referal .card-body strong {
-  word-break: break-all;
-  background: #f5f5f5;
-  padding: 8px;
-  border-radius: 5px;
-  display: inline-block;
-  margin: 5px 0;
-}
-</style>
-
-<main class="main">
-  <div class="page-header breadcrumb-wrap mb-3">
-    <div class="container">
-      <div class="breadcrumb">
-        <a href="#" rel="nofollow">Home</a>
-        <span></span> Profile <span></span> Account
-      </div>
-    </div>
-  </div>
-  
-  <section class="pt-10 pb-10">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-10 m-auto">
-          <div class="row">
-            <!-- Dashboard Menu -->
-            <div class="col-md-4">
-              <div class="dashboard-menu">
-                <ul class="nav flex-column" role="tablist">
-                  <li class="nav-item">
-                    <a class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" href="#dashboard" role="tab" aria-controls="dashboard" aria-selected="false">
-                      <i class="fi-rs-settings-sliders mr-10"></i>Dashboard
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address" role="tab" aria-controls="address" aria-selected="true">
-                      <i class="fi-rs-marker mr-10"></i>My Address
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders" role="tab" aria-controls="orders" aria-selected="false">
-                      <i class="fi-rs-shopping-bag mr-10"></i>Orders
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#track-orders" role="tab" aria-controls="track-orders" aria-selected="false">
-                      <i class="fi-rs-shopping-cart-check mr-10"></i>Wallet Status
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" id="wallet-history-tab" data-bs-toggle="tab" href="#wallet-history" role="tab" aria-controls="wallet-history" aria-selected="false">
-                      <i class="fi-rs-shopping-cart-check mr-10"></i>Wallet History
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" id="referal-tab" data-bs-toggle="tab" href="#referal" role="tab" aria-controls="referal" aria-selected="false">
-                      <i class="fi-rs-shopping-cart-check mr-10"></i>Referals
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="/logout">
-                      <i class="fi-rs-sign-out mr-10"></i>Logout
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- Dashboard Content -->
-            <div class="col-md-8">
-              <div class="tab-content dashboard-content">
-                <!-- Profile Tab -->
-                <div class="tab-pane fade show active" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
-                  <div class="card card-green">
-                    <div class="card-header">
-                      <h5 class="mb-0 text-center">User Profile</h5>
+    <main class="container mx-auto px-4 py-8 pt-20">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center md:text-left">My Account</h1>
+        
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Sidebar Navigation -->
+            <aside class="w-full lg:w-1/4">
+                <div class="bg-white shadow-md rounded-xl p-6 sticky-sidebar">
+                    <div class="flex items-center space-x-4 mb-8 pb-6 border-b border-gray-100">
+                        <div class="relative">
+                            <img src="<%= user.profile_image || '/ui/dprofile.jpg' %>" alt="User Avatar" class="w-16 h-16 rounded-full object-cover border-2 border-indigo-500">
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-800"><%= user.name %></h2>
+                            <p class="text-gray-600 text-sm"><%= user.email %></p>
+                        </div>
                     </div>
-                    <div class="card-body text-center">
-                      <h5 class="card-title"></h5>
-                      <p class="card-text">
-                        <strong>Phone:</strong> <%= user.phone %>
-                      </p>
-                      <p class="card-text">
-                        <strong>Email:</strong> <%= user.email %>
-                      </p>
-                      
-                      <a href="" class="btn btn-sm btn-success ml-2">Change Email</a>
-                      <a href="/forgot-password" class="btn btn-sm btn-success">Change Password</a>
-                    </div>
-                  </div>
+                    <nav>
+                        <ul class="space-y-2">
+                            <li>
+                                <a href="#overview" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-indigo-50 text-gray-700 hover:text-indigo-600">
+                                    <i data-lucide="user" class="w-5 h-5"></i>
+                                    <span>Account Overview</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/profile/edit" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-indigo-50 text-gray-700 hover:text-indigo-600">
+                                    <i data-lucide="edit" class="w-5 h-5"></i>
+                                    <span>Edit Profile</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/profile/change-password" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-indigo-50 text-gray-700 hover:text-indigo-600">
+                                    <i data-lucide="key" class="w-5 h-5"></i>
+                                    <span>Change Password</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#orders" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-indigo-50 text-gray-700 hover:text-indigo-600">
+                                    <i data-lucide="package" class="w-5 h-5"></i>
+                                    <span>My Orders</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#addresses" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-indigo-50 text-gray-700 hover:text-indigo-600">
+                                    <i data-lucide="map-pin" class="w-5 h-5"></i>
+                                    <span>Manage Addresses</span>
+                                </a>
+                            </li>
+                            <li class="pt-4 mt-4 border-t border-gray-100">
+                                <a href="/logout" class="nav-link flex items-center space-x-3 p-3 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700">
+                                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
+            </aside>
 
-                <!-- Address Tab -->
-                <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
-                  <div class="row">
-                    <div class="col-lg-6">
-                      <div class="card mb-3 mb-lg-0">
-                        <div class="card-header">
-                          <h5 class="mb-0"></h5>
-                        </div>
-                        <div class="card-body">
-                          <address></address>
-                          <p></p>
-                          <div class="d-flex justify-content-between">
-                            <a href="#" class="btn-small">Edit</a>
-                            <a href="#" class="btn-small" onclick="">Delete</a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-lg-6">
-                      <div class="card mb-3 mb-lg-0">
-                        <div class="card-header">
-                          <h5 class="mb-0"></h5>
-                        </div>
-                        <div class="card-body">
-                          <address>No address</address>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-12 mt-3">
-                      <a href="#">
-                        <button class="btn btn-primary w-70">Add address</button>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Orders Tab -->
-                <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
-                  <div class="card">
-                    <div class="card-header">
-                      <h5 class="mb-0">Your Orders</h5>
-                    </div>
-                    <div class="card-body">
-                      <div class="table-responsive">
-                        <table class="table">
-                          <thead>
-                            <tr>
-                              <th>Order</th>
-                              <th>Status</th>
-                              <th>Total</th>
-                              <th>Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td></td>
-                              <td></td>
-                              <td></td>
-                              <td>
-                                <a href="" class="btn-small d-block">View</a>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Wallet Status Tab -->
-                <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
-                  <div class="card">
-                    <div class="card-header">
-                      <h5 class="mb-0">Wallet</h5>
-                    </div>
-                    <div class="card-body contact-from-area">
-                      <div class="row">
-                        <div class="col-lg-8 mx-auto text-center mt-90">
-                          <form>
-                            <div class="form-group">
-                              <label for="walletAmount" class="h4">Amount</label>
-                              <div class="h3"></div>
+            <!-- Main Content Area -->
+            <div class="w-full lg:w-3/4">
+                <!-- Account Overview Section -->
+                <section id="overview" class="mb-10 section-card">
+                    <div class="bg-white shadow-md rounded-xl p-6">
+                        <h2 class="text-2xl font-semibold mb-6 text-gray-800 flex items-center">
+                            <i data-lucide="user" class="w-6 h-6 mr-2 text-indigo-600"></i>
+                            Account Overview
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <h3 class="text-lg font-medium mb-4 text-gray-700">Personal Information</h3>
+                                <div class="bg-gray-50 rounded-lg p-5 border border-gray-100">
+                                    <p class="mb-3 flex items-center">
+                                        <span class="font-semibold text-gray-700 w-32">Name:</span> 
+                                        <span class="text-gray-800"><%= user.name %></span>
+                                    </p>
+                                    <p class="mb-3 flex items-center">
+                                        <span class="font-semibold text-gray-700 w-32">Email:</span> 
+                                        <span class="text-gray-800"><%= user.email %></span>
+                                    </p>
+                                    <p class="mb-3 flex items-center">
+                                        <span class="font-semibold text-gray-700 w-32">Mobile:</span> 
+                                        <span class="text-gray-800"><%= user.phone || 'Not provided' %></span>
+                                    </p>
+                                    <p class="flex items-center">
+                                        <span class="font-semibold text-gray-700 w-32">Account Status:</span> 
+                                        <span class="<%= user.isBlocked ? 'text-red-600' : 'text-green-600' %> font-medium">
+                                            <%= user.isBlocked ? 'Inactive' : 'Active' %>
+                                        </span>
+                                    </p>
+                                </div>
                             </div>
-                            <button type="button" class="btn btn-success" onclick="">Add Money</button>
-                          </form>
+                            <div>
+                                <h3 class="text-lg font-medium mb-4 text-gray-700">Account Details</h3>
+                                <div class="bg-gray-50 rounded-lg p-5 border border-gray-100">
+                                    <p class="mb-3 flex items-center">
+                                        <span class="font-semibold text-gray-700 w-32">Account Type:</span> 
+                                        <span class="<%= user.googleId ? 'text-blue-600' : 'text-gray-800' %> font-medium">
+                                            <%= user.googleId ? 'Google Account' : 'Email Account' %>
+                                        </span>
+                                    </p>
+                                    <p class="mb-3 flex items-center">
+                                        <span class="font-semibold text-gray-700 w-32">Member Since:</span> 
+                                        <span class="text-gray-800">
+                                            <%= user.createdOn ? new Date(user.createdOn).toLocaleDateString() : 'Unknown' %>
+                                        </span>
+                                    </p>
+                                    <p class="flex items-center">
+                                        <span class="font-semibold text-gray-700 w-32">Last Updated:</span> 
+                                        <span class="text-gray-800">
+                                            <%= user.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : 'Unknown' %>
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                      </div>
                     </div>
-                  </div>
-                </div>
+                </section>
 
-                <!-- Wallet History Tab -->
-                <div class="tab-pane fade" id="wallet-history" role="tabpanel" aria-labelledby="wallet-history-tab">
-                  <div class="card">
-                    <div class="card-header">
-                      <h5 class="mb-0">Wallet History</h5>
+                <!-- Orders Section -->
+                <section id="orders" class="mb-10 section-card">
+                    <div class="bg-white shadow-md rounded-xl p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
+                                <i data-lucide="package" class="w-6 h-6 mr-2 text-indigo-600"></i>
+                                My Orders
+                            </h2>
+                        </div>
+                        <% if (orders && orders.length > 0) { %>
+                            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <% orders.forEach(order => { %>
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#<%= order.orderId %></td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    <%= new Date(order.createdOn).toLocaleDateString() %>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                                                    $<%= order.totalPrice %>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                        <%= order.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                                                        order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' : 
+                                                        'bg-red-100 text-red-800' %>">
+                                                        <%= order.status %>
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    <a href="/orders/<%= order._id %>" class="text-indigo-600 hover:text-indigo-900 font-medium px-3 py-1 rounded hover:bg-indigo-50 mr-2">View</a>
+                                                    <% if (order.status === 'processing') { %>
+                                                        <button onclick="cancelOrder('<%= order._id %>')" class="text-red-600 hover:text-red-900 font-medium px-3 py-1 rounded hover:bg-red-50">Cancel</button>
+                                                    <% } %>
+                                                </td>
+                                            </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } else { %>
+                            <div class="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                                <i data-lucide="package" class="w-12 h-12 mx-auto text-gray-400 mb-4"></i>
+                                <p class="text-gray-600">No orders found.</p>
+                                <a href="/" class="mt-4 inline-block px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Start Shopping</a>
+                            </div>
+                        <% } %>
                     </div>
-                    <div class="card-body">
-                      <div class="table-responsive">
-                        <table class="table">
-                          <thead>
-                            <tr>
-                              <th>Date</th>
-                              <th>Status</th>
-                              <th>Amount</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td></td>
-                              <td></td>
-                              <td></td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                </section>
 
-                <!-- Referral Tab -->
-                <div class="tab-pane fade" id="referal" role="tabpanel" aria-labelledby="referal-tab">
-                  <div class="card">
-                    <div class="card-header">
-                      <h5 class="mb-0">Referal</h5>
-                    </div>
-                    <div class="card-body">
-                      <h6 class="mb-3">Refer your friends and earn money!</h6>
-                      <p>Share this link: <strong></strong></p>
-                      <p>Earned: ₹</p>
-                    </div>
-                  </div>
+                <!-- Addresses Section -->
+                <section id="addresses" class="mb-10 section-card">
+                    <div class="bg-white shadow-md rounded-xl p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
+                                <i data-lucide="map-pin" class="w-6 h-6 mr-2 text-indigo-600"></i>
+                                Manage Addresses
+                            </h2>
+                            <button onclick="window.location.href='/profile/address/add'" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                                Add New Address
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <% if (addresses && addresses.length > 0) { %>
+                                <% addresses.forEach(doc => { %>
+                                    <% if (doc.address && doc.address.length > 0) { %>
+                                        <% doc.address.forEach(address => { %>
+                                            <div class="address-card rounded-lg p-5 relative hover:shadow-md">
+                                                <div class="absolute top-4 right-4 space-x-2 flex">
+                                                    <button onclick="window.location.href='/profile/address/edit/<%= address._id %>'" class="text-indigo-600 hover:text-indigo-900 p-1 hover:bg-indigo-50 rounded-full" title="Edit Address">
+                                                        <i data-lucide="edit" class="w-4 h-4"></i>
+                                                    </button>
+                                                    
+                                                    <button onclick="deleteAddress('<%= doc._id %>', '<%= address._id %>')" class="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded-full" title="Delete Address">
+                                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="mb-4">
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                        <%= address.adressType || 'Address' %>
+                                                    </span>
+                                                </div>
+                                                <h3 class="font-medium text-lg mb-2 pr-16"><%= address.name %></h3>
+                                                <p class="text-gray-600 mb-1 flex items-start">
+                                                    <i data-lucide="map-pin" class="w-4 h-4 mr-2 mt-1 flex-shrink-0"></i>
+                                                    <span><%= address.landMark %>, <%= address.city %>, <%= address.state %></span>
+                                                </p>
+                                                <p class="text-gray-600 mb-1 flex items-center">
+                                                    <i data-lucide="hash" class="w-4 h-4 mr-2 flex-shrink-0"></i>
+                                                    <span>PIN: <%= address.pincode %></span>
+                                                </p>
+                                                <p class="text-gray-600 flex items-center">
+                                                    <i data-lucide="phone" class="w-4 h-4 mr-2 flex-shrink-0"></i>
+                                                    <span><%= address.phone %></span>
+                                                </p>
+                                            </div>
+                                        <% }) %>
+                                    <% } %>
+                                <% }) %>
+                            <% } else { %>
+                                <div class="col-span-2 text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                                    <i data-lucide="map-pin" class="w-12 h-12 mx-auto text-gray-400 mb-4"></i>
+                                    <p class="text-gray-600 mb-4">No addresses found. Add your first address!</p>
+                                    <button onclick="window.location.href='/profile/address/add'" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                                        <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                                        Add New Address
+                                    </button>
+                                </div>
+                            <% } %>
+                        </div>
+                    </section>
                 </div>
-              </div>
             </div>
-          </div>
         </div>
+    </main>
 
-        <%- include("../../views/partials/user/footer") %>
+    <%- include("../../views/partials/user/footer") %>
+
+    <script>
+        lucide.createIcons();
+
+        // Add active class to current section in navigation
+        function setActiveNavLink() {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let currentSection = 'overview';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.scrollY >= (sectionTop - 200)) {
+                    currentSection = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${currentSection}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        window.addEventListener('scroll', setActiveNavLink);
+        window.addEventListener('load', setActiveNavLink);
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Function to handle order cancellation
+        async function cancelOrder(orderId) {
+            if (confirm('Are you sure you want to cancel this order?')) {
+                try {
+                    const response = await fetch(`/api/orders/${orderId}/cancel`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Failed to cancel order. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while cancelling the order.');
+                }
+            }
+        }
+        async function deleteAddress(docId, addressId) {
+  if (confirm('Are you sure you want to delete this address?')) {
+    try {
+      const response = await fetch(`/address/${docId}/${addressId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        alert(data.message || 'Failed to delete address. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred while deleting the address.');
+    }
+  }
+}
+    </script>
+</body>
+</html>

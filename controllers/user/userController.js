@@ -3,6 +3,7 @@ const Category=require('../../models/categorySchema')
 const Product=require('../../models/productSchema')
 const Brand=require('../../models/brandSchema')
 const express = require('express');
+const mongoose = require('mongoose')
 const app = express();
 const session = require('express-session');
 const nodemailer = require('nodemailer');
@@ -68,82 +69,138 @@ const loadSignup = async (req, res) => {
         console.error('Error loading signup page:', error);
         res.status(500).send('Server Error');
     }
-};
+}
 const loadShopping = async (req, res) => {
-    try {
+    try {        
+        // Get categories and brands for filters
         const categories = await Category.find({ isListed: true });
         const brands = await Brand.find({ isBlocked: false });
-
+        
+        // Pagination setup
         const page = parseInt(req.query.page) || 1;
-        const limit = 9;
+        const limit = 6;
         const skip = (page - 1) * limit;
-        const currentPage = page;
-
+        
         // Build query object
-        let query = { isBlocked: false};
-
+        let query = { isBlocked: false };
+        
         // Extract query parameters
         let searchQuery = req.query.search || "";
         let priceMin = req.query.priceMin || "";
         let priceMax = req.query.priceMax || "";
         let category = req.query.category || "";
-
-        // if (searchQuery) {
-        //     query.name = { $regex: searchQuery, $options: "i" };
-        // }
-        // In loadShopping function, change this part:
-if (searchQuery) {
-    query.$or = [
-        { productName: { $regex: searchQuery, $options: "i" } },
-        { description: { $regex: searchQuery, $options: "i" } }
-    ];
-}
-
+        let brand = req.query.brand || "";
+        let sort = req.query.sort || "asc";
+        
+        console.log(`Filter values - search: "${searchQuery}", priceMin: "${priceMin}", priceMax: "${priceMax}", category: "${category}", brand: "${brand}", sort: "${sort}"`);
+        
+        // Search filter
+        if (searchQuery) {
+            query.$or = [
+                { productName: { $regex: searchQuery, $options: "i" } },
+                { description: { $regex: searchQuery, $options: "i" } }
+            ];
+        }
+        
+        // Price range filter
         if (priceMin && priceMax) {
             query.salePrice = {
                 $gte: parseInt(priceMin),
                 $lte: parseInt(priceMax)
             };
+        } else if (priceMin) {
+            query.salePrice = { $gte: parseInt(priceMin) };
+        } else if (priceMax) {
+            query.salePrice = { $lte: parseInt(priceMax) };
         }
-
+        
+        // Category filter
+        if (category) {
+            query.category = category;
+        }
+        
+        // Brand filter
+        if (brand) {
+            query.brand = brand;
+        }
+        
+        // Determine sort order
+        let sortOption = {};
+        if (sort === "asc") {
+            sortOption = { productName: 1 };
+        } else if (sort === "desc") {
+            sortOption = { productName: -1 };
+        } else if (sort === "price_low") {
+            sortOption = { salePrice: 1 };
+        } else if (sort === "price_high") {
+            sortOption = { salePrice: -1 };
+        } else if (sort === "newest") {
+            sortOption = { createdOn: -1 };
+        } else {
+            sortOption = { productName: 1 }; // Default sort
+        }
+        
+        console.log("MongoDB query:", JSON.stringify(query));
+        console.log("Sort option:", JSON.stringify(sortOption));
+        
+        // Count total products for pagination
         const totalProducts = await Product.countDocuments(query);
-
+        console.log("Total products matching query:", totalProducts);
+        
+        // Fetch products
         const products = await Product.find(query)
             .populate("category")
             .populate("brand")
             .skip(skip)
             .limit(limit)
-            .sort({ createdOn: -1 });
-
+            .sort(sortOption);
+        
+        console.log(`Found ${products.length} products for page ${page}`);
+        
+        // Process products for display
         const processedProducts = products.map(product => ({
             ...product._doc,
             image: product.productImages && product.productImages.length > 0 
                 ? product.productImages[0] 
                 : "/img/default-product.jpg"
         }));
-
-        const totalPages = Math.ceil(totalProducts / limit);
-
-        const user = req.session.user || null;
-        const userId = user._id;
-        const activeUser = await User.findById(userId)
         
-        if(activeUser.isBlocked==true){
-            req.session.destroy()
-            return res.redirect('/login');
+        // Calculate total pages
+        const totalPages = Math.ceil(totalProducts / limit);
+        
+        // User authentication check
+        const user = req.session.user || null;
+        const userId = user ? user._id : null;
+        
+        let activeUser = null;
+        if (userId) {
+            activeUser = await User.findById(userId);
+            
+            if (!activeUser || activeUser.isBlocked) {
+                req.session.destroy();
+                return res.redirect('/login');
+            }
         }
-
-        // Pass `query` data to EJS
+        
+        // Render shop page with all data
         res.render("shop", {
-            user: user,
+            user: activeUser || user,
             products: processedProducts,
             categories: categories,
-            brands: brands,
+            brands,
             totalPages,
-            currentPage,
-            query: { search: searchQuery, priceMin, priceMax, category } // Ensure query is passed
+            currentPage: page,
+            itemsPerPage: limit,
+            totalItems: totalProducts,
+            query: { 
+                search: searchQuery, 
+                priceMin, 
+                priceMax, 
+                category,
+                brand,
+                sort
+            }
         });
-
     } catch (error) {
         console.error("Error loading shopping page:", error);
         res.status(500).send("Server Error");
@@ -374,90 +431,100 @@ const logout=async(req,res)=>{
 }
 const filterProduct = async (req, res) => {
     try {
-      const user = req.session.user;
-      const page = parseInt(req.query.page) || 1;
-      const limit = 9;
-      const skip = (page - 1) * limit;
-  
-      // Build query
-      let query = { isBlocked: false };
-  
-      // Search filter
-      if (req.query.search && req.query.search.trim() !== '') {
-        const searchRegex = new RegExp(req.query.search.trim(), 'i');
-        query.$or = [
-          { productName: { $regex: searchRegex } },
-          { description: { $regex: searchRegex } }
-        ];
-      }
-  
-      // Category filter
-      if (req.query.category && req.query.category !== '') {
-        query.category = new mongoose.Types.ObjectId(req.query.category);
-      }
-  
-      // Brand filter
-      if (req.query.brand && req.query.brand !== '') {
-        query.brand = new mongoose.Types.ObjectId(req.query.brand);
-      }
-  
-      // Price range filter
-      if (req.query.priceMin || req.query.priceMax) {
-        query.salePrice = {};
-        if (req.query.priceMin) {
-          query.salePrice.$gte = Number(req.query.priceMin);
+        const user = req.session.user;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 9;
+        const skip = (page - 1) * limit;
+        
+        // Build query
+        let query = { isBlocked: false };
+        
+        // Search filter
+        if (req.query.search && req.query.search.trim() !== '') {
+            const searchRegex = new RegExp(req.query.search.trim(), 'i');
+            query.$or = [
+                { productName: { $regex: searchRegex } },
+                { description: { $regex: searchRegex } }
+            ];
         }
-        if (req.query.priceMax) {
-          query.salePrice.$lte = Number(req.query.priceMax);
+        
+        // Category filter
+        if (req.query.category && req.query.category !== '') {
+            query.category = req.query.category;
         }
-      }
-  
-      // Get total count for pagination
-      const totalProducts = await Product.countDocuments(query);
-      const totalPages = Math.ceil(totalProducts / limit);
-  
-      // Fetch filtered products
-      const products = await Product.find(query)
-        .populate('category')
-        .populate('brand')
-        .skip(skip)
-        .limit(limit)
-        .sort({ createdOn: -1 });
-  
-      // Process products for display
-      const processedProducts = products.map(product => ({
-        ...product._doc,
-        image: product.productImages?.length > 0 ? product.productImages[0] : "/img/default-product.jpg",
-        isOutOfStock: product.quantity <= 0 // Add a flag
-    }));
-    
-  
-      // Fetch categories and brands for filters
-      const categories = await Category.find({ isListed: true });
-      const brands = await Brand.find({ isBlocked: false });
-  
-      // Render the shop page with all necessary data
-      res.render('shop', {
-        user,
-        products: processedProducts,
-        categories,
-        brands,
-        totalPages,
-        currentPage: page,
-        query: {
-          search: req.query.search || '',
-          category: req.query.category || '',
-          brand: req.query.brand || '',
-          priceMin: req.query.priceMin || '',
-          priceMax: req.query.priceMax || ''
+        
+        // Brand filter
+        if (req.query.brand && req.query.brand !== '') {
+            query.brand = req.query.brand;
         }
-      });
+        
+        // Price range filter
+        if (req.query.priceMin || req.query.priceMax) {
+            query.salePrice = {};
+            if (req.query.priceMin) {
+                query.salePrice.$gte = Number(req.query.priceMin);
+            }
+            if (req.query.priceMax) {
+                query.salePrice.$lte = Number(req.query.priceMax);
+            }
+        }
+        
+        // Sort parameter
+        let sortOption = {};
+        const sort = req.query.sort || 'asc';
+        if (sort === 'asc') {
+            sortOption = { productName: 1 };
+        } else if (sort === 'desc') {
+            sortOption = { productName: -1 };
+        } else {
+            sortOption = { createdOn: -1 }; // Default
+        }
+        
+        // Get total count for pagination
+        const totalProducts = await Product.countDocuments(query);
+        const totalPages = Math.ceil(totalProducts / limit);
+        
+        // Fetch filtered products
+        const products = await Product.find(query)
+            .populate('category')
+            .populate('brand')
+            .skip(skip)
+            .limit(limit)
+            .sort(sortOption);
+        
+        // Process products for display
+        const processedProducts = products.map(product => ({
+            ...product._doc,
+            image: product.productImages?.length > 0 ? product.productImages[0] : "/img/default-product.jpg",
+            isOutOfStock: product.quantity <= 0
+        }));
+        
+        // Fetch categories and brands for filters
+        const categories = await Category.find({ isListed: true });
+        const brands = await Brand.find({ isBlocked: false });
+        
+        // Render the shop page with all necessary data
+        res.render('shop', {
+            user,
+            products: processedProducts,
+            categories,
+            brands,
+            totalPages,
+            currentPage: page,
+            query: {
+                search: req.query.search || '',
+                category: req.query.category || '',
+                brand: req.query.brand || '',
+                priceMin: req.query.priceMin || '',
+                priceMax: req.query.priceMax || '',
+                sort: sort
+            }
+        });
     } catch (error) {
-      console.error('Filter error:', error);
-      res.status(500).send('Internal server error');
+        console.error('Filter error:', error);
+        res.status(500).send('Internal server error');
     }
-  };
-  
+};
 
 module.exports = {
     loadHomepage,

@@ -8,6 +8,7 @@ const categoryController = require("../controllers/admin/categoryController");
 const { upload } = require("../helpers/multer"); // Remove processImages
 const brandController = require("../controllers/admin/brandController");
 const productController = require("../controllers/admin/productController");
+const orderController=require('../controllers/admin/orderController')
 
 
 
@@ -46,6 +47,8 @@ router.get("/products", adminAuth, productController.getAllproduct);
 router.put("/blockProduct/:id", adminAuth, productController.blockProduct);
 router.get("/editProduct/:id", adminAuth, productController.getEditProduct);
 router.put("/editProduct/:id", adminAuth, upload.array("images", 4), productController.submittProduct);
+
+router.get('/AdminOrder',orderController.AllOrder)
 
 
 module.exports = router;

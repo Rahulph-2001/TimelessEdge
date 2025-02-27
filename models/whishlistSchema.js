@@ -19,5 +19,5 @@ const whishlistSchema=new Schema({
     }
    }]
 })
-const Whishlist=mongoose.model("Whishlist",WhishlistSchema)
+const Whishlist=mongoose.model("Whishlist",whishlistSchema)
 module.exports=Whishlist

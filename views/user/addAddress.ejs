@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Address - GuitMan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        .header {
+          position: relative;
+          z-index: 500;
+          height: 150px;
+          padding: 20px 0;
+          background: white;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+
+      /* Logo Styles */
+      .header__logo {
+          display: flex;
+          align-items: center;
+          height: 100%;
+      }
+
+      .header__logo img {
+          max-height: 180px;
+          width: auto;
+      }
+
+      /* Menu Styles */
+      .header__menu {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100%;
+      }
+
+      .header__menu ul {
+          display: flex;
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          gap: 30px;
+      }
+
+      .header__menu ul li a {
+          color: #333;
+          font-weight: 600;
+          text-decoration: none;
+          transition: color 0.3s ease;
+      }
+
+      .header__menu ul li a:hover {
+          color: #ff7f50;
+      }
+
+      /* Navigation Options */
+      .header__nav__option {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          gap: 20px;
+          height: 100%;
+      }
+
+      /* Sign-in Link Styles */
+      .sign-in-link {
+          font-size: 16px;
+          color: #333;
+          text-decoration: none;
+          font-weight: 600;
+          transition: color 0.3s ease;
+          white-space: nowrap;
+      }
+
+      .sign-in-link:hover {
+          color: #ff7f50;
+      }
+
+      /* Dropdown Styles */
+      .dropdown {
+          position: relative;
+          display: flex;
+          align-items: center;
+      }
+
+      .dropdown-content {
+          display: none;
+          position: absolute;
+          top: 100%;
+          right: 0;
+          background-color: white;
+          min-width: 160px;
+          box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+          border-radius: 4px;
+          z-index: 1000;
+      }
+
+      .dropdown:hover .dropdown-content {
+          display: block;
+      }
+
+      .dropdown-content a {
+          color: #333;
+          padding: 12px 16px;
+          text-decoration: none;
+          display: block;
+          transition: background-color 0.3s ease;
+      }
+
+      .dropdown-content a:hover {
+          background-color: #f8f9fa;
+      }
+
+      /* Cart Link Styles */
+      .cartlink {
+          display: flex;
+          align-items: center;
+          color: #ff7f50;
+          text-decoration: none;
+          position: relative;
+      }
+
+      .cartlink span {
+          position: absolute;
+          top: -8px;
+          right: -8px;
+          background: #ff7f50;
+          color: white;
+          font-size: 12px;
+          padding: 2px 6px;
+          border-radius: 50%;
+      }
+
+      /* Icon Links */
+      .header__nav__option a img {
+          width: 20px;
+          height: 20px;
+          transition: opacity 0.3s ease;
+      }
+
+      .header__nav__option a:hover img {
+          opacity: 0.8;
+      }
+
+      /* Mobile Menu Button */
+      .canvas__open {
+          display: none;
+          cursor: pointer;
+          font-size: 24px;
+      }
+
+      /* Responsive Styles */
+      @media (max-width: 992px) {
+          .header__menu ul {
+              gap: 20px;
+          }
+
+          .header__nav__option {
+              gap: 15px;
+          }
+      }
+
+      @media (max-width: 768px) {
+          .header__menu {
+              display: none;
+          }
+
+          .canvas__open {
+              display: block;
+              position: absolute;
+              right: 15px;
+              top: 50%;
+              transform: translateY(-50%);
+          }
+
+          .header__nav__option {
+              justify-content: center;
+              margin-top: 15px;
+          }
+      }
+      body {
+          font-family: 'Inter', sans-serif;
+          background-color: #f3f4f6;
+          margin: 0;
+          padding: 0;
+      }
+      .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 1rem;
+      }
+      main {
+          padding: 2rem 1rem;
+          padding-top: 4rem;
+      }
+      .max-w-3xl {
+          max-width: 48rem;
+          margin: 0 auto;
+      }
+      .breadcrumb {
+          display: flex;
+          margin-bottom: 1.5rem;
+      }
+      .breadcrumb ol {
+          display: inline-flex;
+          align-items: center;
+      }
+      .breadcrumb li {
+          display: inline-flex;
+          align-items: center;
+      }
+      .breadcrumb a {
+          display: inline-flex;
+          align-items: center;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #374151;
+          text-decoration: none;
+      }
+      .breadcrumb a:hover {
+          color: #4f46e5;
+      }
+      .breadcrumb i {
+          width: 1rem;
+          height: 1rem;
+          margin-right: 0.5rem;
+      }
+      .breadcrumb .separator {
+          width: 1rem;
+          height: 1rem;
+          color: #9ca3af;
+          margin: 0 0.25rem;
+      }
+      .card {
+          background-color: white;
+          border-radius: 0.5rem;
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+          padding: 1.5rem;
+      }
+      h2 {
+          font-size: 1.5rem;
+          font-weight: 600;
+          margin-bottom: 1.5rem;
+      }
+      .form-group {
+          margin-bottom: 1.5rem;
+      }
+      label {
+          display: block;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #374151;
+          margin-bottom: 0.25rem;
+      }
+      input[type="text"],
+      input[type="tel"],
+      select {
+          width: 100%;
+          padding: 0.5rem;
+          border: 1px solid #d1d5db;
+          border-radius: 0.375rem;
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      }
+      input[type="text"]:focus,
+      input[type="tel"]:focus,
+      select:focus {
+          outline: none;
+          border-color: #a5b4fc;
+          box-shadow: 0 0 0 3px rgba(165, 180, 252, 0.5);
+      }
+      .grid {
+          display: grid;
+          gap: 1.5rem;
+      }
+      @media (min-width: 768px) {
+          .grid {
+              grid-template-columns: repeat(2, 1fr);
+          }
+      }
+      .col-span-2 {
+          grid-column: span 2;
+      }
+      .form-actions {
+          margin-top: 2rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+      }
+      .checkbox-group {
+          display: inline-flex;
+          align-items: center;
+      }
+      .checkbox-group input[type="checkbox"] {
+          margin-right: 0.5rem;
+      }
+      .btn {
+          padding: 0.5rem 1rem;
+          border-radius: 0.375rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          text-decoration: none;
+          cursor: pointer;
+      }
+      .btn-secondary {
+          background-color: white;
+          color: #374151;
+          border: 1px solid #d1d5db;
+      }
+      .btn-secondary:hover {
+          background-color: #f9fafb;
+      }
+      .btn-primary {
+          background-color: #4f46e5;
+          color: white;
+          border: 1px solid transparent;
+      }
+      .btn-primary:hover {
+          background-color: #4338ca;
+      }
+      .btn-group {
+          display: flex;
+          gap: 1rem;
+      }
+  </style>
+</head>
+<body>
+    <main class="container">
+        <div class="max-w-3xl">
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb" aria-label="Breadcrumb">
+                <ol>
+                    <li>
+                        <a href="/">
+                            <i data-lucide="home"></i>
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <i data-lucide="chevron-right" class="separator"></i>
+                        <a href="/userProfile">Profile</a>
+                    </li>
+                    <li>
+                        <i data-lucide="chevron-right" class="separator"></i>
+                        <a href="#">Add New Address</a>
+                    </li>
+                </ol>
+            </nav>
+            
+            <!-- Address Form Card -->
+            <div class="card">
+                <h2>Add New Address</h2>
+                <form id="addAddressForm" action="/profile/address/add" method="POST">
+                    <div class="form-group">
+                        <label for="addressType">Address Type</label>
+                        <select id="addressType" name="adressType" required>
+                            <option value="Home">Home</option>
+                            <option value="Work">Work</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city" name="city" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="landMark">Landmark</label>
+                            <input type="text" id="landMark" name="landMark" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <input type="text" id="state" name="state" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="pincode">ZIP/Postal Code</label>
+                            <input type="text" id="pincode" name="pincode" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="altPhone">Alternate Phone Number</label>
+                            <input type="tel" id="altPhone" name="altPhone" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="isDefault" name="isDefault">
+                            <label for="isDefault">Set as default address</label>
+                        </div>
+                        
+                        <div class="btn-group">
+                            <a href="/profile#addresses" class="btn btn-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                Add Address
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    <script>
+        lucide.createIcons();
+        
+        // Form validation
+        document.getElementById('addAddressForm').addEventListener('submit', function(event) {
+            const phoneInput = document.getElementById('phone');
+            const altPhoneInput = document.getElementById('altPhone');
+            const pincodeInput = document.getElementById('pincode');
+            
+            // Simple phone validation
+            const phonePattern = /^\d{10,12}$/;
+            if (!phonePattern.test(phoneInput.value.replace(/[^0-9]/g, ''))) {
+                event.preventDefault();
+                alert('Please enter a valid phone number (10-12 digits)');
+                phoneInput.focus();
+                return false;
+            }
+            
+            // Simple alternate phone validation
+            if (!phonePattern.test(altPhoneInput.value.replace(/[^0-9]/g, ''))) {
+                event.preventDefault();
+                alert('Please enter a valid alternate phone number (10-12 digits)');
+                altPhoneInput.focus();
+                return false;
+            }
+            
+            // Simple pincode validation
+            const pincodePattern = /^\d{4,8}$/;
+            if (!pincodePattern.test(pincodeInput.value.replace(/[^0-9]/g, ''))) {
+                event.preventDefault();
+                alert('Please enter a valid postal/zip code (4-8 digits)');
+                pincodeInput.focus();
+                return false;
+            }
+            
+            return true;
+        });
+    </script>
+</body>
+</html>

@@ -324,7 +324,18 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="product-price">₹<%= item.productId.salePrice.toLocaleString() %>
+                                        <div class="product-price">
+                                            <% if (item.productId.offerPrice) { %>
+                                                Rs: <%= item.productId.offerPrice.toLocaleString() %>
+                                                <span style="text-decoration: line-through; color: #718096; font-size: 14px;">
+                                                    Rs: <%= item.productId.salePrice.toLocaleString() %>
+                                                </span>
+                                                <span style="color: #38a169; font-size: 14px;">
+                                                    (Saved Rs: <%= item.productId.savedAmount.toLocaleString() %>)
+                                                </span>
+                                            <% } else { %>
+                                                Rs: <%= item.productId.salePrice.toLocaleString() %>
+                                            <% } %>
                                         </div>
                                     </td>
                                     <td>
@@ -469,6 +480,45 @@
                     });
                 });
             });
+
+
+            $('.remove-btn').click(function () {
+    const productId = $(this).data('product-id'); // Ensure your button has data-product-id
+
+    Swal.fire({
+        title: 'Remove Item?',
+        text: "Are you sure you want to remove this item from your wishlist?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#718096',
+        confirmButtonText: 'Yes, remove it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `/wishlist/remove/${productId}`, // Ensure this matches the backend route
+                type: 'DELETE',
+                success: function (response) {
+                    Swal.fire(
+                        'Removed!',
+                        'Item has been removed from your wishlist.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                },
+                error: function (error) {
+                    Swal.fire(
+                        'Error!',
+                        'Something went wrong.',
+                        'error'
+                    );
+                }
+            });
+        }
+    });
+});
+
         </script>
 </body>
 

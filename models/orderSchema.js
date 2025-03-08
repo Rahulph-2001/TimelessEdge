@@ -37,7 +37,7 @@ const orderSchema=new Schema({
     },
     address:{
         type:Schema.Types.ObjectId,
-        ref:"User",
+        ref:"Address",
         required:true
     },
     invoiceDate:{
@@ -46,7 +46,12 @@ const orderSchema=new Schema({
     status:{
         type:String,
         required:true,
-        enum:['Pending','Processing','Shipped','Delivered',"Canacelled","Return Request",'Returned',]
+        enum:['Pending','Processing','Shipped','Delivered',"Cancelled","Return Request",'Returned',]
+    },
+    paymentMethod: {
+        type: String,
+        enum: ['Credit Card', 'Debit Card', 'UPI', 'NetBanking', 'Wallet', 'COD', 'Other'],
+        default: 'Online Payment'
     },
     createdOn:{
         type:Date,

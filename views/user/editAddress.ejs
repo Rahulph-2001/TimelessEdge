@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -116,44 +117,75 @@
     <script>
         lucide.createIcons();
 
-        // Form submission using fetch and PUT method
         document.getElementById('editAddressForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); // Prevent default form submission
+            event.preventDefault();
 
-            // Gather form data
             const formData = {
                 addressType: document.getElementById('addressType').value,
-                name: document.getElementById('name').value,
-                city: document.getElementById('city').value,
-                landMark: document.getElementById('landMark').value,
-                state: document.getElementById('state').value,
-                pincode: document.getElementById('pincode').value,
-                phone: document.getElementById('phone').value,
-                altPhone: document.getElementById('altPhone').value,
+                name: document.getElementById('name').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                landMark: document.getElementById('landMark').value.trim(),
+                state: document.getElementById('state').value.trim(),
+                pincode: document.getElementById('pincode').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                altPhone: document.getElementById('altPhone').value.trim(),
                 isDefault: document.querySelector('input[name="isDefault"]').checked,
             };
 
-            // Validate form data
+            const namePattern = /^[a-zA-Z\s]+$/;
             const phonePattern = /^\d{10,12}$/;
             const pincodePattern = /^\d{4,8}$/;
 
-            if (!phonePattern.test(formData.phone.replace(/[^0-9]/g, ''))) {
-                alert('Please enter a valid phone number (10-12 digits)');
+            if (!namePattern.test(formData.name)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Name',
+                    text: 'Name should only contain letters.',
+                });
                 return;
             }
-
-            if (formData.altPhone && !phonePattern.test(formData.altPhone.replace(/[^0-9]/g, ''))) {
-                alert('Please enter a valid alternate phone number (10-12 digits)');
+            if (!namePattern.test(formData.city)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid City',
+                    text: 'City should only contain letters.',
+                });
                 return;
             }
-
-            if (!pincodePattern.test(formData.pincode.replace(/[^0-9]/g, ''))) {
-                alert('Please enter a valid postal/zip code (4-8 digits)');
+            if (!namePattern.test(formData.state)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid State',
+                    text: 'State should only contain letters.',
+                });
+                return;
+            }
+            if (!phonePattern.test(formData.phone)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Phone Number',
+                    text: 'Please enter a valid phone number (10-12 digits).',
+                });
+                return;
+            }
+            if (formData.altPhone && !phonePattern.test(formData.altPhone)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Alternate Phone Number',
+                    text: 'Please enter a valid alternate phone number (10-12 digits).',
+                });
+                return;
+            }
+            if (!pincodePattern.test(formData.pincode)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Postal/ZIP Code',
+                    text: 'Please enter a valid postal/zip code (4-8 digits).',
+                });
                 return;
             }
 
             try {
-                // Send PUT request using fetch
                 const response = await fetch(`/profile/address/edit/<%= address._id %>`, {
                     method: 'PUT',
                     headers: {
@@ -163,15 +195,28 @@
                 });
 
                 if (response.ok) {
-                    alert('Address updated successfully!');
-                    window.location.href = '/userProfile'; // Redirect to profile page
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Address updated successfully!',
+                    }).then(() => {
+                        window.location.href = '/userProfile';
+                    });
                 } else {
                     const errorData = await response.json();
-                    alert(`Error: ${errorData.message || 'Failed to update address'}`);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorData.message || 'Failed to update address',
+                    });
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred while updating the address.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while updating the address.',
+                });
             }
         });
     </script>

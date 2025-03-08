@@ -1,558 +1,1046 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order #<%= order.orderId %> - TimelessEdge</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f9fafb;
-            color: #1f2937;
-            line-height: 1.5;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
-        }
-        
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-        
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            color: #4f46e5;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-        
-        .back-btn:hover {
-            color: #4338ca;
-        }
-        
-        .back-btn i {
-            margin-right: 0.5rem;
-        }
-        
-        .order-id {
-            font-size: 1.5rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-        }
-        
-        .order-status {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            border-radius: 9999px;
-            margin-left: 1rem;
-        }
-        
-        .status-pending {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-        
-        .status-processing {
-            background-color: #e0f2fe;
-            color: #0369a1;
-        }
-        
-        .status-shipped {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-        
-        .status-delivered {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-        
-        .status-cancelled {
-            background-color: #fee2e2;
-            color: #b91c1c;
-        }
-        
-        .card {
-            background-color: #ffffff;
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-        }
-        
-        .card-header {
-            background-color: #f9fafb;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .card-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-        }
-        
-        .card-title i {
-            margin-right: 0.5rem;
-            color: #4f46e5;
-        }
-        
-        .card-body {
-            padding: 1.5rem;
-        }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .info-item h4 {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #6b7280;
-            margin-bottom: 0.5rem;
-        }
-        
-        .info-item p {
-            font-size: 0.95rem;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order #<%= order.orderId %> - TimelessEdge</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <!-- Include SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --secondary: #f9fafb;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --warning: #f59e0b;
+      --warning-hover: #d97706;
+      --info: #0ea5e9;
+      --info-hover: #0284c7;
+      --success: #10b981;
+      --success-hover: #059669;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --border: #e5e7eb;
+      --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+      --card-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+      --transition: all 0.2s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f9fafb;
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      background-color: rgba(79, 70, 229, 0.1);
+    }
+    
+    .back-btn:hover {
+      color: var(--primary-hover);
+      background-color: rgba(79, 70, 229, 0.15);
+    }
+    
+    .back-btn i {
+      margin-right: 0.5rem;
+    }
+    
+    .order-id {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+    }
+    
+    .order-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      margin-left: 1rem;
+    }
+    
+    .status-pending {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    
+    .status-processing {
+      background-color: #e0f2fe;
+      color: #0369a1;
+    }
+    
+    .status-shipped {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .status-delivered {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+    
+    .status-cancelled {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
+    
+    .card {
+      background-color: #ffffff;
+      border-radius: 0.75rem;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      transition: var(--transition);
+      border: 1px solid var(--border);
+    }
+    
+    .card:hover {
+      box-shadow: var(--card-shadow-hover);
+    }
+    
+    .card-header {
+      background-color: var(--secondary);
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      color: var(--text-primary);
+    }
+    
+    .card-title i {
+      margin-right: 0.75rem;
+      color: var(--primary);
+    }
+    
+    .card-body {
+      padding: 1.5rem;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .info-item h4 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+    
+    .info-item p {
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
 
-        .product-item {
-            display: grid;
-            grid-template-columns: 80px 1fr 120px 120px;
-            gap: 1rem;
-            padding: 1rem 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .product-item:last-child {
-            border-bottom: none;
-        }
-        
-        .product-image {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 0.5rem;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .product-info h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-        
-        .product-meta {
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-bottom: 0.5rem;
-        }
-        
-        .product-status {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border-radius: 9999px;
-        }
-        
-        .product-actions {
-            margin-top: 0.5rem;
-        }
-        
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            border-radius: 0.375rem;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .btn-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-        }
-        
-        .btn-primary {
-            background-color: #4f46e5;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #4338ca;
-        }
-        
-        .btn-danger {
-            background-color: #ef4444;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background-color: #dc2626;
-        }
-        
-        .btn-warning {
-            background-color: #f59e0b;
-            color: white;
-        }
-        
-        .btn-warning:hover {
-            background-color: #d97706;
-        }
-        
-        .btn-info {
-            background-color: #0ea5e9;
-            color: white;
-        }
-        
-        .btn-info:hover {
-            background-color: #0284c7;
-        }
-        
-        .product-quantity {
-            text-align: center;
-            font-weight: 500;
-        }
-        
-        .product-price {
-            text-align: right;
-            font-weight: 600;
-        }
-        
-        .order-summary {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 0.5rem;
-            font-size: 0.95rem;
-        }
-        
-        .summary-row {
-            padding: 0.5rem 0;
-        }
-        
-        .summary-row.total {
-            font-weight: 700;
-            font-size: 1.125rem;
-            margin-top: 0.5rem;
-            padding-top: 0.5rem;
-            border-top: 2px solid #e5e7eb;
-        }
-        
-        .address-details {
-            line-height: 1.6;
-        }
+    .product-item {
+      display: grid;
+      grid-template-columns: 80px 1fr 120px 120px;
+      gap: 1.25rem;
+      padding: 1.25rem 0;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+    }
+    
+    .product-item:last-child {
+      border-bottom: none;
+    }
+    
+    .product-image {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+      background-color: #f9fafb;
+    }
+    
+    .product-info h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.375rem;
+      color: var(--text-primary);
+    }
+    
+    .product-meta {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+    
+    .product-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 9999px;
+    }
+    
+    .product-actions {
+      margin-top: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    
+    .btn-sm {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    
+    .btn-danger {
+      background-color: var(--danger);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background-color: var(--danger-hover);
+    }
+    
+    .btn-warning {
+      background-color: var(--warning);
+      color: white;
+    }
+    
+    .btn-warning:hover {
+      background-color: var(--warning-hover);
+    }
+    
+    .btn-info {
+      background-color: var(--info);
+      color: white;
+    }
+    
+    .btn-info:hover {
+      background-color: var(--info-hover);
+    }
+    
+    .btn i {
+      margin-right: 0.375rem;
+    }
+    
+    .product-quantity {
+      text-align: center;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .product-price {
+      text-align: right;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .order-summary {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.75rem;
+      font-size: 1rem;
+    }
+    
+    .summary-row {
+      padding: 0.5rem 0;
+      color: var(--text-secondary);
+    }
+    
+    .summary-row.total {
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 2px solid var(--border);
+      color: var(--text-primary);
+    }
+    
+    .address-details {
+      line-height: 1.6;
+      color: var(--text-primary);
+    }
+    
+    .address-details p {
+      margin-bottom: 0.375rem;
+    }
+    
+    .address-details p:last-child {
+      margin-top: 0.75rem;
+    }
+    
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      overflow: auto;
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal-content {
+      background-color: #ffffff;
+      margin: 10% auto;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      max-width: 500px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--border);
+      animation: modalFadeIn 0.3s ease-out;
+    }
+    
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: var(--transition);
+    }
+    
+    .close-modal:hover {
+      color: var(--text-primary);
+    }
+    
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .form-group label {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .form-control {
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      font-size: 0.95rem;
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      transition: var(--transition);
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    
+    .section-divider {
+      height: 1px;
+      background-color: var(--border);
+      margin: 1.5rem 0;
+    }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 9999px;
+    }
+    
+    .badge-home {
+      background-color: #e0f2fe;
+      color: #0369a1;
+    }
+    
+    .badge-work {
+      background-color: #f3e8ff;
+      color: #7e22ce;
+    }
+    
+    .badge-other {
+      background-color: #f3f4f6;
+      color: #4b5563;
+    }
 
-        @media (max-width: 768px) {
-            .product-item {
-                grid-template-columns: 60px 1fr;
-                row-gap: 0.5rem;
-            }
-            
-            .product-image {
-                width: 60px;
-                height: 60px;
-            }
-            
-            .product-quantity, .product-price {
-                text-align: left;
-            }
-            
-            .product-actions {
-                grid-column: span 2;
-            }
-        }
-    </style>
+    @media (max-width: 768px) {
+      .product-item {
+        grid-template-columns: 60px 1fr;
+        row-gap: 0.75rem;
+      }
+      
+      .product-image {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .product-quantity, .product-price {
+        text-align: left;
+      }
+      
+      .product-actions {
+        grid-column: span 2;
+      }
+      
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .order-id {
+        margin-top: 0.5rem;
+      }
+      
+      .order-status {
+        margin-left: 0;
+        margin-top: 0.5rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      .card-body {
+        padding: 1.25rem;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="page-header">
-            <a href="/profile#orders" class="back-btn">
-                <i data-lucide="arrow-left"></i>
-                Back to Orders
-            </a>
-            
-            <div>
-                <span class="order-id">Order #<%= order.orderId %></span>
-                <span class="order-status <%= order.status === 'Pending' ? 'status-pending' : 
-                                            order.status === 'Processing' ? 'status-processing' : 
-                                            order.status === 'Shipped' ? 'status-shipped' : 
-                                            order.status === 'Delivered' ? 'status-delivered' : 
-                                            'status-cancelled' %>">
-                    <%= order.status %>
-                </span>
-            </div>
-        </div>
-        
-        <!-- Order Information -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i data-lucide="info"></i>
-                    Order Information
-                </h2>
-            </div>
-            <div class="card-body">
-                <div class="info-grid">
-                    <div class="info-item">
-                        <h4>Order Date</h4>
-                        <p><%= new Date(order.createdOn).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
-                    </div>
-                    <div class="info-item">
-                        <h4>Payment Method</h4>
-                        <p><%= order.paymentMethod || 'Online Payment' %></p>
-                    </div>
-                    <div class="info-item">
-                        <h4>Invoice Date</h4>
-                        <p><%= new Date(order.invoiceDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
-                    </div>
-                    <% if (order.couponApplied) { %>
-                    <div class="info-item">
-                        <h4>Coupon Applied</h4>
-                        <p>Yes</p>
-                    </div>
-                    <% } %>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Shipping Information -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i data-lucide="map-pin"></i>
-                    Shipping Information
-                </h2>
-            </div>
-            <div class="card-body">
-                <div class="address-details">
-                    <p><strong><%= address.name %></strong></p>
-                    <p><%= address.landMark %></p>
-                    <p><%= address.city %>, <%= address.state %> - <%= address.pincode %></p>
-                    <p>Phone: <%= address.phone %></p>
-                    <% if (address.altPhone) { %>
-                    <p>Alternative Phone: <%= address.altPhone %></p>
-                    <% } %>
-                    <p><span class="product-status status-processing"><%= address.adressType %> Address</span></p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Order Items -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i data-lucide="shopping-bag"></i>
-                    Order Items
-                </h2>
-            </div>
-            <div class="card-body">
-                <% order.orderedItems.forEach(item => { %>
-                <div class="product-item">
-                    <img src="<%= item.product.productImages[0] %>" alt="<%= item.product.productName %>" class="product-image">
-                    
-                    <div class="product-info">
-                        <h3><%= item.product.productName %></h3>
-                        <div class="product-meta">
-                            <p>Color: <%= item.product.color %></p>
-                        </div>
-                        <span class="product-status <%= 
-                            item.status === 'Processing' ? 'status-processing' : 
-                            item.status === 'Shipped' ? 'status-shipped' : 
-                            item.status === 'Delivered' ? 'status-delivered' : 
-                            item.status === 'Cancelled' ? 'status-cancelled' : 
-                            'status-pending' %>">
-                            <%= item.status || 'Pending' %>
-                        </span>
-                        
-                        <div class="product-actions">
-                            <% if (item.status === 'Processing') { %>
-                            <button class="btn btn-sm btn-danger" onclick="cancelIndividualItem('<%= order._id %>', '<%= item._id %>')">
-                                Cancel Item
-                            </button>
-                            <% } else if (item.status === 'Failed') { %>
-                            <button class="btn btn-sm btn-danger" onclick="cancelIndividualItem('<%= order._id %>')">
-                                Cancel Payment
-                            </button>
-                            <% } else if (item.status === 'Delivered') { %>
-                            <button class="btn btn-sm btn-warning" onclick="returnDeliveredItem('<%= order._id %>', '<%= item._id %>')">
-                                Return Item
-                            </button>
-                            <button class="btn btn-sm btn-info" onclick="downloadInvoice('<%= order._id %>','<%= item._id %>')">
-                                Download Invoice
-                            </button>
-                            <% } %>
-                        </div>
-                    </div>
-                    
-                    <div class="product-quantity">
-                        Qty: <%= item.quantity %>
-                    </div>
-                    
-                    <div class="product-price">
-                        ₹<%= item.price.toLocaleString() %>
-                    </div>
-                </div>
-                <% }); %>
-            </div>
-        </div>
-        
-        <!-- Order Summary -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i data-lucide="receipt"></i>
-                    Order Summary
-                </h2>
-            </div>
-            <div class="card-body">
-                <div class="order-summary">
-                    <div class="summary-row">Subtotal</div>
-                    <div class="summary-row">₹<%= order.totalPrice.toLocaleString() %></div>
-                    
-                    <% if (order.discount > 0) { %>
-                    <div class="summary-row">Discount</div>
-                    <div class="summary-row">- ₹<%= order.discount.toLocaleString() %></div>
-                    <% } %>
-                    
-                    <div class="summary-row total">Total</div>
-                    <div class="summary-row total">₹<%= order.finalAmount.toLocaleString() %></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Order Actions -->
-        <% if (order.status === 'Pending' || order.status === 'Processing') { %>
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i data-lucide="settings"></i>
-                    Order Actions
-                </h2>
-            </div>
-            <div class="card-body">
-                <button class="btn btn-danger" onclick="cancelOrder('<%= order._id %>')">
-                    <i data-lucide="x"></i>
-                    Cancel Order
-                </button>
-            </div>
-        </div>
-        <% } %>
+  <div class="container">
+    <div class="page-header">
+      <a href="/userProfile#orders" class="back-btn">
+        <i data-lucide="arrow-left"></i>
+        Back to Orders
+      </a>
+      <div>
+        <span class="order-id">Order #<%= order.orderId %></span>
+        <span class="order-status <%= order.status === 'Pending' ? 'status-pending' : 
+            order.status === 'Processing' ? 'status-processing' : 
+            order.status === 'Shipped' ? 'status-shipped' : 
+            order.status === 'Delivered' ? 'status-delivered' : 
+            'status-cancelled' %>">
+          <%= order.status %>
+        </span>
+      </div>
     </div>
-
-    <script>
-        // Initialize lucide icons
-        lucide.createIcons();
-        
-        // Function to handle order cancellation
-        async function cancelOrder(orderId) {
-            if (confirm('Are you sure you want to cancel this order?')) {
-                try {
-                    const response = await fetch(`/api/orders/${orderId}/cancel`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        alert('Order cancelled successfully');
-                        window.location.reload();
-                    } else {
-                        alert('Failed to cancel order. Please try again.');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('An error occurred while cancelling the order.');
-                }
-            }
+    
+    <!-- Order Information -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i data-lucide="info"></i>
+          Order Information
+        </h2>
+      </div>
+      <div class="card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <h4>Order Date</h4>
+            <p><%= new Date(order.createdOn).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+          </div>
+          <div class="info-item">
+            <h4>Payment Method</h4>
+            <p><%= order.paymentMethod || 'Online Payment' %></p>
+          </div>
+          <div class="info-item">
+            <h4>Invoice Date</h4>
+            <p><%= new Date(order.invoiceDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+          </div>
+          <% if (order.couponApplied) { %>
+          <div class="info-item">
+            <h4>Coupon Applied</h4>
+            <p>Yes</p>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Shipping Information -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i data-lucide="map-pin"></i>
+          Shipping Information
+        </h2>
+      </div>
+      <div class="card-body">
+        <div class="address-details">
+          <p><strong><%= address.name %></strong></p>
+          <p><%= address.landMark %></p>
+          <p><%= address.city %>, <%= address.state %> - <%= address.pincode %></p>
+          <p>Phone: <%= address.phone %></p>
+          <% if (address.altPhone) { %>
+          <p>Alternative Phone: <%= address.altPhone %></p>
+          <% } %>
+          <p>
+            <span class="badge <%= address.adressType === 'Home' ? 'badge-home' : 
+                address.adressType === 'Work' ? 'badge-work' : 'badge-other' %>">
+              <%= address.adressType %> Address
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Order Items -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i data-lucide="shopping-bag"></i>
+          Order Items
+        </h2>
+      </div>
+      <div class="card-body">
+        <% order.orderedItems.forEach(item => { %>
+          <div class="product-item">
+            <img src="<%= item.product.productImages[0] %>" alt="<%= item.product.productName %>" class="product-image">
+            <div class="product-info">
+              <h3><%= item.product.productName %></h3>
+              <div class="product-meta">
+                <p>Color: <%= item.product.color %></p>
+              </div>
+              <span class="product-status <%= 
+                order.status === 'Processing' ? 'status-processing' : 
+                order.status === 'Shipped' ? 'status-shipped' : 
+                order.status === 'Delivered' ? 'status-delivered' : 
+                order.status === 'Cancelled' ? 'status-cancelled' : 
+                'status-pending' %>">
+                <%= order.status || 'Pending' %>
+              </span>
+              <div class="product-actions">
+                <% if (order.status === 'Processing') { %>
+                <button class="btn btn-sm btn-danger" onclick="openCancelItemModal('<%= order._id %>', '<%= item._id %>', '<%= item.product.productName %>')">
+                  <i data-lucide="x-circle" class="w-3 h-3"></i>
+                  Cancel Item
+                </button>
+                <% } else if (order.status === 'Failed') { %>
+                <button class="btn btn-sm btn-danger" onclick="openCancelItemModal('<%= order._id %>', '<%= item._id %>', '<%= item.product.productName %>')">
+                  <i data-lucide="x-circle" class="w-3 h-3"></i>
+                  Cancel Payment
+                </button>
+                <% } else if (order.status === 'Delivered') { %>
+                <button class="btn btn-sm btn-warning" onclick="openReturnItemModal('<%= order._id %>', '<%= item._id %>', '<%= item.product.productName %>')">
+                  <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                  Return Item
+                </button>
+                <button class="btn btn-sm btn-info" onclick="downloadInvoice('<%= order._id %>','<%= item._id %>')">
+                  <i data-lucide="download" class="w-3 h-3"></i>
+                  Download Invoice
+                </button>
+                <% } %>
+              </div>
+            </div>
+            <div class="product-quantity">
+              Qty: <%= item.quantity %>
+            </div>
+            <div class="product-price">
+              ₹<%= item.price.toLocaleString() %>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+    
+    <!-- Order Summary -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i data-lucide="receipt"></i>
+          Order Summary
+        </h2>
+      </div>
+      <div class="card-body">
+        <div class="order-summary">
+          <div class="summary-row">Subtotal</div>
+          <div class="summary-row">₹<%= order.totalPrice.toLocaleString() %></div>
+          <% if (order.discount > 0) { %>
+          <div class="summary-row">Discount</div>
+          <div class="summary-row">- ₹<%= order.discount.toLocaleString() %></div>
+          <% } %>
+          <div class="summary-row total">Total</div>
+          <div class="summary-row total">₹<%= order.finalAmount.toLocaleString() %></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Order Actions -->
+    <% if (order.status === 'Pending' || order.status === 'Processing') { %>
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i data-lucide="settings"></i>
+          Order Actions
+        </h2>
+      </div>
+      <div class="card-body">
+        <button class="btn btn-danger" onclick="openCancelOrderModal('<%= order._id %>')">
+          <i data-lucide="x"></i>
+          Cancel Order
+        </button>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  
+  <!-- Cancel Order Modal -->
+  <div id="cancelOrderModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Cancel Order</h3>
+        <button class="close-modal" onclick="closeModal('cancelOrderModal')">&times;</button>
+      </div>
+      <form id="cancelOrderForm" class="modal-form">
+        <input type="hidden" id="cancelOrderId">
+        <div class="form-group">
+          <label for="cancelOrderReason">Please provide a reason for cancellation:</label>
+          <select id="cancelOrderReason" class="form-control" required>
+            <option value="">Select a reason</option>
+            <option value="Changed my mind">Changed my mind</option>
+            <option value="Found a better price elsewhere">Found a better price elsewhere</option>
+            <option value="Ordered by mistake">Ordered by mistake</option>
+            <option value="Delivery takes too long">Delivery takes too long</option>
+            <option value="Payment issues">Payment issues</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group" id="otherReasonOrderGroup" style="display:none;">
+          <label for="otherCancelOrderReason">Please specify:</label>
+          <textarea id="otherCancelOrderReason" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn" onclick="closeModal('cancelOrderModal')">Cancel</button>
+          <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Cancel Item Modal -->
+  <div id="cancelItemModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Cancel Item</h3>
+        <button class="close-modal" onclick="closeModal('cancelItemModal')">&times;</button>
+      </div>
+      <form id="cancelItemForm" class="modal-form">
+        <input type="hidden" id="cancelItemOrderId">
+        <input type="hidden" id="cancelItemId">
+        <p id="cancelItemName" style="margin-bottom: 1rem;"></p>
+        <div class="form-group">
+          <label for="cancelItemReason">Please provide a reason for cancellation:</label>
+          <select id="cancelItemReason" class="form-control" required>
+            <option value="">Select a reason</option>
+            <option value="Changed my mind">Changed my mind</option>
+            <option value="Found a better price elsewhere">Found a better price elsewhere</option>
+            <option value="Ordered by mistake">Ordered by mistake</option>
+            <option value="Ordered wrong product">Ordered wrong product</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group" id="otherReasonItemGroup" style="display:none;">
+          <label for="otherCancelItemReason">Please specify:</label>
+          <textarea id="otherCancelItemReason" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn" onclick="closeModal('cancelItemModal')">Cancel</button>
+          <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Return Item Modal -->
+  <div id="returnItemModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Return Item</h3>
+        <button class="close-modal" onclick="closeModal('returnItemModal')">&times;</button>
+      </div>
+      <form id="returnItemForm" class="modal-form">
+        <input type="hidden" id="returnItemOrderId">
+        <input type="hidden" id="returnItemId">
+        <p id="returnItemName" style="margin-bottom: 1rem;"></p>
+        <div class="form-group">
+          <label for="returnReason">Please provide a reason for return:</label>
+          <select id="returnReason" class="form-control" required>
+            <option value="">Select a reason</option>
+            <option value="Item doesn't fit">Item doesn't fit</option>
+            <option value="Item damaged">Item damaged</option>
+            <option value="Item different from description">Item different from description</option>
+            <option value="Received wrong item">Received wrong item</option>
+            <option value="Quality not as expected">Quality not as expected</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group" id="otherReasonReturnGroup" style="display:none;">
+          <label for="otherReturnReason">Please specify:</label>
+          <textarea id="otherReturnReason" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn" onclick="closeModal('returnItemModal')">Cancel</button>
+          <button type="submit" class="btn btn-warning">Confirm Return</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <script>
+    // Initialize lucide icons
+    lucide.createIcons();
+    
+    // Modal functions
+    function openModal(modalId) {
+      document.getElementById(modalId).style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+    
+    // Open Cancel Order Modal using the MongoDB _id
+    function openCancelOrderModal(orderId) {
+      document.getElementById('cancelOrderId').value = orderId;
+      openModal('cancelOrderModal');
+    }
+    
+    // Open Cancel Item Modal
+    function openCancelItemModal(orderId, itemId, itemName) {
+      document.getElementById('cancelItemOrderId').value = orderId;
+      document.getElementById('cancelItemId').value = itemId;
+      document.getElementById('cancelItemName').textContent = `Item: ${itemName}`;
+      openModal('cancelItemModal');
+    }
+    
+    // Open Return Item Modal
+    function openReturnItemModal(orderId, itemId, itemName) {
+      document.getElementById('returnItemOrderId').value = orderId;
+      document.getElementById('returnItemId').value = itemId;
+      document.getElementById('returnItemName').textContent = `Item: ${itemName}`;
+      openModal('returnItemModal');
+    }
+    
+    // Show/hide additional reason fields based on selection
+    document.getElementById('cancelOrderReason').addEventListener('change', function() {
+      document.getElementById('otherReasonOrderGroup').style.display = this.value === 'Other' ? 'block' : 'none';
+    });
+    
+    document.getElementById('cancelItemReason').addEventListener('change', function() {
+      document.getElementById('otherReasonItemGroup').style.display = this.value === 'Other' ? 'block' : 'none';
+    });
+    
+    document.getElementById('returnReason').addEventListener('change', function() {
+      document.getElementById('otherReasonReturnGroup').style.display = this.value === 'Other' ? 'block' : 'none';
+    });
+    
+    // Submit Cancel Order Form
+    document.getElementById('cancelOrderForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const orderId = document.getElementById('cancelOrderId').value;
+      const reasonSelect = document.getElementById('cancelOrderReason');
+      let reason = reasonSelect.value;
+      
+      if (reason === 'Other') {
+        const otherReason = document.getElementById('otherCancelOrderReason').value.trim();
+        if (!otherReason) {
+          return Swal.fire({
+            title: 'Error',
+            text: 'Please provide a reason for cancellation.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
         }
+        reason = otherReason;
+      }
+      
+      try {
+        const response = await fetch(`/api/orders/${orderId}/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason })
+        });
         
-        // Function to handle individual item cancellation
-        async function cancelIndividualItem(orderId, itemId) {
-            if (confirm('Are you sure you want to cancel this item?')) {
-                try {
-                    const response = await fetch(`/api/orders/${orderId}/items/${itemId}/cancel`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        alert('Item cancelled successfully');
-                        window.location.reload();
-                    } else {
-                        alert('Failed to cancel item. Please try again.');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('An error occurred while cancelling the item.');
-                }
-            }
+        const result = await response.json();
+        if (response.ok) {
+          Swal.fire({
+            title: 'Cancelled',
+            text: 'Order cancelled successfully',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          }).then(() => {
+            closeModal('cancelOrderModal');
+            window.location.reload();
+          });
+        } else {
+          Swal.fire({
+            title: 'Error',
+            text: `Failed to cancel order: ${result.message || 'Please try again.'}`,
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
         }
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'An error occurred while cancelling the order.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    });
+    
+    // Submit Cancel Item Form
+    document.getElementById('cancelItemForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const orderId = document.getElementById('cancelItemOrderId').value;
+      const itemId = document.getElementById('cancelItemId').value;
+      const reasonSelect = document.getElementById('cancelItemReason');
+      let reason = reasonSelect.value;
+      
+      if (reason === 'Other') {
+        const otherReason = document.getElementById('otherCancelItemReason').value.trim();
+        if (!otherReason) {
+          return Swal.fire({
+            title: 'Error',
+            text: 'Please provide a reason for cancellation.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        }
+        reason = otherReason;
+      }
+      
+      try {
+        const response = await fetch(`/api/orders/${orderId}/items/${itemId}/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason })
+        });
         
-        // Function to handle item return
-        async function returnDeliveredItem(orderId, itemId) {
-            if (confirm('Are you sure you want to return this item?')) {
-                try {
-                    const response = await fetch(`/api/orders/${orderId}/items/${itemId}/return`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        alert('Return request submitted successfully');
-                        window.location.reload();
-                    } else {
-                        alert('Failed to submit return request. Please try again.');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('An error occurred while submitting the return request.');
-                }
-            }
+        if (response.ok) {
+          Swal.fire({
+            title: 'Cancelled',
+            text: 'Item cancelled successfully',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          }).then(() => {
+            closeModal('cancelItemModal');
+            window.location.reload();
+          });
+        } else {
+          Swal.fire({
+            title: 'Error',
+            text: 'Failed to cancel item. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
         }
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'An error occurred while cancelling the item.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    });
+    
+    // Submit Return Item Form
+    document.getElementById('returnItemForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const orderId = document.getElementById('returnItemOrderId').value;
+      const itemId = document.getElementById('returnItemId').value;
+      const reasonSelect = document.getElementById('returnReason');
+      let reason = reasonSelect.value;
+      
+      if (reason === 'Other') {
+        const otherReason = document.getElementById('otherReturnReason').value.trim();
+        if (!otherReason) {
+          return Swal.fire({
+            title: 'Error',
+            text: 'Please provide a reason for return.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        }
+        reason = otherReason;
+      }
+      
+      try {
+        const response = await fetch(`/api/orders/${orderId}/items/${itemId}/return`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason })
+        });
         
-        // Function to download invoice
-        async function downloadInvoice(orderId, itemId) {
-            try {
-                window.location.href = `/api/orders/${orderId}/items/${itemId}/invoice`;
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred while downloading the invoice.');
-            }
+        if (response.ok) {
+          Swal.fire({
+            title: 'Success',
+            text: 'Return request submitted successfully',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          }).then(() => {
+            closeModal('returnItemModal');
+            window.location.reload();
+          });
+        } else {
+          Swal.fire({
+            title: 'Error',
+            text: 'Failed to submit return request. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
         }
-    </script>
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'An error occurred while submitting the return request.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    });
+    
+    // Function to download invoice
+    function downloadInvoice(orderId, itemId) {
+      try {
+        window.location.href = `/api/orders/${orderId}/items/${itemId}/invoice`;
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'An error occurred while downloading the invoice.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    }
+    
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+      if (event.target.classList && event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+    };
+  </script>
 </body>
 </html>

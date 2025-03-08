@@ -9,6 +9,9 @@ const Brand=require('../../models/brandSchema')
 const Address=require('../../models/addressSchema')
 const Category=require('../../models/categorySchema')
 const Order=require('../../models/orderSchema')
+const { validationResult } = require("express-validator");
+
+
 function generateOtp() {
     let otp = "";
     for (let i = 0; i < 6; i++) {
@@ -98,13 +101,12 @@ const verifyForgotOtp = async (req, res) => {
         const emailSent = await sendVerificationEmail(email, otp);
 
         if (emailSent) {
-            // Store in session
             req.session.userOtp = otp;
             req.session.email = email;
-            req.session.otpExpiresAt = Date.now() + 60000; // 60 seconds
-            req.session.otpAttempts = 0; // Reset attempts counter
+            req.session.otpExpiresAt = Date.now() + 60000;
+            req.session.otpAttempts = 0; 
 
-            console.log("OTP:", otp); // For development only
+            console.log("OTP:", otp); 
             const remainingTime = Math.ceil((req.session.otpExpiresAt - Date.now()) / 1000);
 
             return res.render('forgotPass-otp', { message: '',remainingtime:remainingTime });
@@ -124,7 +126,6 @@ const verifyForgotPassOtp = async (req, res) => {
         const enteredOtp = req.body.otp;
         const currentTime = Date.now();
 
-        // Check if session exists
         if (!req.session.userOtp || !req.session.email) {
             return res.status(400).json({ 
                 success: false, 
@@ -132,7 +133,6 @@ const verifyForgotPassOtp = async (req, res) => {
             });
         }
 
-        // Check OTP expiration
         if (currentTime > req.session.otpExpiresAt) {
             return res.status(400).json({ 
                 success: false, 
@@ -140,10 +140,8 @@ const verifyForgotPassOtp = async (req, res) => {
             });
         }
 
-        // Track OTP attempts
         req.session.otpAttempts = (req.session.otpAttempts || 0) + 1;
         if (req.session.otpAttempts >= 3) {
-            // Clear session data after too many attempts
             req.session.userOtp = null;
             req.session.otpExpiresAt = null;
             req.session.otpAttempts = 0;
@@ -155,7 +153,6 @@ const verifyForgotPassOtp = async (req, res) => {
         }
 
         if (enteredOtp === req.session.userOtp) {
-            // Mark OTP as verified
             req.session.isOtpVerified = true;
             req.session.userOtp = null;
             req.session.otpExpiresAt = null;
@@ -183,7 +180,6 @@ const verifyForgotPassOtp = async (req, res) => {
 
 const getResetPasspage = async (req, res) => {
     try {
-        // Verify that OTP was validated
         if (!req.session.isOtpVerified || !req.session.email) {
             return res.redirect('/forgot-password');
         }
@@ -231,7 +227,7 @@ const resendOtp = async (req, res) => {
             req.session.otpExpiresAt = Date.now() + 60000;
             req.session.otpAttempts = 0;
             
-            console.log("Resent OTP:", otp); // For development only
+            console.log("Resent OTP:", otp)
             
             return res.json({ 
                 success: true,
@@ -328,7 +324,6 @@ const userProfile = async (req, res) => {
         
         const addresses = await Address.find({userId: user._id})
         
-        // Collect all sub-address IDs
         const allAddressIds = [];
         addresses.forEach(doc => {
             if (doc.address && doc.address.length > 0) {
@@ -336,7 +331,6 @@ const userProfile = async (req, res) => {
                     allAddressIds.push(addr._id);
                 });
             }
-            // Also include the parent address ID
             allAddressIds.push(doc._id);
         });
         
@@ -373,6 +367,12 @@ const createAddress = async (req, res) => {
     try {
         if (!req.user) {
             return res.redirect("/login");
+        }
+
+
+        const errors=validationResult(req)
+        if(!errors.isEmpty()){
+            return res.status(400).json({errors:errors.array()})
         }
         const { adressType, name, city, landMark, state, pincode, phone, altPhone } = req.body;
 
@@ -453,34 +453,253 @@ const updateAddress = async (req, res) => {
       res.status(500).json({ message: "Internal Server error" });
     }
   };
-  const deleteAddress = async (req, res) => {
+
+const blockAddress=async(req,res)=>{
     try {
-      const { docId, addressId } = req.params;
-      
-      // Find the address document
-      const addressDoc = await Address.findById(docId);
-      
-      if (!addressDoc) {
-        return res.status(404).json({ success: false, message: 'Address document not found' });
+        const docId = req.params.docId;
+        const addressId = req.params.addressId;
+        
+        const addressDoc = await Address.findById(docId);
+        
+        if (!addressDoc) {
+            return res.status(404).json({ success: false, message: 'Address document not found' });
+        }
+        
+        const address = addressDoc.address.find(addr => addr._id.toString() === addressId);
+        
+        if (!address) {
+            return res.status(404).json({ success: false, message: 'Address not found' });
+        }
+        
+        address.isBlocked = !address.isBlocked;
+        await addressDoc.save()
+        return res.status(200).json({success:true,message:`Address ${address.isBlocked ? 'blocked':'unblocked'}successfully`})
+}catch (error) {
+          console.error('Error blockin address:', error);
+          return res.status(500).json({ success: false, message: 'Server error' });
+        }
       }
-      
-      // Filter out the address to be deleted
-      addressDoc.address = addressDoc.address.filter(
-        addr => addr._id.toString() !== addressId
-      );
-      
-      // Save the updated document
-      await addressDoc.save();
-      
-      return res.status(200).json({ success: true, message: 'Address deleted successfully' });
+
+
+      const unblockAddress = async (req, res) => {
+        try {
+            const docId = req.params.docId;
+            const addressId = req.params.addressId;
+            console.log(`Unblocking address: docId=${docId}, addressId=${addressId}`);
+    
+            const addressDoc = await Address.findById(docId);
+            console.log('Address Document:', addressDoc);
+    
+            if (!addressDoc) {
+                return res.status(404).json({ success: false, message: 'Address document not found' });
+            }
+    
+            const address = addressDoc.address.find(addr => addr._id.toString() === addressId);
+            console.log('Address to unblock:', address);
+    
+            if (!address) {
+                return res.status(404).json({ success: false, message: 'Address not found' });
+            }
+    
+            address.isBlocked = false;
+            console.log('Address before save:', address);
+            await addressDoc.save();
+            console.log('Address after save:', address);
+    
+            return res.status(200).json({ success: true, message: 'Address unblocked successfully' });
+        } catch (error) {
+            console.error('Error unblocking address:', error);
+            return res.status(500).json({ success: false, message: 'Server error' });
+        }
+    };
+
+  const changeEmail=async(req,res)=>{
+    try {
+        res.render('change-Email')
+        
     } catch (error) {
-      console.error('Error deleting address:', error);
-      return res.status(500).json({ success: false, message: 'Server error' });
+        res.redirect('/pageNotFound')
+  }
+}
+
+  const changeEmailValid=async(req,res)=>{
+    try {
+        const {email}=req.body
+
+        const userExists=await User.findOne({email})
+        if(userExists){
+         const otp=generateOtp() 
+         const emailsSend=await sendVerificationEmail(email,otp)
+         if(emailsSend){
+            req.session.userotp=otp;
+            req.session.userdata=req.body;
+            req.session.email=email
+            res.render('change-EmailOtp',)
+            console.log("Email send",email);
+            console.log("OTP",otp);
+            
+            
+         }else{
+            res.json("email-error")
+         }
+        }else{
+            res.redirect('/change-Email?message=OTP not matching');
+
+        }
+    } catch (error) {
+
+        res.redirect("/pageNotFound")
+
     }
-  };
+  }
+
+  const verifyEmailOtp = async (req, res) => {
+    try {
+        const enteredOtp = req.body.otp;
+        if (enteredOtp === req.session.userotp) {
+            req.session.userData = req.body.userData;
+            res.render('new-Email', {
+                userData: req.session.userData,
+            });
+        } else {
+            res.render('change-Email', {
+                message: 'OTP not matching',
+                userData: req.session.userData
+            });
+        }
+    } catch (error) {
+        res.redirect("/pageNotFound");
+    }
+};
+
+
+
+  const changingEmail=async(req,res)=>{
+    try {
+        const newEmail=req.body.newEmail
+        const userId=req.session.user;
+        await User.findByIdAndUpdate(userId,{email:newEmail})
+        res.redirect('/userProfile')
+        
+    } catch (error) {
+       res.redirect('/pageNotFound') 
+    }
+  }
   
+const getChangePasswordPage = async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.redirect('/login');
+        }
+        
+        res.render('changeUserPass')
+    } catch (error) {
+        console.error("Error rendering change password page:", error);
+        res.redirect('/userProfile');
+    }
+};
+  
+const changePassword = async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.redirect('/login');
+        }
+        
+        const { currentPassword, newPassword, confirmNewPassword } = req.body;
+        
+        if (!currentPassword || !newPassword || !confirmNewPassword) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+        
+        if (newPassword !== confirmNewPassword) {
+            return res.status(400).json({ error: 'New passwords do not match' });
+        }
+        
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            return res.status(400).json({ 
+                error: 'Password must have at least 8 characters, including uppercase, lowercase, number and special character' 
+            });
+        }
+        
+        const user = await User.findById(req.session.user);
+        
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        
+        if (!isPasswordValid) {
+            return res.status(400).json({ error: 'Current password is incorrect' });
+        }
+        
+        const passwordHash = await securePassword(newPassword);
+        
+        await User.updateOne(
+            { _id: user._id },
+            { $set: { password: passwordHash } }
+        );
+        
+        req.session.passwordChangedAt = Date.now();
+        
+        return res.status(200).json({ message: 'Password changed successfully' });
+        
+    } catch (error) {
+        console.error("Error changing password:", error);
+        return res.status(500).json({ error: 'Something went wrong. Please try again.' });
+    }
+};
 
+const editProfile=async(req,res)=>{
+    try {
+        const user=req.session.user;
 
+        if(!user){
+            return res.redirect('/login')
+        }
+        const userData=await User.findById(user._id)
+        if(!userData){
+           return res.redirect('/userProfile')
+        }
+        res.render('profileEdit',{user:userData,user: req.user})
+
+        
+    } catch (error) {
+        console.error("Error loading Edit Profile page :",error)
+        res.redirect('/userProfile')
+        
+    }
+}
+
+const updateProfile=async(req,res)=>{
+    try {
+
+        const userId=req.session.user._id
+        const user=await User.findById(userId)
+        if(!user){
+            return res.redirect('/login')
+        }
+        const {name,phone}=req.body
+        user.name=name;
+        user.phone=phone||user.phone
+
+        if(req.file){
+            user.profile_image=req.file.path||req.file.secure_url
+        }
+
+        user.updatedAt=new Date()
+        await user.save()
+        req.session.user=user.toObject()
+        return res.redirect('/userProfile')
+        
+    } catch (error) {
+        console.error('Error updating Profile')
+        res.redirect('/profile/edit')
+        
+    }
+}
+  
 module.exports = {
     getForgotPassPage,
     verifyForgotOtp,
@@ -494,5 +713,14 @@ module.exports = {
     createAddress,
     getEditAddress,
     updateAddress,
-    deleteAddress
+    blockAddress,
+    changeEmail,
+    changeEmailValid,
+    verifyEmailOtp,
+    changingEmail,
+    getChangePasswordPage,
+    changePassword,
+    editProfile,
+    updateProfile,
+    unblockAddress
 }

@@ -245,7 +245,11 @@
                         <a href="/wishlist"><img src="img/icon/heart.png" alt="Wishlist"></a>
                         <a href="/cart" class="cartlink">
                             <img src="img/icon/cart.png" alt="Cart">
-                            <span>0</span>
+                            <% if (locals.cart && locals.cart.items) { %>
+                                <span><%= locals.cart.items.length %></span>
+                            <% } else { %>
+                                <span>0</span>
+                            <% } %>
                         </a>
                     </div>
                 </div>

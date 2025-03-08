@@ -17,14 +17,9 @@ const myOrder = async(req, res) => {
             return res.redirect('/profile#orders');
         }
 
-        // You don't have userId in your schema, so we need to check ownership another way
-        // For now, I'll remove this check, but you should implement a proper way to verify
-        // that this order belongs to the current user
-        
-        // Get the user data - either from req.user or from the address
+    
         const user = req.user || await User.findById(req.session.userId);
         
-        // Try to get the shipping address
         let shippingAddress = "Address not available";
         try {
             if (typeof order.address === 'object' && order.address._id) {
@@ -43,7 +38,7 @@ const myOrder = async(req, res) => {
             createdAt: order.createdOn,
             status: order.status,
             shippingAddress: shippingAddress,
-            paymentMethod: "Credit Card", // Update with actual payment method if available
+            paymentMethod: "Credit Card", 
             subtotal: order.totalPrice,
             total: order.finalAmount,
             items: order.orderedItems.map(item => ({
@@ -52,8 +47,8 @@ const myOrder = async(req, res) => {
                 color: item.product && item.product.color ? item.product.color : "N/A",
                 price: item.price,
                 quantity: item.quantity,
-                itemStatus: order.status, // You might want individual item status
-                Image: item.product && item.product.images ? [item.product.images[0]] : ["default-image.jpg"] // Adjust based on your Product schema
+                itemStatus: order.status, 
+                Image: item.product && item.product.images ? [item.product.images[0]] : ["default-image.jpg"] 
             }))
         };
 
@@ -65,7 +60,6 @@ const myOrder = async(req, res) => {
 
     } catch (error) {
         console.error('Error fetching order details:', error);
-        // Only send one response - choose either redirect or JSON response, not both
         return res.redirect('/profile#orders');
     }
 };

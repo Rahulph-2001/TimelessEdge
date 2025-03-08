@@ -5,10 +5,11 @@ const { adminAuth, userAuth } = require("../middlewares/auth");
 const {redirectIfadminLoggedIn}=require('../middlewares/auth')
 const customerController = require("../controllers/admin/customerController");
 const categoryController = require("../controllers/admin/categoryController");
-const { upload } = require("../helpers/multer"); // Remove processImages
+const { upload } = require("../helpers/multer"); 
 const brandController = require("../controllers/admin/brandController");
 const productController = require("../controllers/admin/productController");
 const orderController=require('../controllers/admin/orderController')
+const couponController=require('../controllers/admin/couponController')
 
 
 
@@ -31,10 +32,12 @@ router.get("/listCategory", adminAuth, categoryController.getListCategory);
 router.get("/unlistCategory", adminAuth, categoryController.getUnlistCategory);
 router.get("/editcategory", adminAuth, categoryController.geteditCategory);
 router.post("/editCategory/:id", adminAuth, categoryController.editCategory);
+router.put('/addCategoryOffer',adminAuth,categoryController.addOfferCat)
+router.put('/removeCategoryOffer',adminAuth,categoryController.removeOfferCat)
 
 // Brand management
 router.get("/brands", adminAuth, brandController.getBrandPage);
-router.post("/addbrand", adminAuth, upload.single("image"), brandController.addBrand); // Removed processImages
+router.post("/addbrand", adminAuth, upload.single("image"), brandController.addBrand); 
 router.get('/blockBrand', adminAuth, brandController.blockBrand);
 router.get('/unblockBrand', adminAuth, brandController.unblockBrand);
 router.put('/deleteBrand',adminAuth,brandController.deleteBrand)
@@ -42,13 +45,27 @@ router.get("/editBrand/:id", adminAuth, brandController.editBrand)
 router.post("/updateBrand/:id", adminAuth, upload.single('image'), brandController.updateBrand)
 // Product management
 router.get("/addProducts", adminAuth, productController.getProductAddPage);
-router.post("/addProducts", adminAuth, upload.array("images", 4), productController.addProduct); // Removed processImages
+router.post("/addProducts", adminAuth, upload.array("images", 4), productController.addProduct); 
 router.get("/products", adminAuth, productController.getAllproduct);
 router.put("/blockProduct/:id", adminAuth, productController.blockProduct);
 router.get("/editProduct/:id", adminAuth, productController.getEditProduct);
 router.put("/editProduct/:id", adminAuth, upload.array("images", 4), productController.submittProduct);
+router.put('/addProductOffer/:id',productController.addOffer)
+router.put('/removeProductOffer/:id',productController.removeProductOffer)
 
-router.get('/AdminOrder',orderController.AllOrder)
+
+router.get('/AdminOrder',orderController.getAllOrders)
+router.get('/orders/view/:id',orderController.viewOrderDetails)
+router.post('/orders/update-status',orderController.updateStatus)
+router.put('/orders/approve-return',orderController.approveReturn)
+router.put('/orders/reject-return',orderController.rejectReturn)
+
+router.get('/coupon',adminAuth,couponController.getCoupon)
+router.post('/createCoupon',adminAuth,couponController.createCoupon)
+router.put('/blockcoupon/:couponId',adminAuth,couponController.blockCoupon)
+router.put('/unblockcoupon/:couponId',adminAuth,couponController.unblockCoupon)
+router.get('/editcoupon/:id',adminAuth,couponController.getEditCoupon)
+router.put('/updatecoupon',adminAuth,couponController.updateCoupon)
 
 
 module.exports = router;

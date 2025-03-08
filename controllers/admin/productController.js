@@ -329,8 +329,72 @@ const submittProduct = async (req, res) => {
 };
 
 
+const addOffer = async (req, res) => {
+    try {
+        const productId = req.params.id;
+        const productOffer = req.body.productOffer;
+
+        // Validate productOffer
+        if (typeof productOffer !== 'number' || productOffer < 1 || productOffer > 99) {
+            return res.status(400).json({
+                success: false,
+                message: "Offer percentage must be a number between 1 and 99"
+            });
+        }
+
+        const product = await Product.findByIdAndUpdate(
+            productId,
+            { $set: { productOffer: productOffer } },
+            { new: true, runValidators: true }
+        );
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Product offer added successfully"
+        });
+    } catch (error) {
+        console.error('Error adding product Offer', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error',
+            error: error.message // Include the error message for debugging
+        });
+    }
+};
+
+
+const removeProductOffer=async(req,res)=>{
+    try {
+        const productId=req.params.id
+        const product=await Product.findById(productId)
+
+        if(!product){
+            
+            return res.status(404).json({success:false,message:'Product not Found'})
+        }
+        product.productOffer = 0
+        await product.save()
+        return res.status(200).json({success:true,message:'Product Offer Removed SuccessFully'})
+
+        
+    } catch (error) {
+        console.error('Error removing Product offer:',error)
+        return res.status(500).json({success:false,message:'Internal Server error'})
+        
+    }
+}
+
+
 
 module.exports={
-    getProductAddPage,addProduct,getAllproduct,blockProduct,getEditProduct,submittProduct
+    getProductAddPage,addProduct,getAllproduct,blockProduct,getEditProduct,submittProduct,addOffer,
+    removeProductOffer
 
 }

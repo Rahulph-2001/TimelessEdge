@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +7,7 @@
   <title><%= title %></title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
   <style>
     body {
       background-color: #f8f9fa;
@@ -161,7 +163,6 @@
       <h2>Select Shipping Address</h2>
       <div class="address-list">
         <% if (addresses && addresses.length > 0) { %>
-          <% console.log('Addresses:', addresses); %> <!-- Debugging: Log addresses to the server console -->
           <% addresses.forEach(function(address) { %>
             <div class="address-card">
               <label>
@@ -216,18 +217,19 @@
       <p class="discount" id="discount">Discount: ₹0.00</p>
       <p class="grand-total" id="grand-total">Grand Total: ₹<%= summary.total.toFixed(2) %></p>
 
-      <!-- Coupon Form -->
       <div class="cart-discount">
         <form id="couponForm">
           <div class="input-group">
-            <input
-              type="text"
-              id="coupon-code"
-              class="coupon-input"
-              required
-              placeholder="Enter coupon code"
-              value="WELCOME500"
-            />
+            <select id="coupon-select" class="form-select">
+              <option value="">Select a coupon</option>
+              <% if (coupons && coupons.length > 0) { %>
+                <% coupons.forEach(function(coupon) { %>
+                  <option value="<%= coupon.name %>" data-offer="<%= coupon.offerPrice %>" data-minimum-price="<%= coupon.minimumPrice %>">
+                    <%= coupon.name %> - ₹<%= coupon.offerPrice %> off (Min ₹<%= coupon.minimumPrice %>)
+                  </option>
+                <% }); %>
+              <% } %>
+            </select>
             <button id="applyCoupon" class="apply-button" type="button">
               <i class="fas fa-tag me-2"></i> Apply
             </button>
@@ -236,12 +238,8 @@
             </button>
           </div>
         </form>
-        <button id="showCouponsButton" class="apply-button">
-          <i class="fas fa-ticket-alt me-2"></i> Show Available Coupons
-        </button>
       </div>
 
-      <!-- Payment Methods -->
       <div class="payment-methods">
         <h3><i class="fas fa-credit-card me-2"></i> Select Payment Method</h3>
         <div class="payment-option">
@@ -272,112 +270,208 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    $(document).ready(function() {
-      $('input[name="selectedAddress"]').change(function() {
-        $(".address-card").removeClass("selected");
-        $(this).closest(".address-card").addClass("selected");
-      });
-
-      $("#applyCoupon").click(function() {
-        $("#removeCoupon").prop("disabled", false);
-        $(this).prop("disabled", true);
-        $("#discount").text("Discount: ₹500.00");
-        $("#grand-total").text("Grand Total: ₹<%= summary.total.toFixed(2) %>");
-        $("<div class='alert alert-success mt-2'>Coupon applied successfully!</div>")
-          .insertAfter("#couponForm")
-          .fadeOut(3000);
-      });
-
-      $("#removeCoupon").click(function() {
-        $("#applyCoupon").prop("disabled", false);
-        $(this).prop("disabled", true);
-        $("#coupon-code").val("");
-        $("#discount").text("Discount: ₹0.00");
-        $("#grand-total").text("Grand Total: ₹<%= summary.total.toFixed(2) %>");
-      });
-
-      
-    });
-
-    function placeOrder() {
-  // Get selected address
-  let selectedAddress = $('input[name="selectedAddress"]:checked').val();
-  if (!selectedAddress) {
-    alert("Please select a shipping address");
-    return;
-  }
-  
-  // Get payment method
-  let paymentMethod = $('input[name="paymentMethod"]:checked').val();
-  
-  // Get coupon code (if any)
-  let couponCode = $("#coupon-code").val();
-  
-  // Calculate values from the UI
-  let totalPrice = parseFloat("<%= summary.originalPrice %>"); 
+// Add this JavaScript to your checkout page
+$(document).ready(function() {
+  let appliedCoupon = null;
+  let originalTotal = parseFloat("<%= summary.originalPrice %>");
   let discount = 0;
   
-  // If a coupon is applied, get the discount value
-  if ($("#discount").text() !== "Discount: ₹0.00") {
-    discount = parseFloat($("#discount").text().replace("Discount: ₹", ""));
+  // Apply coupon button click handler
+  $("#applyCoupon").click(function() {
+    const couponCode = $("#coupon-select").val();
+    if (!couponCode) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No Coupon Selected',
+        text: 'Please select a coupon to apply'
+      });
+      return;
+    }
+    
+    // Get selected coupon data
+    const selectedOption = $("#coupon-select option:selected");
+    const minimumPrice = parseFloat(selectedOption.data("minimum-price"));
+    
+    // Validate minimum purchase requirement
+    if (originalTotal < minimumPrice) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Cannot Apply Coupon',
+        text: `This coupon requires a minimum purchase of ₹${minimumPrice.toFixed(2)}`
+      });
+      return;
+    }
+    
+    // Make AJAX request to validate coupon
+    $.ajax({
+      url: '/validate-coupon',
+      method: 'POST',
+      data: JSON.stringify({
+        couponCode: couponCode,
+        cartTotal: originalTotal
+      }),
+      contentType: 'application/json',
+      dataType: 'json',
+      success: function(response) {
+        if (response.success) {
+          appliedCoupon = response.coupon;
+          discount = parseFloat(appliedCoupon.discount);
+          
+          // Update displayed values
+          $("#discount").text(`Discount: ₹${discount.toFixed(2)}`);
+          
+          const grandTotal = calculateGrandTotal(originalTotal, discount);
+          $("#grand-total").text(`Grand Total: ₹${grandTotal.toFixed(2)}`);
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Coupon Applied',
+            text: `Coupon "${appliedCoupon.name}" applied successfully! You saved ₹${discount.toFixed(2)}`
+          });
+        }
+      },
+      error: function(xhr) {
+        let errorMessage = "Failed to apply coupon";
+        try {
+          const response = JSON.parse(xhr.responseText);
+          if (response.message) {
+            errorMessage = response.message;
+          }
+        } catch (e) {}
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Coupon Error',
+          text: errorMessage
+        });
+      }
+    });
+  });
+  
+  // Remove coupon button click handler
+  $("#removeCoupon").click(function() {
+    if (!appliedCoupon) {
+      Swal.fire({
+        icon: 'info',
+        title: 'No Coupon Applied',
+        text: 'There is no coupon currently applied to remove'
+      });
+      return;
+    }
+    
+    appliedCoupon = null;
+    discount = 0;
+    
+    // Reset displayed values
+    $("#discount").text("Discount: ₹0.00");
+    const grandTotal = calculateGrandTotal(originalTotal, 0);
+    $("#grand-total").text(`Grand Total: ₹${grandTotal.toFixed(2)}`);
+    
+    // Reset coupon select
+    $("#coupon-select").val("");
+    
+    Swal.fire({
+      icon: 'success',
+      title: 'Coupon Removed',
+      text: 'Coupon has been removed successfully'
+    });
+  });
+  
+  // Helper function to calculate grand total
+  function calculateGrandTotal(total, discount) {
+    const subtotal = total - discount;
+    const tax = subtotal * 0.1;  // 10% tax
+    const shipping = 99;        // Shipping fee
+    return subtotal + tax + shipping;
   }
   
-  // Calculate final amount
-  let finalAmount = totalPrice - discount;
-  
-  // Create order data object
-  let orderData = {
-    addressId: selectedAddress,
-    paymentMethod: paymentMethod,
-    coupon: couponCode,
-    totalPrice: totalPrice,
-    discount: discount,
-    finalAmount: finalAmount,
-    status: paymentMethod === "COD" ? "Pending" : "Processing",
-    couponApplied: discount > 0
-  };
-  
-  // Disable the place order button to prevent multiple submissions
-  $("#placeOrderBtn").prop("disabled", true).html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...');
-  
-  // Submit the order via AJAX
-  $.ajax({
-    url: '/order/place',
-    method: 'POST',
-    data: JSON.stringify(orderData),
-    contentType: 'application/json',
-    dataType: 'json',
-    success: function(response) {
-      console.log("Order response:", response); // Debug log
-      
-      if (response.success) {
-        // Make sure we're accessing the orderId correctly
-
-        console.log('order object',response.order)
-        const orderId = response.order&&response.order._id
+  // Override the placeOrder function
+  window.placeOrder = function() {
+    let selectedAddress = $('input[name="selectedAddress"]:checked').val();
+    if (!selectedAddress) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please select a shipping address'
+      });
+      return;
+    }
+    
+    let paymentMethod = $('input[name="paymentMethod"]:checked').val();
+    let couponCode = appliedCoupon ? appliedCoupon.name : "";
+    
+    const finalAmount = calculateGrandTotal(originalTotal, discount);
+    
+    let orderData = {
+      addressId: selectedAddress,
+      paymentMethod: paymentMethod,
+      coupon: couponCode,
+      totalPrice: originalTotal,
+      discount: discount,
+      finalAmount: finalAmount,
+      status: paymentMethod === "COD" ? "Pending" : "Processing",
+      couponApplied: discount > 0
+    };
+    
+    $("#placeOrderBtn").prop("disabled", true).html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...');
+    
+    $.ajax({
+      url: '/order/place',
+      method: 'POST',
+      data: JSON.stringify(orderData),
+      contentType: 'application/json',
+      dataType: 'json',
+      success: function(response) {
+        console.log("Order response:", response); 
         
-        if (!orderId) {
-          console.error("No order ID returned from server");
-          alert("Order placed but confirmation page couldn't be loaded. Please check your orders history.");
-          window.location.href = "/profile/orders";
-          return;
+        if (response.success) {
+          console.log('order object', response.order);
+          const orderId = response.order && response.order._id;
+          
+          if (!orderId) {
+            console.error("No order ID returned from server");
+            Swal.fire({
+              icon: 'warning',
+              title: 'Order Placed',
+              text: "Order placed but confirmation page couldn't be loaded. Please check your orders history."
+            });
+            window.location.href = "/profile/orders";
+            return;
+          }
+          
+          window.location.href = `/order/confirmation/${orderId}`;
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Order Failed',
+            text: response.message || "Failed to place order. Please try again."
+          });
+          $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
         }
+      },
+      error: function(xhr, status, error) {
+        console.error("AJAX Error:", xhr.responseText);
+        let errorMessage = "An error occurred while placing your order. Please try again.";
         
-        // Redirect to confirmation page with the order ID
-        window.location.href = `/order/confirmation/${orderId}`;
-      } else {
-        alert(response.message || "Failed to place order. Please try again.");
+        try {
+          const response = JSON.parse(xhr.responseText);
+          if (response.error) {
+            errorMessage = response.error;
+          }
+        } catch (e) {}
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: errorMessage
+        });
         $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
       }
-    },
-    error: function(xhr, status, error) {
-      console.error("AJAX Error:", xhr.responseText);
-      alert("An error occurred while placing your order. Please try again.");
-      $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
-    }
-  });
-}
+    });
+  };
+});
   </script>
 </body>
 </html>

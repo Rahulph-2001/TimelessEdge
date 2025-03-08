@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Address - GuitMan</title>
+    <title>Add New Address - TimelessEdge</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -325,6 +325,27 @@
           gap: 1rem;
       }
   </style>
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Address - TimelessEdge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- SweetAlert2 Library -->
+    <style>
+        /* Your existing CSS styles */
+        .header {
+            position: relative;
+            z-index: 500;
+            height: 150px;
+            padding: 20px 0;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        /* Add all your existing CSS styles here */
+    </style>
 </head>
 <body>
     <main class="container">
@@ -355,7 +376,7 @@
                 <form id="addAddressForm" action="/profile/address/add" method="POST">
                     <div class="form-group">
                         <label for="addressType">Address Type</label>
-                        <select id="addressType" name="adressType" required>
+                        <select id="addressType" name="addressType" required>
                             <option value="Home">Home</option>
                             <option value="Work">Work</option>
                             <option value="Other">Other</option>
@@ -395,7 +416,7 @@
                         
                         <div class="form-group">
                             <label for="altPhone">Alternate Phone Number</label>
-                            <input type="tel" id="altPhone" name="altPhone" required>
+                            <input type="tel" id="altPhone" name="altPhone">
                         </div>
                     </div>
                     
@@ -418,42 +439,114 @@
             </div>
         </div>
     </main>
+
     <script>
         lucide.createIcons();
-        
+
         // Form validation
         document.getElementById('addAddressForm').addEventListener('submit', function(event) {
-            const phoneInput = document.getElementById('phone');
-            const altPhoneInput = document.getElementById('altPhone');
-            const pincodeInput = document.getElementById('pincode');
-            
-            // Simple phone validation
+            event.preventDefault();
+
+            const formData = {
+                addressType: document.getElementById('addressType').value,
+                name: document.getElementById('name').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                landMark: document.getElementById('landMark').value.trim(),
+                state: document.getElementById('state').value.trim(),
+                pincode: document.getElementById('pincode').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                altPhone: document.getElementById('altPhone').value.trim(),
+                isDefault: document.getElementById('isDefault').checked,
+            };
+
+            const namePattern = /^[a-zA-Z\s]+$/;
             const phonePattern = /^\d{10,12}$/;
-            if (!phonePattern.test(phoneInput.value.replace(/[^0-9]/g, ''))) {
-                event.preventDefault();
-                alert('Please enter a valid phone number (10-12 digits)');
-                phoneInput.focus();
-                return false;
-            }
-            
-            // Simple alternate phone validation
-            if (!phonePattern.test(altPhoneInput.value.replace(/[^0-9]/g, ''))) {
-                event.preventDefault();
-                alert('Please enter a valid alternate phone number (10-12 digits)');
-                altPhoneInput.focus();
-                return false;
-            }
-            
-            // Simple pincode validation
             const pincodePattern = /^\d{4,8}$/;
-            if (!pincodePattern.test(pincodeInput.value.replace(/[^0-9]/g, ''))) {
-                event.preventDefault();
-                alert('Please enter a valid postal/zip code (4-8 digits)');
-                pincodeInput.focus();
-                return false;
+
+            if (!namePattern.test(formData.name)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Name',
+                    text: 'Name should only contain letters.',
+                });
+                return;
             }
-            
-            return true;
+            if (!namePattern.test(formData.city)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid City',
+                    text: 'City should only contain letters.',
+                });
+                return;
+            }
+            if (!namePattern.test(formData.state)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid State',
+                    text: 'State should only contain letters.',
+                });
+                return;
+            }
+            if (!phonePattern.test(formData.phone)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Phone Number',
+                    text: 'Please enter a valid phone number (10-12 digits).',
+                });
+                return;
+            }
+            if (formData.altPhone && !phonePattern.test(formData.altPhone)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Alternate Phone Number',
+                    text: 'Please enter a valid alternate phone number (10-12 digits).',
+                });
+                return;
+            }
+            if (!pincodePattern.test(formData.pincode)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Postal/ZIP Code',
+                    text: 'Please enter a valid postal/zip code (4-8 digits).',
+                });
+                return;
+            }
+
+            // Submit the form if validation passes
+            fetch('/profile/address/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            })
+            .then(response => {
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Address added successfully!',
+                    }).then(() => {
+                        window.location.href = '/userProfile';
+                    });
+                } else {
+                    response.json().then(errorData => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: errorData.message || 'Failed to add address.',
+                        });
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while adding the address.',
+                });
+            });
         });
     </script>
 </body>

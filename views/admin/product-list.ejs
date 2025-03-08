@@ -94,6 +94,7 @@ body {
     padding: 8px 12px;
     display: inline-block;
     text-align: center;
+    margin: 2px;
 }
 
 /* Ensure anchor tags inside buttons inherit styles */
@@ -129,6 +130,16 @@ body {
 
 .btn-success:hover {
     background-color: #218838;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border: none;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
 }
 
 /* Pagination styles */
@@ -178,6 +189,16 @@ body {
     background-color: #fff;
 }
 
+/* Offer badge style */
+.offer-badge {
+    background-color: #28a745;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .table {
@@ -225,10 +246,11 @@ body {
                 <th>Brand</th>
                 <th>Category</th>
                 <th>Sale Price</th>
+                <th>Offer</th>
                 <th>Quantity</th>
                 <th>Image</th>
-                <th>Action</th>
-                <th>Edit</th>
+                <th>Status</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -238,6 +260,13 @@ body {
                 <td><%= ele.brand ? ele.brand.name : 'No Brand' %></td>
                 <td><%= ele.category ? ele.category.name : 'No Category' %></td>
                 <td>Rs :<%= ele.salePrice.toLocaleString() %></td>
+                <td>
+                    <% if (ele.productOffer > 0) { %>
+                        <span class="offer-badge"><%= ele.productOffer %>% OFF</span>
+                    <% } else { %>
+                        No Offer
+                    <% } %>
+                </td>
                 <td><%= ele.quantity %></td>
                 <td>
                     <% if (ele.productImages && ele.productImages.length > 0) { %>
@@ -255,6 +284,11 @@ body {
                 </td>
                 <td>
                     <button onclick="editProduct('<%=ele._id%>')" class="btn btn-info">Edit</button>
+                    <% if (ele.productOffer > 0) { %>
+                        <button onclick="removeOffer('<%=ele._id%>')" class="btn btn-danger">Remove Offer</button>
+                    <% } else { %>
+                        <button onclick="addOffer('<%=ele._id%>')" class="btn btn-warning">Add Offer</button>
+                    <% } %>
                 </td>
             </tr>
             <% }); %>
@@ -347,6 +381,98 @@ body {
             }
         });
     }
+    function addOffer(productId) {
+    Swal.fire({
+        title: 'Add Product Offer',
+        input: 'number',
+        inputLabel: 'Offer Percentage (%)',
+        inputPlaceholder: 'Enter percentage (1-99)',
+        inputAttributes: {
+            min: 1,
+            max: 99,
+            step: 1
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Add Offer',
+        inputValidator: (value) => {
+            if (!value) {
+                return 'Please enter a value';
+            }
+            if (value < 1 || value > 99) {
+                return 'Offer must be between 1% and 99%';
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const offerPercentage = parseInt(result.value);
+            $.ajax({
+                url: `/admin/addProductOffer/${productId}`,
+                method: "PUT",
+                data: JSON.stringify({ productOffer: offerPercentage }),
+                contentType: "application/json",
+                dataType: "json",
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Offer Added!',
+                            text: `${offerPercentage}% offer has been added to the product.`,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error!', response.message || 'Something went wrong.', 'error');
+                    }
+                },
+                error: function(xhr) {
+                    console.error("Error response:", xhr.responseText);
+                    Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+                }
+            });
+        }
+    });
+}
+
+function removeOffer(productId) {
+    Swal.fire({
+        title: 'Remove Offer',
+        text: 'Are you sure you want to remove the offer from this product?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, remove it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `/admin/removeProductOffer/${productId}`,
+                method: 'PUT',
+                data: JSON.stringify({}), 
+                contentType: 'application/json',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Offer Removed!',
+                            text: 'The offer has been removed from the product.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error!', response.message || 'Something went wrong.', 'error');
+                    }
+                },
+                error: function(xhr) {
+                    console.error("Error response:", xhr.responseText);
+                    Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+                }
+            });
+        }
+    });
+}
 </script>
 
 <%- include("../../views/partials/admin/footer") %>

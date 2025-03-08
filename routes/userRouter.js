@@ -8,7 +8,9 @@ const {redirectIfUserLoggedIn,redirectIfadminLoggedIn} = require('../middlewares
 const profileController=require('../controllers/user/profileController')
 const productController=require('../controllers/user/productController')
 const cartController=require('../controllers/user/cartController')
-const userOrderController=require('../controllers/user/userOrderController')
+const userOrderController=require('../controllers/user/userOrderController');
+const {validateAddress}=require('../helpers/validators')
+const { upload } = require('../helpers/multer');
 
 
 router.use(redirectIfUserLoggedIn)
@@ -50,16 +52,25 @@ router.get('/reset-password',profileController.getResetPasspage)
 router.post('/resend-forgot-otp',profileController.resendOtp)
 router.post('/reset-password',profileController.postNewPassword)
 router.get("/profile/address/add",userAuth,profileController.getAddAddress)
-router.post("/profile/address/add",profileController.createAddress)
-router.get('/profile/address/edit/:id',  profileController.getEditAddress);
+router.post("/profile/address/add",validateAddress,profileController.createAddress)
+router.get('/profile/address/edit/:id',validateAddress,profileController.getEditAddress);
 router.put('/profile/address/edit/:id',profileController.updateAddress)
-router.delete('/address/:docId/:addressId', profileController.deleteAddress);
-
+router.put('/address/block/:docId/:addressId', profileController.blockAddress);
+router.put('/address/unblock/:docId/:addressId', profileController.unblockAddress);
+router.get('/change-Email',userAuth,profileController.changeEmail)
+router.post('/change-Email',userAuth,profileController.changeEmailValid)
+router.post('/verify-email-otp',userAuth,profileController.verifyEmailOtp)
+router.post('/update-email',userAuth,profileController.changingEmail)
+router.get('/change-password',userAuth,profileController.getChangePasswordPage)
+router.post('/change-password',userAuth,profileController.changePassword)
+router.get('/profile/edit',profileController.editProfile)
+router.post('/profile/update', upload.single('profile_image'),profileController.updateProfile)
 
 
 router.get('/productDetails',productController.productDetails)
 router.post('/wishlist/add/:id',productController.addWhishlist)
 router.get('/wishlist',productController.wishListPage)
+router.delete('/wishlist/remove/:productId',productController.removeWishlist)
 router.post('/cart/add-from-wishlist',productController.addToCartFromWishlist)
 
 router.get('/cart',userAuth,cartController.getCart)
@@ -67,14 +78,21 @@ router.post('/cart/add',cartController.addToCart)
 router.post("/cart/update-cart",cartController.updateCart)
 router.post("/cart/remove",cartController.removeItem)
 router.get('/checkout',cartController.checkOut)
+router.post('/validate-coupon',cartController.validateCoupon)
 router.post('/order/place',cartController.placeOrder)
 
 router.get('/order/confirmation/:orderId',userOrderController.confirmOrder)
 
 
 
-router.get('/orders/:orderId',userOrderController.getOrderDetails);
-router.post('/api/orders/:orderId/cancel', userOrderController.cancelOrder);
+router.get('/orders/:orderId',userOrderController.getOrderDetails)
+router.get('/api/orders/:orderId/items/:itemId/invoice',userOrderController.downloadInvoice);
+router.post('/api/orders/:orderId/cancel', userAuth,userOrderController.cancelOrder);
+router.post('/api/orders/:orderId/items/:itemId/return',userOrderController.returnOrderItem);
+
+router.get('/wallet',userOrderController.getWalletPage)
+router.post('/user/wallet/add-funds',userOrderController.addFunds);
+
 
 
 module.exports= router 

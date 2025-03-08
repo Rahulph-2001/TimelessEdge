@@ -1,0 +1,666 @@
+<%- include("../../views/partials/admin/header") %>
+
+<style>
+  /* Modern dashboard styling */
+  .content-main {
+    padding: 2rem;
+    background-color: #f8f9fa;
+  }
+  
+  .content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .content-title {
+    color: #344767;
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+  }
+  
+  .order-detail-card {
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+    border: none;
+    overflow: hidden;
+  }
+  
+  .order-detail-header {
+    background-color: #fff;
+    padding: 1.25rem;
+    border-bottom: 1px solid #f1f1f1;
+  }
+  
+  .order-detail-header h5 {
+    margin: 0;
+    font-weight: 600;
+    color: #344767;
+  }
+  
+  .order-detail-body {
+    padding: 1.25rem;
+    background-color: #fff;
+  }
+  
+  /* Status badges */
+  .status-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 20px;
+  }
+  
+  /* Order info */
+  .order-info {
+    padding: 0.5rem 0;
+  }
+  
+  .order-id {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #344767;
+  }
+  
+  /* Timeline styling */
+  .order-timeline {
+    margin-top: 1.5rem;
+  }
+  
+  .timeline-item {
+    position: relative;
+    padding-left: 25px;
+    padding-bottom: 20px;
+    border-left: 2px solid #e9ecef;
+    margin-left: 10px;
+  }
+  
+  .timeline-item:last-child {
+    padding-bottom: 0;
+  }
+  
+  .timeline-item:before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #6c757d;
+  }
+  
+  .timeline-item.active:before {
+    background: #5c60f5;
+    border-color: #5c60f5;
+  }
+  
+  .timeline-date {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+  }
+  
+  .timeline-title {
+    font-weight: 600;
+    color: #344767;
+    margin-bottom: 0.25rem;
+  }
+  
+  .timeline-content {
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+  
+  /* Address card */
+  .address-card {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+  
+  .address-card h6 {
+    color: #344767;
+    font-weight: 600;
+  }
+  
+  /* Product image */
+  .product-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 12px;
+  }
+  
+  .product-details {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Tables */
+  .table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  
+  .table thead th {
+    background-color: #f8f9fa;
+    color: #344767;
+    font-weight: 600;
+    border-top: none;
+    padding: 0.75rem 1rem;
+  }
+  
+  .table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+  
+  /* Amounts table */
+  .amounts-table {
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+  }
+  
+  .amount-label {
+    padding: 0.5rem 0;
+    color: #6c757d;
+  }
+  
+  .amount-value {
+    padding: 0.5rem 0;
+    text-align: right;
+    font-weight: 500;
+  }
+  
+  .total-row {
+    border-top: 1px solid #e9ecef;
+  }
+  
+  .total-row .amount-label {
+    font-weight: 700;
+    color: #344767;
+  }
+  
+  .total-row .amount-value {
+    font-weight: 700;
+    color: #344767;
+    font-size: 1.2rem;
+  }
+  
+  /* Buttons */
+  .btn-primary {
+    background-color: #5c60f5;
+    border-color: #5c60f5;
+  }
+  
+  .btn-primary:hover {
+    background-color: #4a4dcc;
+    border-color: #4a4dcc;
+  }
+  
+  .btn-light {
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+    color: #6c757d;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  /* Form elements */
+  .form-select {
+    border-radius: 8px;
+    padding: 0.5rem;
+    border-color: #e9ecef;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .content-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .action-buttons {
+      width: 100%;
+    }
+    
+    .btn {
+      flex: 1;
+    }
+  }
+</style>
+
+<section class="content-main">
+    <!-- Header section -->
+    <div class="content-header">
+        <div>
+            <h2 class="content-title">Order Details</h2>
+            <p class="text-muted">Order #<%= order.orderId %></p>
+        </div>
+        <div class="action-buttons">
+            <a href="/admin/AdminOrder" class="btn btn-light">Back to Orders</a>
+            <a href="/admin/orders/invoice/<%= order.orderId %>" class="btn btn-primary" target="_blank">Print Invoice</a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Order Status Column -->
+        <div class="col-lg-4">
+            <div class="order-detail-card">
+                <div class="order-detail-header">
+                    <h5>Order Status</h5>
+                </div>
+                <div class="order-detail-body">
+                    <div class="order-info mb-4">
+                        <p class="order-id mb-2">Order #<%= order.orderId %></p>
+                        <p class="mb-1"><span class="text-muted">Date: </span> <%= new Date(order.createdOn).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        }) %></p>
+                        
+                        <!-- Status Badge -->
+                        <span class="status-badge 
+                            <%= order.status === 'Pending' ? 'bg-warning text-dark' : 
+                               order.status === 'Processing' ? 'bg-info text-white' : 
+                               order.status === 'Shipped' ? 'bg-primary text-white' :
+                               order.status === 'Delivered' ? 'bg-success text-white' :
+                               order.status === 'Cancelled' ? 'bg-danger text-white' :
+                               order.status === 'Return Request' ? 'bg-secondary text-white' :
+                               order.status === 'Returned' ? 'bg-dark text-white' : 'bg-secondary text-white' %>">
+                            <%= order.status %>
+                        </span>
+                        
+                        <!-- Status Update Form -->
+                        <form action="/admin/orders/update-status" method="POST" class="mt-4">
+                            <input type="hidden" name="orderId" value="<%= order.orderId %>">                            <div class="mb-3">
+                                <label class="form-label">Update Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                    <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                    <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                    <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                    <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                    <option value="Return Request" <%= order.status === 'Return Request' ? 'selected' : '' %>>Return Request</option>
+                                    <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-primary w-100" onclick="updateOrderStatus('<%= order.orderId %>')">Update Status</button>                        </form>
+                    </div>
+                    
+                    <!-- Timeline -->
+                    <div class="order-timeline mt-4">
+                        <h6 class="mb-3">Order Timeline</h6>
+                        
+                        <div class="timeline-item <%= order.status === 'Pending' || order.status === 'Processing' || order.status === 'Shipped' || order.status === 'Delivered' ? 'active' : '' %>">
+                            <div class="timeline-date"><%= new Date(order.createdOn).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            }) %></div>
+                            <div class="timeline-title">Order Placed</div>
+                            <div class="timeline-content">Order has been placed successfully.</div>
+                        </div>
+                        
+                        <% if(order.status !== 'Pending') { %>
+                        <div class="timeline-item <%= order.status === 'Processing' || order.status === 'Shipped' || order.status === 'Delivered' ? 'active' : '' %>">
+                            <div class="timeline-date">-</div>
+                            <div class="timeline-title">Order Processing</div>
+                            <div class="timeline-content">Order is being processed.</div>
+                        </div>
+                        <% } %>
+                        
+                        <% if(order.status === 'Shipped' || order.status === 'Delivered') { %>
+                        <div class="timeline-item <%= order.status === 'Shipped' || order.status === 'Delivered' ? 'active' : '' %>">
+                            <div class="timeline-date">-</div>
+                            <div class="timeline-title">Order Shipped</div>
+                            <div class="timeline-content">Order has been shipped.</div>
+                        </div>
+                        <% } %>
+                        
+                        <% if(order.status === 'Delivered') { %>
+                        <div class="timeline-item active">
+                            <div class="timeline-date">-</div>
+                            <div class="timeline-title">Order Delivered</div>
+                            <div class="timeline-content">Order has been delivered successfully.</div>
+                        </div>
+                        <% } %>
+                        
+                        <% if(order.status === 'Cancelled') { %>
+                        <div class="timeline-item active">
+                            <div class="timeline-date">-</div>
+                            <div class="timeline-title">Order Cancelled</div>
+                            <div class="timeline-content">Order has been cancelled.</div>
+                        </div>
+                        <% } %>
+                        
+                        <% if(order.status === 'Return Request') { %>
+                        <div class="timeline-item active">
+                            <div class="timeline-date">-</div>
+                            <div class="timeline-title">Return Requested</div>
+                            <div class="timeline-content">Customer has requested a return.</div>
+                        </div>
+                        <% } %>
+                        
+                        <% if(order.status === 'Returned') { %>
+                        <div class="timeline-item active">
+                            <div class="timeline-date">-</div>
+                            <div class="timeline-title">Item Returned</div>
+                            <div class="timeline-content">Item has been returned successfully.</div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customer Information -->
+            <div class="order-detail-card">
+                <div class="order-detail-header">
+                    <h5>Customer Information</h5>
+                </div>
+                <div class="order-detail-body">
+                    <% if (userData) { %>
+                        <p><strong>Name:</strong> <%= userData.name %></p>
+                        <p><strong>Email:</strong> <%= userData.email %></p>
+                        <p><strong>Phone:</strong> <%= userData.phone %></p>
+                    <% } else { %>
+                        <p>Customer information not available.</p>
+                    <% } %>
+                    
+                    <div class="address-card mt-3">
+                        <h6 class="mb-2">Shipping Address</h6>
+                        <% if (addressDetails) { %>
+                            <p class="mb-1"><%= addressDetails.name %></p>
+                            <p class="mb-1"><%= addressDetails.phone %></p>
+                            <p class="mb-1">
+                                <%= addressDetails.landMark || '' %>
+                            </p>
+                            <p class="mb-1">
+                                <%= addressDetails.city %>, 
+                                <%= addressDetails.state %> - <%= addressDetails.pincode %>
+                            </p>
+                        <% } else { %>
+                            <p>Address information not available.</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Details Column -->
+        <div class="col-lg-8">
+            <!-- Order Items Table -->
+            <div class="order-detail-card">
+                <div class="order-detail-header">
+                    <h5>Order Items</h5>
+                </div>
+                <div class="order-detail-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (order && order.orderedItems && order.orderedItems.length > 0) { %>
+                                    <% order.orderedItems.forEach(function(item) { %>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <% if (item.product && item.product.productImages && item.product.productImages.length > 0) { %>
+                                                        <img src="<%= item.product.productImages[0] %>" 
+                                                             alt="<%= item.product.productName %>" 
+                                                             class="product-image">
+                                                    <% } else { %>
+                                                        <img src="/images/placeholder.jpg" 
+                                                             alt="Placeholder Image" 
+                                                             class="product-image">
+                                                    <% } %>
+                                                    <div class="product-details">
+                                                        <div class="fw-bold"><%= item.product.productName %></div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><%= item.quantity %></td>
+                                            <td>₹<%= item.price.toLocaleString() %></td>
+                                            <td>
+                                                <span class="status-badge 
+                                                    <%= order.status === 'Pending' ? 'bg-warning text-dark' : 
+                                                       order.status === 'Processing' ? 'bg-info text-white' : 
+                                                       order.status === 'Shipped' ? 'bg-primary text-white' :
+                                                       order.status === 'Delivered' ? 'bg-success text-white' :
+                                                       order.status === 'Cancelled' ? 'bg-danger text-white' :
+                                                       order.status === 'Return Request' ? 'bg-secondary text-white' :
+                                                       order.status === 'Returned' ? 'bg-dark text-white' : 'bg-secondary text-white' %>">
+                                                    <%= order.status %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <% if (order.status === 'Return Request') { %>
+                                                    <div class="d-flex flex-column">
+                                                        <button class="btn btn-sm btn-primary mb-1" onclick="approveReturn('<%= order._id %>')">Approve</button>
+                                                        <button class="btn btn-sm btn-danger" onclick="rejectReturn('<%= order._id %>')">Reject</button>
+                                                    </div>
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="5" class="text-center">No items found</td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Information -->
+            <div class="order-detail-card">
+                <div class="order-detail-header">
+                    <h5>Payment Information</h5>
+                </div>
+                <div class="order-detail-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="payment-method">
+                                <h6 class="mb-2">Payment Method</h6>
+                                <p class="bg-light p-2 rounded"><%= order.paymentMethod || 'Not specified' %></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="amounts-table">
+                                <tr>
+                                    <td class="amount-label">Subtotal</td>
+                                    <td class="amount-value">Rs:<%= order.totalPrice.toLocaleString() %></td>
+                                </tr>
+                                <% if (order.discount > 0) { %>
+                                <tr>
+                                    <td class="amount-label">Discount</td>
+                                    <td class="amount-value text-success">-Rs:<%= order.discount.toLocaleString() %></td>
+                                </tr>
+                                <% } %>
+                                <tr class="total-row">
+                                    <td class="amount-label pt-3">Total</td>
+                                    <td class="amount-value pt-3">Rs:<%= order.finalAmount.toLocaleString() %></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function updateOrderStatus(orderId) {
+    const status = document.querySelector('select[name="status"]').value;
+    
+    Swal.fire({
+        title: 'Update Status?',
+        text: `Are you sure you want to change the order status to ${status}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#5c60f5',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, update it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const displayedOrderId = document.querySelector('.order-id').textContent.split('#')[1].trim();
+            
+            fetch('/admin/orders/update-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    orderId: displayedOrderId,
+                    status: status 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire(
+                        'Updated!',
+                        'Order status has been updated.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire(
+                        'Error!',
+                        data.message || 'Failed to update order status.',
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire(
+                    'Error!',
+                    'An error occurred while processing the request.',
+                    'error'
+                );
+            });
+        }
+    });
+}
+function approveReturn(orderId) {
+    Swal.fire({
+        title: 'Approve Return?',
+        text: 'Are you sure you want to approve this return request?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#5c60f5',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, approve it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/admin/orders/approve-return', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ orderId: orderId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire(
+                        'Approved!',
+                        'Return request has been approved.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire(
+                        'Error!',
+                        data.message || 'Failed to approve return request.',
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire(
+                    'Error!',
+                    'An error occurred while processing the request.',
+                    'error'
+                );
+            });
+        }
+    });
+}
+    function rejectReturn(orderId) {
+        Swal.fire({
+            title: 'Reject Return?',
+            text: 'Are you sure you want to reject this return request?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#5c60f5',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, reject it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/admin/orders/reject-return', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ orderId: orderId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire(
+                            'Rejected!',
+                            'Return request has been rejected.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            data.message || 'Failed to reject return request.',
+                            'error'
+                        );
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire(
+                        'Error!',
+                        'An error occurred while processing the request.',
+                        'error'
+                    );
+                });
+            }
+        });
+    }
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

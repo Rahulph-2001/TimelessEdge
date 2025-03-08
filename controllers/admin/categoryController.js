@@ -12,7 +12,7 @@ const categoryInfo = async(req,res) => {
     const skip = (page-1) * limit
     
     const categoryData = await Category.find({})
-      .skip(skip)  // You were missing the skip
+      .skip(skip)  
       .sort({createdAt: -1})
       .limit(limit)
     
@@ -110,10 +110,47 @@ const editCategory = async(req,res) => {
 }
 
 
+const addOfferCat=async(req,res)=>{
+  try {
+    const{categoryId,offerPercentage}=req.body
+
+    const updateCategory=await Category.findByIdAndUpdate(categoryId,{categoryOffer:offerPercentage},{new:true})
+    if(!updateCategory){
+      return res.status(404).json({error:'Category not Found'})
+    }
+
+    res.status(200).json({success:true,message:"Offer added successfully"})
+  } catch (error) {
+    res.status(500).json({error:error.message})
+    
+  }
+}
+
+const removeOfferCat=async(req,res)=>{
+  try {
+    const { categoryId } = req.body;
+    
+    // Find the category and set offer to 0
+    const updatedCategory = await Category.findByIdAndUpdate(
+      categoryId,
+      { categoryOffer: 0 },
+      { new: true }
+    );
+    
+    if (!updatedCategory) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+    
+    res.status(200).json({ success: true, message: 'Offer removed successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 
 
 module.exports={
     addCategory,categoryInfo,
     getListCategory,getUnlistCategory,geteditCategory,editCategory,
+    addOfferCat,removeOfferCat
    
 }

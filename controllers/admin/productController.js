@@ -26,6 +26,8 @@ const getProductAddPage=async(req,res)=>{
         res.redirect("/pageerror")
     }
 }
+
+
 const addProduct = async (req, res) => {
     try {
         const { productName, brand, description, regularPrice, salePrice, quantity, color, category } = req.body;
@@ -127,7 +129,6 @@ const getAllproduct = async (req, res) => {
         const filter = searchQuery 
             ? { productName: { $regex: searchQuery, $options: 'i' } }
             : {};
-        // Let's see all product names first
         const allProductNames = await Product.find({}).select('productName');
         const totalProducts = await Product.countDocuments(filter);
 

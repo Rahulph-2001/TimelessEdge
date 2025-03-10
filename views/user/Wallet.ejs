@@ -592,12 +592,12 @@
                     
                     <!-- Action buttons section -->
                     <div class="wallet-actions">
-                        <button class="btn btn-primary" data-toggle="modal" data-target="#addFundsModal">
+                        <!-- <button class="btn btn-primary" data-toggle="modal" data-target="#addFundsModal">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
                                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
                             </svg>
                             Add Funds
-                        </button>
+                        </button> -->
                     </div>
                     
                     <h4>Transaction History</h4>
@@ -640,7 +640,7 @@
                                             <td class="transaction-date"><%= formattedDate %></td>
                                             <td>
                                                 <% if (transaction.orderId) { %>
-                                                    <a href="/order/<%= transaction.orderId %>" class="order-link">
+                                                    <a href="/orders/<%= transaction.orderId %>" class="order-link">
                                                         View Order
                                                     </a>
                                                 <% } else { %>

@@ -515,10 +515,17 @@
                                     </ul>
                                 </td>
                                 <td><span class="fw-bold">₹<%= orders[i].finalAmount.toLocaleString() %></span></td>
-                                <td><span class="badge bg-secondary">COD</span></td>
+                                <td>
+                                    <% if (orders[i].paymentMethod === 'COD') { %>
+                                        <span class="badge bg-secondary">COD</span>
+                                    <% } else if (orders[i].paymentMethod === 'Razorpay') { %>
+                                        <span class="badge bg-success">Razorpay</span>
+                                    <% } else { %>
+                                        <span class="badge bg-primary"><%= orders[i].paymentMethod %></span>
+                                    <% } %>
+                                </td>
                                 <td>
                                     <% if (orders[i].status === 'Return Request') { %>
-                                        <!-- Special case for Return Request: only allow changing to Returned -->
                                         <select 
                                             data-order-id="<%= orders[i].orderId %>"
                                             data-current-status="<%= orders[i].status %>"

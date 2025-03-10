@@ -8,6 +8,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <style>
     body {
       background-color: #f8f9fa;
@@ -257,7 +258,7 @@
         <div class="payment-option">
           <label>
             <input type="radio" id="wallet" name="paymentMethod" value="Wallet">
-            <span><i class="fas fa-wallet me-2"></i> Wallet (Available: ₹1,200)</span>
+            <span><i class="fas fa-wallet me-2"></i> Wallet (Available: ₹<%= walletBalance.toFixed(2) %>)</span>
           </label>
         </div>
       </div>
@@ -319,7 +320,6 @@ $(document).ready(function() {
           appliedCoupon = response.coupon;
           discount = parseFloat(appliedCoupon.discount);
           
-          // Update displayed values
           $("#discount").text(`Discount: ₹${discount.toFixed(2)}`);
           
           const grandTotal = calculateGrandTotal(originalTotal, discount);
@@ -350,7 +350,6 @@ $(document).ready(function() {
     });
   });
   
-  // Remove coupon button click handler
   $("#removeCoupon").click(function() {
     if (!appliedCoupon) {
       Swal.fire({
@@ -364,12 +363,10 @@ $(document).ready(function() {
     appliedCoupon = null;
     discount = 0;
     
-    // Reset displayed values
     $("#discount").text("Discount: ₹0.00");
     const grandTotal = calculateGrandTotal(originalTotal, 0);
     $("#grand-total").text(`Grand Total: ₹${grandTotal.toFixed(2)}`);
     
-    // Reset coupon select
     $("#coupon-select").val("");
     
     Swal.fire({
@@ -379,15 +376,13 @@ $(document).ready(function() {
     });
   });
   
-  // Helper function to calculate grand total
   function calculateGrandTotal(total, discount) {
     const subtotal = total - discount;
-    const tax = subtotal * 0.1;  // 10% tax
-    const shipping = 99;        // Shipping fee
+    const tax = subtotal * 0.1;  
+    const shipping = 99;        
     return subtotal + tax + shipping;
   }
   
-  // Override the placeOrder function
   window.placeOrder = function() {
     let selectedAddress = $('input[name="selectedAddress"]:checked').val();
     if (!selectedAddress) {
@@ -417,60 +412,225 @@ $(document).ready(function() {
     
     $("#placeOrderBtn").prop("disabled", true).html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...');
     
+    if (paymentMethod === "Razorpay") {
+      $.ajax({
+        url: '/order/create-razorpay-order',
+        method: 'POST',
+        data: JSON.stringify(orderData),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+          if (response.success) {
+            const options = {
+              key: response.key_id,
+              amount: response.amount,
+              currency: "INR",
+              name: "Your Store Name",
+              description: "Purchase Payment",
+              order_id: response.order_id,
+              handler: function(response) {
+                verifyRazorpayPayment(response, orderData);
+              },
+              prefill: {
+                name: "<%= user.name %>",
+                email: "<%= user.email %>",
+                contact: "<%= user.phone %>"
+              },
+              theme: {
+                color: "#007bff"
+              },
+              modal: {
+                ondismiss: function() {
+                  $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+                  Swal.fire({
+                    icon: 'info',
+                    title: 'Payment Cancelled',
+                    text: 'You have cancelled the payment process.'
+                  });
+                }
+              }
+            };
+            
+            const rzp = new Razorpay(options);
+            rzp.open();
+            
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Order Failed',
+              text: response.message || "Failed to create Razorpay order. Please try again."
+            });
+            $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+          }
+        },
+        error: function(xhr) {
+          console.error("AJAX Error:", xhr.responseText);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: "Failed to initialize payment. Please try again."
+          });
+          $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+        }
+      });
+    } else {
+      $.ajax({
+        url: '/order/place',
+        method: 'POST',
+        data: JSON.stringify(orderData),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+          console.log("Order response:", response); 
+          
+          if (response.success) {
+            console.log('order object', response.order);
+            const orderId = response.order && response.order._id;
+            
+            if (!orderId) {
+              console.error("No order ID returned from server");
+              Swal.fire({
+                icon: 'warning',
+                title: 'Order Placed',
+                text: "Order placed but confirmation page couldn't be loaded. Please check your orders history."
+              });
+              window.location.href = "/profile/orders";
+              return;
+            }
+            
+            window.location.href = `/order/confirmation/${orderId}`;
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Order Failed',
+              text: response.message || "Failed to place order. Please try again."
+            });
+            $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error("AJAX Error:", xhr.responseText);
+          let errorMessage = "An error occurred while placing your order. Please try again.";
+          
+          try {
+            const response = JSON.parse(xhr.responseText);
+            if (response.error) {
+              errorMessage = response.error;
+            }
+          } catch (e) {}
+          
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: errorMessage
+          });
+          $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+        }
+      });
+    }
+  };
+
+
+$("#wallet").on("change", function() {
+  if ($(this).is(":checked")) {
+    const walletBalance = 1200; 
+    const finalAmount = calculateGrandTotal(originalTotal, discount);
+    
+
+    if (walletBalance < finalAmount) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Insufficient Wallet Balance',
+        text: `Your wallet balance (₹${walletBalance.toFixed(2)}) is less than the order amount (₹${finalAmount.toFixed(2)})`
+      });
+      
+   
+      $("#cod").prop("checked", true);
+    }
+  }
+});
+
+if (paymentMethod === "Wallet") {
+  orderData.paymentMethod = "Wallet";
+  orderData.status = "Paid"; 
+  
+  $.ajax({
+    url: '/order/wallet-payment',
+    method: 'POST',
+    data: JSON.stringify(orderData),
+    contentType: 'application/json',
+    dataType: 'json',
+    success: function(response) {
+      if (response.success) {
+        const orderId = response.order && response.order._id;
+        window.location.href = `/order/confirmation/${orderId}`;
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Payment Failed',
+          text: response.message || "Wallet payment failed. Please try another payment method."
+        });
+        $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+      }
+    },
+    error: function(xhr) {
+      console.error("AJAX Error:", xhr.responseText);
+      let errorMessage = "An error occurred during wallet payment.";
+      
+      try {
+        const response = JSON.parse(xhr.responseText);
+        if (response.error) {
+          errorMessage = response.error;
+        }
+      } catch (e) {}
+      
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: errorMessage
+      });
+      $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+    }
+  });
+}
+  
+  function verifyRazorpayPayment(paymentData, orderData) {
+    const verificationData = {
+      ...orderData,
+      razorpay_payment_id: paymentData.razorpay_payment_id,
+      razorpay_order_id: paymentData.razorpay_order_id,
+      razorpay_signature: paymentData.razorpay_signature
+    };
+    
     $.ajax({
-      url: '/order/place',
+      url: '/order/verify-payment',
       method: 'POST',
-      data: JSON.stringify(orderData),
+      data: JSON.stringify(verificationData),
       contentType: 'application/json',
       dataType: 'json',
       success: function(response) {
-        console.log("Order response:", response); 
-        
         if (response.success) {
-          console.log('order object', response.order);
-          const orderId = response.order && response.order._id;
-          
-          if (!orderId) {
-            console.error("No order ID returned from server");
-            Swal.fire({
-              icon: 'warning',
-              title: 'Order Placed',
-              text: "Order placed but confirmation page couldn't be loaded. Please check your orders history."
-            });
-            window.location.href = "/profile/orders";
-            return;
-          }
-          
-          window.location.href = `/order/confirmation/${orderId}`;
+          window.location.href = `/order/confirmation/${response.order._id}`;
         } else {
           Swal.fire({
             icon: 'error',
-            title: 'Order Failed',
-            text: response.message || "Failed to place order. Please try again."
+            title: 'Payment Failed',
+            text: response.message || "Payment verification failed. Please try again or contact support."
           });
           $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
         }
       },
-      error: function(xhr, status, error) {
+      error: function(xhr) {
         console.error("AJAX Error:", xhr.responseText);
-        let errorMessage = "An error occurred while placing your order. Please try again.";
-        
-        try {
-          const response = JSON.parse(xhr.responseText);
-          if (response.error) {
-            errorMessage = response.error;
-          }
-        } catch (e) {}
-        
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: errorMessage
+          text: "An error occurred during payment verification."
         });
         $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
       }
     });
-  };
+  }
 });
   </script>
 </body>

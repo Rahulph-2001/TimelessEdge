@@ -1,0 +1,666 @@
+<%- include('../partials/admin/header') %>
+
+<style>
+    /* Global Container */
+    .card-body {
+        background-color: #f9fafb;
+        padding: 2rem;
+        border-radius: 16px;
+        max-width: 100%;
+        margin: 2rem auto;
+        overflow-x: hidden;
+    }
+
+    /* Ensure content doesn't overlap with sidebar */
+    @media (min-width: 768px) {
+        .card-body {
+            margin-left: 250px; /* Adjust this value to match your sidebar width */
+        }
+    }
+
+    /* Header Section */
+    .d-flex.justify-content-between {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    h4 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+        letter-spacing: -0.025em;
+    }
+
+    /* Export Buttons */
+    .export-buttons {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .export-buttons .btn {
+        border-radius: 8px;
+        padding: 0.75rem 1.25rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .export-buttons .btn i {
+        font-size: 1.25rem;
+    }
+
+    .btn-primary {
+        background-color: #4f46e5;
+        border-color: #4f46e5;
+    }
+
+    .btn-primary:hover {
+        background-color: #4338ca;
+        border-color: #4338ca;
+    }
+
+    .btn-success {
+        background-color: #10b981;
+        border-color: #10b981;
+    }
+
+    .btn-success:hover {
+        background-color: #059669;
+        border-color: #059669;
+    }
+
+    /* Date Filter Section */
+    .filter-section {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .filter-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .date-range-select {
+        min-width: 220px;
+    }
+
+    .date-inputs {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .input-group {
+        min-width: 200px;
+        position: relative;
+    }
+
+    .form-select, .form-control {
+        border: 1px solid #e5e7eb;
+        padding: 0.625rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .form-select:focus, .form-control:focus {
+        border-color: #a5b4fc;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    /* Summary Cards */
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .summary-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .summary-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-content {
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .icon-container {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .icon-container i {
+        font-size: 1.75rem;
+    }
+
+    .card-details {
+        flex: 1;
+    }
+
+    .card-details h6 {
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin: 0 0 0.5rem 0;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .amount {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #111827;
+        letter-spacing: -0.025em;
+    }
+
+    /* Custom Colors */
+    .bg-primary-light { background-color: #eff6ff; }
+    .bg-success-light { background-color: #ecfdf5; }
+    .bg-warning-light { background-color: #fffbeb; }
+    .bg-info-light { background-color: #f0f9ff; }
+
+    .text-primary { color: #4f46e5; }
+    .text-success { color: #10b981; }
+    .text-warning { color: #f59e0b; }
+    .text-info { color: #0ea5e9; }
+
+    /* Table Styles */
+    .table-responsive {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .table {
+        width: 100%;
+        min-width: 800px;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table thead th {
+        background-color: #f9fafb;
+        color: #4b5563;
+        font-weight: 600;
+        padding: 1rem;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid #e5e7eb;
+        position: sticky;
+        top: 0;
+    }
+
+    .table tbody td {
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        color: #1f2937;
+        vertical-align: middle;
+    }
+
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+
+    .table tbody td ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+    .table tbody td ul li {
+        padding: 0.25rem 0;
+    }
+
+    /* Status Badges */
+    .badge {
+        padding: 0.5rem 0.75rem;
+        border-radius: 9999px;
+        font-weight: 500;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-block;
+    }
+
+    .bg-success {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .bg-warning {
+        background-color: #f59e0b;
+        color: white;
+    }
+
+    .bg-danger {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .bg-info {
+        background-color: #0ea5e9;
+        color: white;
+    }
+
+    /* Pagination */
+    .pagination-area {
+        margin-top: 2rem;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .pagination .page-item {
+        margin: 0;
+    }
+
+    .pagination .page-link {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        color: #4b5563;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #f3f4f6;
+        border-color: #d1d5db;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #4f46e5;
+        color: white;
+        border-color: #4f46e5;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #9ca3af;
+        pointer-events: none;
+        background-color: #f9fafb;
+        border-color: #e5e7eb;
+    }
+    
+    /* Empty State */
+    .text-center {
+        text-align: center;
+        padding: 2rem;
+        color: #6b7280;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .filter-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .export-buttons {
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .card-body {
+            margin-left: 0;
+            margin-top: 1rem;
+        }
+
+        .date-inputs {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .input-group {
+            width: 100%;
+        }
+
+        .summary-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .table-responsive {
+            padding: 1rem 0.5rem;
+        }
+
+        .table thead th,
+        .table tbody td {
+            padding: 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .amount {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="card-body">
+    <!-- Header section with export buttons -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4>Sales Report</h4>
+        <div class="export-buttons">
+            <button id="exportPdf" class="btn btn-primary">
+                <i class="material-icons md-file_download"></i> Export PDF
+            </button>
+            <button id="exportExcel" class="btn btn-success">
+                <i class="material-icons md-file_download"></i> Export Excel
+            </button>
+        </div>
+    </div>
+
+    <!-- Date Filter Section -->
+    <div class="filter-section mb-4">
+        <form id="filterForm" action="/admin/sales-report" method="GET">
+            <div class="filter-container">
+                <div class="date-range-select">
+                    <select class="form-select" name="dateRange" id="dateRangeSelect">
+                        <option value="">Select Date Range</option>
+                        <option value="today" <%= req.query.dateRange === 'today' ? 'selected' : '' %>>Today</option>
+                        <option value="week" <%= req.query.dateRange === 'week' ? 'selected' : '' %>>This Week</option>
+                        <option value="month" <%= req.query.dateRange === 'month' ? 'selected' : '' %>>This Month</option>
+                        <option value="year" <%= req.query.dateRange === 'year' ? 'selected' : '' %>>This Year</option>
+                    </select>
+                </div>
+                <div class="date-inputs">
+                    <div class="input-group">
+                        <input type="date" id="startDate" name="startDate" class="form-control" value="<%= req.query.startDate || '' %>" placeholder="Start Date">
+                    </div>
+                    <div class="input-group">
+                        <input type="date" id="endDate" name="endDate" class="form-control" value="<%= req.query.endDate || '' %>" placeholder="End Date">
+                    </div>
+                    <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="summary-card">
+            <div class="card-content">
+                <div class="icon-container bg-primary-light">
+                    <i class="material-icons md-monetization_on text-primary"></i>
+                </div>
+                <div class="card-details">
+                    <h6>Total Sales</h6>
+                    <span class="amount">₹<%= typeof totalSales !== 'undefined' ? totalSales.toLocaleString() : '0' %></span>
+                </div>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="card-content">
+                <div class="icon-container bg-success-light">
+                    <i class="material-icons md-shopping_cart text-success"></i>
+                </div>
+                <div class="card-details">
+                    <h6>Total Orders</h6>
+                    <span class="amount"><%= typeof totalOrders !== 'undefined' ? totalOrders.toLocaleString() : '0' %></span>
+                </div>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="card-content">
+                <div class="icon-container bg-warning-light">
+                    <i class="material-icons md-person text-warning"></i>
+                </div>
+                <div class="card-details">
+                    <h6>Total Customers</h6>
+                    <span class="amount"><%= typeof totalCustomers !== 'undefined' ? totalCustomers.toLocaleString() : '0' %></span>
+                </div>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="card-content">
+                <div class="icon-container bg-info-light">
+                    <i class="material-icons md-trending_up text-info"></i>
+                </div>
+                <div class="card-details">
+                    <h6>Average Order Value</h6>
+                    <span class="amount">₹<%= typeof avgOrderValue !== 'undefined' ? avgOrderValue.toLocaleString() : '0' %></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Table -->
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Product Details</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (orders && orders.length > 0) { %>
+                    <% orders.forEach(order => { %>
+                        <tr>
+                            <td>#<%= order.orderNumber %></td>
+                            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                            <td><%= order.customerName %></td>
+                            <td>
+                                <ul>
+                                    <% order.products.forEach(product => { %>
+                                        <li><%= product.name %> x <%= product.quantity %></li>
+                                    <% }) %>
+                                </ul>
+                            </td>
+                            <td>₹<%= order.totalAmount.toLocaleString() %></td>
+                            <td>
+                                <span class="badge <%= order.status === 'Delivered' ? 'bg-success' : 
+                                                    (order.status === 'Processing' ? 'bg-warning' : 
+                                                    (order.status === 'Cancelled' ? 'bg-danger' : 'bg-info')) %>">
+                                    <%= order.status %>
+                                </span>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="6" class="text-center">No orders found for the selected period.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+        <div class="pagination-area">
+            <ul class="pagination">
+                <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                    <a class="page-link" href="/admin/sales-report?page=<%= currentPage - 1 %><%= 
+                        (req.query.startDate && req.query.endDate) ? 
+                        '&startDate=' + req.query.startDate + '&endDate=' + req.query.endDate : 
+                        (req.query.dateRange ? '&dateRange=' + req.query.dateRange : '') 
+                    %>">Previous</a>
+                </li>
+                
+                <% for(let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="/admin/sales-report?page=<%= i %><%= 
+                            (req.query.startDate && req.query.endDate) ? 
+                            '&startDate=' + req.query.startDate + '&endDate=' + req.query.endDate : 
+                            (req.query.dateRange ? '&dateRange=' + req.query.dateRange : '') 
+                        %>"><%= i %></a>
+                    </li>
+                <% } %>
+                
+                <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                    <a class="page-link" href="/admin/sales-report?page=<%= currentPage + 1 %><%= 
+                        (req.query.startDate && req.query.endDate) ? 
+                        '&startDate=' + req.query.startDate + '&endDate=' + req.query.endDate : 
+                        (req.query.dateRange ? '&dateRange=' + req.query.dateRange : '') 
+                    %>">Next</a>
+                </li>
+            </ul>
+        </div>
+    <% } %>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateRangeSelect = document.getElementById('dateRangeSelect');
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const filterButton = document.getElementById('filterButton');
+        const filterForm = document.getElementById('filterForm');
+        const exportPdfBtn = document.getElementById('exportPdf');
+        const exportExcelBtn = document.getElementById('exportExcel');
+        
+        
+        dateRangeSelect.addEventListener('change', function() {
+            if (this.value) {
+                startDateInput.value = '';
+                endDateInput.value = '';
+            }
+        });
+        
+        [startDateInput, endDateInput].forEach(input => {
+            input.addEventListener('change', function() {
+                if (this.value) {
+                    dateRangeSelect.value = '';
+                }
+            });
+        });
+
+        filterForm.addEventListener('submit', function(e) {
+            if (dateRangeSelect.value === '' && (startDateInput.value === '' || endDateInput.value === '')) {
+                e.preventDefault();
+                
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Date Selection Required',
+                    text: 'Please select either a date range or both start and end dates',
+                    confirmButtonColor: '#4f46e5'
+                });
+            } else if (startDateInput.value && endDateInput.value) {
+                const startDate = new Date(startDateInput.value);
+                const endDate = new Date(endDateInput.value);
+                
+                if (startDate > endDate) {
+                    e.preventDefault();
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Date Range',
+                        text: 'Start date cannot be after end date',
+                        confirmButtonColor: '#4f46e5'
+                    });
+                }
+            }
+        });
+        
+        exportPdfBtn.addEventListener('click', function() {
+            Swal.fire({
+                title: 'Exporting PDF',
+                text: 'Preparing your PDF report...',
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            }).then(() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                let exportUrl = '/admin/sales-report/pdf';
+                
+                if (urlParams.has('startDate') && urlParams.has('endDate')) {
+                    exportUrl += `?startDate=${urlParams.get('startDate')}&endDate=${urlParams.get('endDate')}`;
+                } else if (urlParams.has('dateRange')) {
+                    exportUrl += `?dateRange=${urlParams.get('dateRange')}`;
+                }
+                
+                window.location.href = exportUrl;
+            });
+        });
+        
+        exportExcelBtn.addEventListener('click', function() {
+            Swal.fire({
+                title: 'Exporting Excel',
+                text: 'Preparing your Excel report...',
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            }).then(() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                let exportUrl = '/admin/sales-report/excel';
+                
+                if (urlParams.has('startDate') && urlParams.has('endDate')) {
+                    exportUrl += `?startDate=${urlParams.get('startDate')}&endDate=${urlParams.get('endDate')}`;
+                } else if (urlParams.has('dateRange')) {
+                    exportUrl += `?dateRange=${urlParams.get('dateRange')}`;
+                }
+                
+                window.location.href = exportUrl;
+            });
+        });
+    });
+</script>
+
+<%- include('../partials/admin/footer') %>

@@ -11,6 +11,7 @@ const Wallet=require('../../models/walletSchema')
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
+
 const confirmOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.orderId)
@@ -329,6 +330,8 @@ const returnOrderItem = async (req, res) => {
 };
 
 
+
+
 const downloadInvoice = async (req, res) => {
   try {
     if (!req.user) {
@@ -450,8 +453,8 @@ const downloadInvoice = async (req, res) => {
     const product = orderedItem.product;
     const position = invoiceTableTop + 25;
 
-    const unitPrice = parseFloat(orderedItem.price / orderedItem.quantity).toFixed(2);
-    const amount = parseFloat(orderedItem.price).toFixed(2);
+    const unitPrice = parseFloat(orderedItem.price).toFixed(2);
+    const amount = parseFloat(orderedItem.price * orderedItem.quantity).toFixed(2);
 
     doc.fontSize(10)
        .text(product.productName, 50, position)
@@ -463,28 +466,29 @@ const downloadInvoice = async (req, res) => {
        .lineTo(550, position + 20)
        .stroke();
     
-    const itemSubtotal = parseFloat(orderedItem.price).toFixed(2);
-    const itemProportion = itemSubtotal / order.totalPrice; 
-    const itemDiscount = (order.discount * itemProportion).toFixed(2);
-    const itemTotal = (itemSubtotal - itemDiscount).toFixed(2);
+const itemSubtotal = orderedItem.price * orderedItem.quantity;
+const itemProportion = itemSubtotal / order.totalPrice; 
+const itemDiscount = order.discount * itemProportion;
 
-    doc.fontSize(10)
-       .text('Subtotal:', 350, position + 30)
-       .text(`₹${itemSubtotal}`, 450, position + 30);
+const itemTotal = itemSubtotal - itemDiscount;
 
-    if (order.discount > 0) {
-      doc.fontSize(10)
-         .text('Discount:', 350, position + 50)
-         .text(`- ₹${itemDiscount}`, 450, position + 50);
+doc.fontSize(10)
+   .text('Subtotal:', 350, position + 30)
+   .text(`₹${itemSubtotal.toFixed(2)}`, 450, position + 30);
 
-      doc.fontSize(10)
-         .text('Total:', 350, position + 70)
-         .text(`₹${itemTotal}`, 450, position + 70);
-    } else {
-      doc.fontSize(10)
-         .text('Total:', 350, position + 50)
-         .text(`₹${itemTotal}`, 450, position + 50);
-    }
+if (order.discount > 0) {
+  doc.fontSize(10)
+     .text('Discount:', 350, position + 50)
+     .text(`- ₹${itemDiscount.toFixed(2)}`, 450, position + 50);
+
+  doc.fontSize(10)
+     .text('Total:', 350, position + 70)
+     .text(`₹${itemTotal.toFixed(2)}`, 450, position + 70);
+} else {
+  doc.fontSize(10)
+     .text('Total:', 350, position + 50)
+     .text(`₹${itemTotal.toFixed(2)}`, 450, position + 50);
+}
 
     doc.fontSize(10)
        .text('Thank you for your purchase!', 50, 700, { align: 'center' });
@@ -500,7 +504,6 @@ const downloadInvoice = async (req, res) => {
     });
   }
 }
-
 
 
     module.exports={confirmOrder,getOrderDetails,cancelOrder,getWalletPage,addFunds,returnOrderItem,downloadInvoice}

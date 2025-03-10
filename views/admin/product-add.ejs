@@ -1,3 +1,4 @@
+
 <%- include("../../views/partials/admin/header") %>
 
     <head>
@@ -347,7 +348,9 @@
         </div>
     </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css">
     <script>
 // Initialize global variables
 let croppers = [];
@@ -529,7 +532,6 @@ function handleFormSubmission(form) {
     return false;
 }
 
-// Helper functions
 function showError(elementId, message) {
     const errorElement = document.getElementById(elementId);
     if (errorElement) {

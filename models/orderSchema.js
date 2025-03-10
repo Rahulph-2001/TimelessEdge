@@ -46,11 +46,11 @@ const orderSchema=new Schema({
     status:{
         type:String,
         required:true,
-        enum:['Pending','Processing','Shipped','Delivered',"Cancelled","Return Request",'Returned',]
+        enum:['Pending','Processing','Paid','Shipped','Delivered',"Cancelled","Return Request",'Returned',]
     },
     paymentMethod: {
         type: String,
-        enum: ['Credit Card', 'Debit Card', 'UPI', 'NetBanking', 'Wallet', 'COD', 'Other'],
+        enum: ['Credit Card', 'Debit Card', 'Razorpay', 'NetBanking', 'Wallet', 'COD', 'Other'],
         default: 'Online Payment'
     },
     createdOn:{

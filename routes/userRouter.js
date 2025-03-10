@@ -82,13 +82,16 @@ router.post('/validate-coupon',cartController.validateCoupon)
 router.post('/order/place',cartController.placeOrder)
 
 router.get('/order/confirmation/:orderId',userOrderController.confirmOrder)
+router.post('/order/create-razorpay-order', cartController.createRazorpayOrder)
+router.post('/order/verify-payment', cartController.verifyPayment)
+
 
 
 
 router.get('/orders/:orderId',userOrderController.getOrderDetails)
 router.get('/api/orders/:orderId/items/:itemId/invoice',userOrderController.downloadInvoice);
 router.post('/api/orders/:orderId/cancel', userAuth,userOrderController.cancelOrder);
-router.post('/api/orders/:orderId/items/:itemId/return',userOrderController.returnOrderItem);
+router.post('/api/orders/:orderId/items/:itemId/return',userAuth,userOrderController.returnOrderItem);
 
 router.get('/wallet',userOrderController.getWalletPage)
 router.post('/user/wallet/add-funds',userOrderController.addFunds);

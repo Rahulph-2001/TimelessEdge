@@ -9,7 +9,8 @@ const Brand=require('../../models/brandSchema')
 const Address=require('../../models/addressSchema')
 const Category=require('../../models/categorySchema')
 const Order=require('../../models/orderSchema')
-const { validationResult } = require("express-validator");
+const crypto = require('crypto')
+const ReferralTransaction=require('../../models/refferalSchema')
 
 
 function generateOtp() {
@@ -311,19 +312,28 @@ const searchProducts=async (req,res)=>{
     }
 
 }
+
 const userProfile = async (req, res) => {
     try {
         if (!req.user) {
-            return res.redirect('/pageNotFound')
+            return res.redirect('/pageNotFound');
         }
-        
-        const user = await User.findById(req.user._id)
+
+        let user = await User.findById(req.user._id);
         if (!user) {
-            return res.redirect('/pageNotFound')
+            return res.redirect('/pageNotFound');
         }
-        
-        const addresses = await Address.find({userId: user._id})
-        
+
+        if (!user.referralCode) {
+            const timestamp = new Date().getTime().toString();
+            const hash = crypto.createHash('md5').update(user.email + timestamp).digest('hex');
+            user.referralCode = hash.substring(0, 8).toUpperCase();
+            await user.save();
+            console.log('Generated referralCode for existing user:', user.referralCode);
+        }
+
+        const addresses = await Address.find({ userId: user._id });
+
         const allAddressIds = [];
         addresses.forEach(doc => {
             if (doc.address && doc.address.length > 0) {
@@ -333,126 +343,310 @@ const userProfile = async (req, res) => {
             }
             allAddressIds.push(doc._id);
         });
-        
-        const orders = await Order.find({ address: { $in: allAddressIds } });
-        
-        console.log('Filtered Orders:', orders);
-        
-        res.render('userProfile', {user, orders, addresses})
-        console.log('userdata fetched')
-        
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        const skip = (page - 1) * limit;
+
+        const totalOrders = await Order.countDocuments({ address: { $in: allAddressIds } });
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        const orders = await Order.find({ address: { $in: allAddressIds } })
+            .sort({ createdOn: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const referralTransactions = await ReferralTransaction.find({ referrer: user._id })
+            .populate('referred', 'name email')
+            .sort({ createdAt: -1 });
+
+        const totalReferralEarnings = referralTransactions
+            .filter(transaction => transaction.status === 'completed')
+            .reduce((total, transaction) => total + transaction.reward, 0);
+
+        const referralReward = 100;
+        const siteUrl = process.env.SITE_URL || 'https://yourdomain.com';
+        const referralUrl = `${siteUrl}/register?ref=${user.referralCode}`;
+        console.log('Referral URL:', referralUrl);
+
+        res.render('userProfile', {
+            user,
+            orders,
+            addresses,
+            referralTransactions,
+            totalReferralEarnings,
+            referralReward,
+            siteUrl,
+            pagination: {
+                page,
+                limit,
+                totalPages,
+                totalOrders
+            }
+        });
+        console.log('userdata fetched');
+
     } catch (error) {
-        console.log(error, {message: "Internal server error"})
-        res.status(500).send('Internal Server Error')
+        console.log(error, { message: "Internal server error" });
+        res.status(500).send('Internal Server Error');
     }
 }
 
-const getAddAddress= async(req,res)=>{
-   try {
-    if(!req.user){
-        return res.redirect('/login')
-       
+
+const getAddAddress = async (req, res) => {
+    try {
+      if (!req.user) {
+          return res.redirect('/login');
+      }
+      res.render('addAddress', { user: req.user });
+    } catch (error) {
+      console.error("Error rendering add address page:", error);
+      res.redirect('/userProfile');
     }
-    res.render('addAddress',{user:req.user})
-    
-   } catch (error) {
-     console.error("Error rendering add render page :",error)
-     req.flash('error','something went wrong .please try again')
-     res.redirect('/profile#address')
-   }
-}
+ };
 
 
-const createAddress = async (req, res) => {
+ const createAddress = async (req, res) => {
     try {
         if (!req.user) {
-            return res.redirect("/login");
+            return res.status(401).json({ message: 'Please login to continue' });
         }
 
+        const { 
+            addressType, 
+            name, 
+            city, 
+            landMark, 
+            state, 
+            pincode, 
+            phone, 
+            altPhone,
+            isDefault
+        } = req.body;
 
-        const errors=validationResult(req)
-        if(!errors.isEmpty()){
-            return res.status(400).json({errors:errors.array()})
+        if (!addressType) {
+            return res.status(400).json({ message: 'Address type is required' });
         }
-        const { adressType, name, city, landMark, state, pincode, phone, altPhone } = req.body;
+        if (!name) {
+            return res.status(400).json({ message: 'Name is required' });
+        }
+        if (!city) {
+            return res.status(400).json({ message: 'City is required' });
+        }
+        if (!landMark) {
+            return res.status(400).json({ message: 'Landmark is required' });
+        }
+        if (!state) {
+            return res.status(400).json({ message: 'State is required' });
+        }
+        if (!pincode) {
+            return res.status(400).json({ message: 'Pincode is required' });
+        }
+        if (!phone) {
+            return res.status(400).json({ message: 'Phone number is required' });
+        }
+
+        const namePattern = /^[a-zA-Z\s]+$/;
+        const phonePattern = /^\d{10,12}$/;
+        const pincodePattern = /^\d{4,8}$/;
+
+        if (!namePattern.test(name)) {
+            return res.status(400).json({ message: 'Name should only contain letters' });
+        }
+        if (!namePattern.test(city)) {
+            return res.status(400).json({ message: 'City should only contain letters' });
+        }
+        if (!namePattern.test(state)) {
+            return res.status(400).json({ message: 'State should only contain letters' });
+        }
+        if (!phonePattern.test(phone)) {
+            return res.status(400).json({ message: 'Please enter a valid phone number (10-12 digits)' });
+        }
+        if (altPhone && !phonePattern.test(altPhone)) {
+            return res.status(400).json({ message: 'Please enter a valid alternate phone number (10-12 digits)' });
+        }
+        if (!pincodePattern.test(pincode)) {
+            return res.status(400).json({ message: 'Please enter a valid postal/zip code (4-8 digits)' });
+        }
 
         const newAddress = {
             userId: req.user._id,
             address: [{
-                adressType,
+                adressType: addressType, 
                 name,
                 city,
                 landMark,
                 state,
                 pincode,
                 phone,
-                altPhone
+                altPhone: altPhone || '', 
             }]
         };
 
- 
-
         const address = new Address(newAddress);
         await address.save();
-        res.redirect('/userProfile');
+
+        if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+            return res.status(200).json({ 
+                success: true, 
+                message: 'Address added successfully' 
+            });
+        }
+        
+        return res.redirect('/userProfile');
+        
     } catch (error) {
         console.error("Error saving Address:", error);
-        res.status(500).send("Error saving Address");
+        
+        if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Error saving address', 
+                error: error.message 
+            });
+        }
+        
+        return res.redirect('/userProfile');
     }
-};
+}
 const getEditAddress = async (req, res) => {
     try {
         if (!req.user) {
             return res.redirect("/login");
         }
+        
         const addressDoc = await Address.findOne({ 
             userId: req.user._id, 
             "address._id": req.params.id 
         });
+        
         if (!addressDoc) {
             return res.redirect('/userProfile');
         }
+        
         const address = addressDoc.address.id(req.params.id);
         if (!address) {
             return res.redirect('/userProfile');
         }
+        
         res.render('editAddress', { address, user: req.user });
     } catch (error) {
         console.error('Error fetching address for editing', error);
         res.redirect("/userProfile");
     }
 };
+
 const updateAddress = async (req, res) => {
     try {
-      const { id } = req.params;
-      console.log("Updating address with id:", id);
-      const updateData = req.body;
+        if (!req.user) {
+            return res.status(401).json({ message: 'Please login to continue' });
+        }
 
+        const { id } = req.params;
+        console.log("Updating address with id:", id);
 
-      const addressDoc=await Address.findOne({
-        userId:req.user._id,
-        'address._id':id
-      })
-      if(!addressDoc){
-        return res.status(404).json({message:"Address not found"})
-      }
-      const address=addressDoc.address.id(id)
-      if(!address){
-        return res.status(404).json({message:"Address not found"})
+        const { 
+            addressType,  
+            name, 
+            city, 
+            landMark, 
+            state, 
+            pincode, 
+            phone, 
+            altPhone,
+            isDefault
+        } = req.body;
 
-      }
-      Object.keys(updateData).forEach(key=>{
-        address[key]=updateData[key]
-      })
-      await addressDoc.save()
+        if (!addressType) {
+            return res.status(400).json({ message: 'Address type is required' });
+        }
+        if (!name) {
+            return res.status(400).json({ message: 'Name is required' });
+        }
+        if (!city) {
+            return res.status(400).json({ message: 'City is required' });
+        }
+        if (!landMark) {
+            return res.status(400).json({ message: 'Landmark is required' });
+        }
+        if (!state) {
+            return res.status(400).json({ message: 'State is required' });
+        }
+        if (!pincode) {
+            return res.status(400).json({ message: 'Pincode is required' });
+        }
+        if (!phone) {
+            return res.status(400).json({ message: 'Phone number is required' });
+        }
 
-      res.status(200).json({message:"Address updated successfully",address:address})
-  
+        const namePattern = /^[a-zA-Z\s]+$/;
+        const phonePattern = /^\d{10,12}$/;
+        const pincodePattern = /^\d{4,8}$/;
+
+        if (!namePattern.test(name)) {
+            return res.status(400).json({ message: 'Name should only contain letters' });
+        }
+        if (!namePattern.test(city)) {
+            return res.status(400).json({ message: 'City should only contain letters' });
+        }
+        if (!namePattern.test(state)) {
+            return res.status(400).json({ message: 'State should only contain letters' });
+        }
+        if (!phonePattern.test(phone)) {
+            return res.status(400).json({ message: 'Please enter a valid phone number (10-12 digits)' });
+        }
+        if (altPhone && !phonePattern.test(altPhone)) {
+            return res.status(400).json({ message: 'Please enter a valid alternate phone number (10-12 digits)' });
+        }
+        if (!pincodePattern.test(pincode)) {
+            return res.status(400).json({ message: 'Please enter a valid postal/zip code (4-8 digits)' });
+        }
+
+        const addressDoc = await Address.findOne({
+            userId: req.user._id,
+            'address._id': id
+        });
+        
+        if (!addressDoc) {
+            return res.status(404).json({ message: "Address not found" });
+        }
+        
+        const address = addressDoc.address.id(id);
+        if (!address) {
+            return res.status(404).json({ message: "Address not found" });
+        }
+
+        address.addressType = addressType;
+        address.name = name;
+        address.city = city;
+        address.landMark = landMark;
+        address.state = state;
+        address.pincode = pincode;
+        address.phone = phone;
+        address.altPhone = altPhone || '';
+        
+        if (isDefault) {
+            addressDoc.address.forEach(addr => {
+                if (addr._id.toString() !== id) {
+                    addr.isDefault = false;
+                } else {
+                    addr.isDefault = true;
+                }
+            });
+        }
+
+        await addressDoc.save();
+        res.status(200).json({ 
+            message: "Address updated successfully", 
+            address: address 
+        });
     } catch (error) {
-      console.error("Error updating address", error);
-      res.status(500).json({ message: "Internal Server error" });
+        console.error("Error updating address", error);
+        res.status(500).json({ message: "Internal Server error" });
     }
-  };
+};
+
+
 
 const blockAddress=async(req,res)=>{
     try {
@@ -699,6 +893,9 @@ const updateProfile=async(req,res)=>{
         
     }
 }
+
+
+
   
 module.exports = {
     getForgotPassPage,
@@ -722,5 +919,5 @@ module.exports = {
     changePassword,
     editProfile,
     updateProfile,
-    unblockAddress
+    unblockAddress,
 }

@@ -103,7 +103,8 @@ const getSalesReport = async (req, res) => {
       createdOn: {
         $gte: start,
         $lte: end
-      }
+      },
+      status:{$nin:['Pending', 'Processing', 'Shipped', 'Cancelled', 'Return Request', 'Returned','Paid']}
     };
 
     const orders = await Order.find(dateQuery)
@@ -321,14 +322,13 @@ const exportSalesExcel = async (req, res) => {
           };
       });
       
-      // Process orders and add rows to Excel - must be done synchronously for Excel generation
-      // First gather all customer names
+     
       const customersMap = new Map();
       await Promise.all(orders.map(async (order) => {
           customersMap.set(order._id.toString(), await getCustomerNameFromOrder(order));
       }));
       
-      // Now add rows with customer names
+     
       orders.forEach((order, index) => {
           const products = order.orderedItems.map(item => 
               `${item.product ? item.product.productName : 'Unknown Product'} (${item.quantity})`

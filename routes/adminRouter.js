@@ -56,8 +56,8 @@ router.put('/removeProductOffer/:id',productController.removeProductOffer)
 
 
 router.get('/AdminOrder',orderController.getAllOrders)
+router.post('/orders/update-item-status', orderController.updateItemStatus);
 router.get('/orders/view/:id',orderController.viewOrderDetails)
-router.post('/orders/update-status',orderController.updateStatus)
 router.put('/orders/approve-return',orderController.approveReturn)
 router.put('/orders/reject-return',orderController.rejectReturn)
 

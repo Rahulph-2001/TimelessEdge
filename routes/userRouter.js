@@ -52,8 +52,8 @@ router.get('/reset-password',profileController.getResetPasspage)
 router.post('/resend-forgot-otp',profileController.resendOtp)
 router.post('/reset-password',profileController.postNewPassword)
 router.get("/profile/address/add",userAuth,profileController.getAddAddress)
-router.post("/profile/address/add",validateAddress,profileController.createAddress)
-router.get('/profile/address/edit/:id',validateAddress,profileController.getEditAddress);
+router.post("/profile/address/add",profileController.createAddress)
+router.get('/profile/address/edit/:id',profileController.getEditAddress);
 router.put('/profile/address/edit/:id',profileController.updateAddress)
 router.put('/address/block/:docId/:addressId', profileController.blockAddress);
 router.put('/address/unblock/:docId/:addressId', profileController.unblockAddress);
@@ -84,18 +84,20 @@ router.post('/order/place',cartController.placeOrder)
 router.get('/order/confirmation/:orderId',userOrderController.confirmOrder)
 router.post('/order/create-razorpay-order', cartController.createRazorpayOrder)
 router.post('/order/verify-payment', cartController.verifyPayment)
-
-
-
-
-router.get('/orders/:orderId',userOrderController.getOrderDetails)
-router.get('/api/orders/:orderId/items/:itemId/invoice',userOrderController.downloadInvoice);
-router.post('/api/orders/:orderId/cancel', userAuth,userOrderController.cancelOrder);
-router.post('/api/orders/:orderId/items/:itemId/return',userAuth,userOrderController.returnOrderItem);
-
+router.get('/order/payment-failed/:orderId',cartController.paymentFailed)
+router.post('/order/retry-payment', cartController.retryPayment)
+router.get('/order/verify-retry-payment', cartController.verifyRetryPayment)
 router.get('/wallet',userOrderController.getWalletPage)
+
+
+
 router.post('/user/wallet/add-funds',userOrderController.addFunds);
 
 
+router.get('/orders/:orderId',userOrderController.getOrderDetails)
 
+router.post('/api/orders/:orderId/cancel', userAuth, userOrderController.cancelOrder);
+router.post('/api/orders/:orderId/items/:itemId/cancel', userAuth, userOrderController.cancelOrderItem);
+router.post('/api/orders/:orderId/items/:itemId/return', userAuth, userOrderController.returnOrderItem);
+router.get('/api/orders/:orderId/items/:itemId/invoice', userAuth, userOrderController.downloadInvoice);
 module.exports= router 

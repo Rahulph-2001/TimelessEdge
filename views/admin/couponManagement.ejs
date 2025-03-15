@@ -502,19 +502,16 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
-// Replace your existing validateForm function with this one
 function validateForm(event) {
     event.preventDefault();
     document.querySelectorAll(".error-message").forEach((element) => (element.innerHTML = ""));
     
-    // Getting form values
     const name = document.getElementsByName("couponName")[0].value;
     const sDate = document.getElementsByName("startDate")[0].value;
     const eDate = document.getElementsByName("endDate")[0].value;
     const offerPrice = document.getElementsByName("offerPrice")[0].value.trim();
     const minimumPrice = document.getElementsByName("minimumPrice")[0].value.trim();
     
-    // Validation
     const sDateObj = new Date(sDate);
     const eDateObj = new Date(eDate);
     const todayDateObj = new Date();
@@ -522,14 +519,12 @@ function validateForm(event) {
     
     let errors = [];
     
-    // Validate coupon name
     const nameRegex = /^[A-Za-z0-9]{1,50}$/;
     if (!nameRegex.test(name)) {
         errors.push("Coupon name must be alphanumeric and 1-50 characters long");
         document.getElementById("error-coupon-name").innerHTML = "Coupon name must be alphanumeric and 1-50 characters long";
     }
     
-    // Validate dates
     if (sDateObj <= todayDateObj) {
         errors.push("Starting date should be greater than or equal to today's date");
         document.getElementById("error-start-date").innerHTML = "Starting date should be greater than or equal to today's date";
@@ -540,7 +535,6 @@ function validateForm(event) {
         document.getElementById("error-end-date").innerHTML = "End date should be after the start date";
     }
     
-    // Validate prices
     const offerPriceValue = parseFloat(offerPrice);
     const minimumPriceValue = parseFloat(minimumPrice);
     
@@ -600,16 +594,16 @@ function validateForm(event) {
     return false;
 }
 
-function setDefaultStartdate() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = (today.getMonth() + 1).toString().padStart(2, "0");
-    const day = today.getDate().toString().padStart(2, "0");
-    document.getElementById("startingDate").value = `${year}-${month}-${day}`;
-}
+// function setDefaultStartdate() {
+//     const today = new Date();
+//     const year = today.getFullYear();
+//     const month = (today.getMonth() + 1).toString().padStart(2, "0");
+//     const day = today.getDate().toString().padStart(2, "0");
+//     document.getElementById("startingDate").value = `${year}-${month}-${day}`;
+// }
 
-document.addEventListener("DOMContentLoaded", function() {
-    setDefaultStartdate();
-});
+// document.addEventListener("DOMContentLoaded", function() {
+//     setDefaultStartdate();
+// });
 </script>
 <%- include("../../views/partials/admin/footer") %>

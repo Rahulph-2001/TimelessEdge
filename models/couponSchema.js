@@ -33,7 +33,11 @@ const couponSchema= new Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"User",
 
-    }]
+    }],
+    usedBy: [{ 
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+      }],
 
 })
 

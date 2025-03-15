@@ -1099,13 +1099,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Handle quantity increment/decrement
-    const qtyDown = document.querySelector('.qty-down');
-    const qtyUp = document.querySelector('.qty-up');
-    const qtyVal = document.querySelector('.qty-val');
-    
     // Get product stock information
-    let maxQuantity = 10; // Default max quantity limit
+    let maxQuantity = 10; // Default max quantity limit - matches your controller's maxLimit
     
     // If we have product data, extract the real stock quantity
     const inStockElement = document.querySelector('.in-stock');
@@ -1115,6 +1110,11 @@ document.addEventListener('DOMContentLoaded', function() {
             maxQuantity = Math.min(stockQuantity, 10); // Use the smaller of stock quantity or max limit
         }
     }
+
+    // Handle quantity increment/decrement
+    const qtyDown = document.querySelector('.qty-down');
+    const qtyUp = document.querySelector('.qty-up');
+    const qtyVal = document.querySelector('.qty-val');
 
     if (qtyDown && qtyVal) {
         qtyDown.addEventListener('click', function(e) {
@@ -1158,7 +1158,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const zoomImage = document.querySelector('.product-image-slider img');
     
     if (container && zoomImage) {
-        // Zoom functionality (existing code)
+        // Zoom functionality
         const lens = document.createElement('div');
         lens.className = 'zoom-lens';
         const zoomResult = document.createElement('div');
@@ -1214,7 +1214,7 @@ document.addEventListener('DOMContentLoaded', function() {
         container.addEventListener('mousemove', moveLens);
     }
 
-    // Handle add to cart functionality
+    // Handle add to cart functionality - UPDATED TO MATCH CONTROLLER
     const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
     
     addToCartButtons.forEach(function(button) {
@@ -1243,6 +1243,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.disabled = true;
 
             try {
+                // FIXED URL to match controller - matches the router.post('/cart/add')
                 const response = await fetch('/cart/add', {
                     method: 'POST',
                     headers: {
@@ -1324,21 +1325,22 @@ document.addEventListener('DOMContentLoaded', function() {
         wishlistBtn.addEventListener('click', async function() {
             try {
                 const productId = this.getAttribute('data-product');
+                if (!productId) {
+                    console.error("Product ID not found on the button.");
+                    return;
+                }
                 
                 // Visual feedback - change the text to indicate loading
                 const heartIcon = this.querySelector('i');
                 heartIcon.className = 'fas fa-spinner fa-spin';
                 
-                // Make the API request
+                // Make the API request to the wishlist endpoint
                 const response = await fetch(`/wishlist/add/${productId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        productId: productId,
-                        quantity: 1
-                    })
+                    }
+                    // No need to send body for this endpoint as it uses the ID from params
                 });
                 
                 // Reset icon
@@ -1360,7 +1362,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Show success message
                 Swal.fire({
                     title: 'Success!',
-                    text: "Product added to wishlist",
+                    text: data.message || "Product added to wishlist successfully",
                     icon: 'success',
                     confirmButtonText: 'View Wishlist',
                     confirmButtonColor: '#3BB77E',
@@ -1497,195 +1499,66 @@ document.addEventListener('DOMContentLoaded', function() {
             label.style.color = index < rating ? '#FDC040' : '#ddd';
         });
     }
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    const addToCartButtons = document.querySelectorAll('.button.button-add-to-cart, .add-to-cart-btn');
     
-    addToCartButtons.forEach(function(button) {
-        button.addEventListener('click', async function() {
-            const productId = this.getAttribute('data-product');
-            if (!productId) {
-                console.error("Product ID not found on the button.");
-                return;
-            }
-            
-            // Get quantity value for primary product
-            let quantity = 1;
-            const qtyVal = document.querySelector('.qty-val');
-            if (qtyVal && this.classList.contains('button-add-to-cart')) {
-                quantity = parseInt(qtyVal.textContent) || 1;
-            }
-            
-            const originalText = this.innerHTML;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-            this.disabled = true;
-
-            try {
-                const response = await fetch('/cart/add', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        productId: productId,
-                        quantity: quantity
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to add product to cart');
-                }
-
-                const data = await response.json();
-
-                Swal.fire({
-                    title: 'Success!',
-                    text: data.message || "Product added to cart successfully",
-                    icon: 'success',
-                    confirmButtonText: 'View Cart',
-                    confirmButtonColor: '#3BB77E',
-                    showCancelButton: true,
-                    cancelButtonText: 'Continue Shopping'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/cart';
-                    }
-                });
-            } catch (error) {
-                console.error('Error:', error);
-                Swal.fire({
-                    title: 'Error',
-                    text: error.message || "Error adding product to cart",
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#3BB77E'
-                });
-            } finally {
-                // Reset the button state
-                this.innerHTML = originalText;
-                this.disabled = false;
-            }
-        });
-    });
-
-    // Handle quantity increment/decrement
-    const qtyDown = document.querySelector('.qty-down');
-    const qtyUp = document.querySelector('.qty-up');
-    const qtyVal = document.querySelector('.qty-val');
-
-    if (qtyDown && qtyVal) {
-        qtyDown.addEventListener('click', function(e) {
-            e.preventDefault();
-            let currentQty = parseInt(qtyVal.textContent);
-            if (currentQty > 1) {
-                qtyVal.textContent = currentQty - 1;
-            }
-        });
-    }
-
-    if (qtyUp && qtyVal) {
-        qtyUp.addEventListener('click', function(e) {
-            e.preventDefault();
-            let currentQty = parseInt(qtyVal.textContent);
-            qtyVal.textContent = currentQty + 1;
-        });
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    const wishlistBtn = document.querySelector('.wishlist-btn');
+    // Handle quantity update in cart
+    const updateCartButtons = document.querySelectorAll('.update-cart-btn');
     
-    if (wishlistBtn) {
-        wishlistBtn.addEventListener('click', async function() {
-            try {
-                const productId = this.getAttribute('data-product');
+    if (updateCartButtons.length > 0) {
+        updateCartButtons.forEach(function(button) {
+            button.addEventListener('click', async function(e) {
+                e.preventDefault();
                 
-                // Visual feedback - change the text to indicate loading
-                const heartIcon = this.querySelector('i');
-                heartIcon.className = 'fas fa-spinner fa-spin';
+                const itemId = this.getAttribute('data-item');
+                const quantityInput = document.querySelector(`input[data-item="${itemId}"]`);
                 
-                // Make the API request
-                const response = await fetch(`/wishlist/add/${productId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        productId: productId,
-                        quantity: 1
-                    })
-                });
-                
-                // Reset icon
-                heartIcon.className = 'far fa-heart';
-                
-                // Check if the request was successful
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Failed to add product to wishlist');
+                if (!itemId || !quantityInput) {
+                    console.error("Item ID or quantity input not found");
+                    return;
                 }
                 
-                // Process the successful response
-                const data = await response.json();
+                const quantity = parseInt(quantityInput.value) || 1;
                 
-                // Provide visual feedback for success
-                heartIcon.className = 'fas fa-heart';
-                heartIcon.style.color = 'red';
-                
-                // Show success message
-                Swal.fire({
-                    title: 'Success!',
-                    text: "Product added to wishlist",
-                    icon: 'success',
-                    confirmButtonText: 'View Wishlist',
-                    confirmButtonColor: '#3BB77E',
-                    showCancelButton: true,
-                    cancelButtonText: 'Continue Shopping'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/wishlist';
-                    }
-                });
-                
-            } catch (error) {
-                console.error('Error:', error);
-                
-                // Reset icon
-                this.querySelector('i').className = 'far fa-heart';
-                
-                // Check for authentication errors
-                if (error.message && (
-                    error.message.includes('not authenticated') || 
-                    error.message.includes('not logged in') ||
-                    error.message.includes('login required') ||
-                    error.message.includes('unauthorized')
-                )) {
-                    Swal.fire({
-                        title: 'Not Logged In',
-                        text: "Please login to add items to wishlist",
-                        icon: 'info',
-                        confirmButtonText: 'Login',
-                        confirmButtonColor: '#3BB77E',
-                        showCancelButton: true,
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if(result.isConfirmed) {
-                            window.location.href = '/login';
-                        }
+                try {
+                    const response = await fetch('/cart/update', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            itemId: itemId,
+                            quantity: quantity
+                        })
                     });
-                } else {
-                    // General error handling
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to update cart');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    Swal.fire({
+                        title: 'Success!',
+                        text: data.message || "Cart updated successfully",
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#3BB77E'
+                    }).then(() => {
+                        location.reload(); // Refresh to show updated cart
+                    });
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    
                     Swal.fire({
                         title: 'Error',
-                        text: error.message || "Error adding product to wishlist",
+                        text: error.message || "Error updating cart",
                         icon: 'error',
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#3BB77E'
                     });
                 }
-            }
+            });
         });
     }
 });

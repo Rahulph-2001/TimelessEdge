@@ -78,7 +78,7 @@ const getAllOrders = async (req, res) => {
                 path: 'orderedItems.product',
                 select: 'productName'
             })
-            .sort({ createdOn: -1 }) // Newest first
+            .sort({ createdOn: -1 }) 
             .skip(skip)
             .limit(limit);
 
@@ -134,71 +134,7 @@ const getAllOrders = async (req, res) => {
 }
 
 
-const viewOrderDetails = async (req, res) => {
-    try {
-        const orderId = req.params.id;
-        
-        if (!mongoose.Types.ObjectId.isValid(orderId)) {
-            return res.status(400).render('admin/error', { 
-                message: 'Invalid order ID format'
-            });
-        }
-        console.log("Order ID being queried:", orderId);
 
-        const order = await Order.findById(orderId)
-            .populate({
-                path: 'orderedItems.product',
-                select: 'productName productImages price'
-            });
-        
-        console.log("Query result:", order ? "Order found" : "No order found");
-        console.log("Order data:", JSON.stringify(order, null, 2))
-        
-        if (!order) {
-            return res.status(404).render('admin/error', { 
-                message: 'Order not found'
-            });
-        }
-
-        const addressDoc = await Address.findOne({
-            "address._id": order.address
-        });
-        
-        let addressDetails = null;
-        
-        if (addressDoc && addressDoc.address && addressDoc.address.length > 0) {
-            addressDetails = addressDoc.address.find(
-                addr => addr._id.toString() === order.address.toString()
-            );
-            
-            if (!addressDetails && addressDoc.address.length > 0) {
-                addressDetails = addressDoc.address[0];
-            }
-        }
-        
-        console.log("Address details:", addressDetails); 
-        
-        let userData = null;
-        if (addressDoc) {
-            userData = await User.findById(addressDoc.userId, 'name email phone');
-        }
-        
-        console.log("User data:", userData); 
-        
-        res.render('viewOrderDetail', {
-            order, 
-            addressDetails,
-            userData
-        });
-        
-    } catch (error) {
-        console.error("Error viewing order details:", error);
-        res.status(500).render('admin/error', { 
-            message: 'Error loading order details', 
-            error 
-        });
-    }
-}
 const updateStatus = async (req, res) => {
     try {
         const { orderId, status } = req.body;
@@ -312,6 +248,71 @@ const updateStatus = async (req, res) => {
     }
 };
 
+const viewOrderDetails = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        
+        if (!mongoose.Types.ObjectId.isValid(orderId)) {
+            return res.status(400).render('admin/error', { 
+                message: 'Invalid order ID format'
+            });
+        }
+        console.log("Order ID being queried:", orderId);
+
+        const order = await Order.findById(orderId)
+            .populate({
+                path: 'orderedItems.product',
+                select: 'productName productImages price'
+            });
+        
+        console.log("Query result:", order ? "Order found" : "No order found");
+        console.log("Order data:", JSON.stringify(order, null, 2))
+        
+        if (!order) {
+            return res.status(404).render('admin/error', { 
+                message: 'Order not found'
+            });
+        }
+
+        const addressDoc = await Address.findOne({
+            "address._id": order.address
+        });
+        
+        let addressDetails = null;
+        
+        if (addressDoc && addressDoc.address && addressDoc.address.length > 0) {
+            addressDetails = addressDoc.address.find(
+                addr => addr._id.toString() === order.address.toString()
+            );
+            
+            if (!addressDetails && addressDoc.address.length > 0) {
+                addressDetails = addressDoc.address[0];
+            }
+        }
+        
+        console.log("Address details:", addressDetails); 
+        
+        let userData = null;
+        if (addressDoc) {
+            userData = await User.findById(addressDoc.userId, 'name email phone');
+        }
+        
+        console.log("User data:", userData); 
+        
+        res.render('viewOrderDetail', {
+            order, 
+            addressDetails,
+            userData
+        });
+        
+    } catch (error) {
+        console.error("Error viewing order details:", error);
+        res.status(500).render('admin/error', { 
+            message: 'Error loading order details', 
+            error 
+        });
+    }
+}
 
 const approveReturn=async(req,res)=>{
     try {
@@ -445,6 +446,170 @@ const rejectReturn=async(req,res)=>{
     }
 }
 
+const updateItemStatus = async (req, res) => {
+    try {
+        const { orderId, itemId, status } = req.body;
+
+        if (!orderId || !itemId || !status) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Order Id, item Id, and status are required' 
+            });
+        }
+        
+        const validStatuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid status value' 
+            });
+        }
+        
+        const order = await Order.findOne({ orderId: orderId });
+        
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: 'Order not found'
+            });
+        }
+        
+        const itemIndex = order.orderedItems.findIndex(item => item._id.toString() === itemId);
+        
+        if (itemIndex === -1) {
+            return res.status(404).json({
+                success: false,
+                message: 'Item not found in this order'
+            });
+        }
+        
+        const updateFields = {};
+        updateFields[`orderedItems.${itemIndex}.status`] = status;
+        
+        if (status === 'Cancelled') {
+            updateFields[`orderedItems.${itemIndex}.cancelledAt`] = new Date();
+        } else if (status === 'Return Request') {
+            updateFields[`orderedItems.${itemIndex}.returnRequestedOn`] = new Date();
+        } else if (status === 'Returned') {
+            updateFields[`orderedItems.${itemIndex}.returnedOn`] = new Date();
+        }
+        
+        const updatedOrder = await Order.findOneAndUpdate(
+            { orderId: orderId },
+            { $set: updateFields },
+            { new: true }
+        ).populate({
+            path: 'orderedItems.product',
+            select: 'productName'
+        });
+        
+        if (status === 'Returned') {
+            try {
+                const returnedItem = updatedOrder.orderedItems[itemIndex];
+                
+                await Product.findByIdAndUpdate(
+                    returnedItem.product._id,
+                    { $inc: { quantity: returnedItem.quantity } },
+                    { new: true }
+                );
+                
+                const addressDoc = await Address.findOne({
+                    "address._id": order.address
+                });
+                
+                if (!addressDoc) {
+                    console.error("Address not found for order:", orderId);
+                    return res.status(404).json({
+                        success: false,
+                        message: 'User address not found'
+                    });
+                }
+                
+                const userId = addressDoc.userId;
+                
+                let wallet = await Wallet.findOne({ userId: userId });
+                
+                if (!wallet) {
+                    wallet = new Wallet({
+                        userId: userId,
+                        walletBalance: 0,
+                        transactions: []
+                    });
+                }
+                
+                const refundAmount = returnedItem.price * returnedItem.quantity;
+                
+                wallet.transactions.push({
+                    orderId: order._id,
+                    itemId: returnedItem._id,
+                    transactionType: 'credit',
+                    transactionAmount: refundAmount,
+                    transactionDate: new Date(),
+                    transactionStatus: 'completed',
+                    transactionDescription: `Refund for returned item in order #${order.orderId}`
+                });
+                
+                await wallet.save();
+                
+                await User.findByIdAndUpdate(
+                    userId,
+                    { $inc: { wallet: refundAmount } },
+                    { new: true }
+                );
+                
+                console.log(`Item in Order ${orderId} returned, wallet credited with ${refundAmount}`);
+            } catch (updateError) {
+                console.error("Error processing item return:", updateError);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Error processing item return',
+                    error: updateError.message
+                });
+            }
+        }
+        
+        const allItemStatuses = updatedOrder.orderedItems.map(item => item.status);
+        
+        let overallStatus;
+        
+        if (allItemStatuses.every(s => s === 'Cancelled')) {
+            overallStatus = 'Cancelled';
+        } else if (allItemStatuses.every(s => s === 'Returned' || s === 'Cancelled')) {
+            overallStatus = 'Returned';
+        } else if (allItemStatuses.some(s => s === 'Return Request')) {
+            overallStatus = 'Return Request';
+        } else if (allItemStatuses.every(s => s === 'Delivered' || s === 'Returned' || s === 'Cancelled')) {
+            overallStatus = 'Delivered';
+        } else if (allItemStatuses.some(s => s === 'Shipped')) {
+            overallStatus = 'Shipped';
+        } else if (allItemStatuses.some(s => s === 'Processing')) {
+            overallStatus = 'Processing';
+        } else {
+            overallStatus = 'Pending';
+        }
+        
+        await Order.findOneAndUpdate(
+            { orderId: orderId },
+            { $set: { status: overallStatus } },
+            { new: true }
+        );
+        
+        res.json({
+            success: true,
+            message: 'Item status updated successfully',
+            order: updatedOrder
+        });
+        
+    } catch (error) {
+        console.error("Error updating item status:", error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating item status',
+            error: error.message
+        });
+    }
+}
 
 
-module.exports = { getAllOrders,viewOrderDetails,updateStatus,approveReturn,rejectReturn};
+
+module.exports = { getAllOrders,viewOrderDetails,updateStatus,approveReturn,rejectReturn,updateItemStatus};

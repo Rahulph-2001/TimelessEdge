@@ -125,7 +125,6 @@ const getAllproduct = async (req, res) => {
         const skip = (page - 1) * limit;
         const searchQuery = (req.query.search || '').trim();
 
-
         const filter = searchQuery 
             ? { productName: { $regex: searchQuery, $options: 'i' } }
             : {};
@@ -139,8 +138,22 @@ const getAllproduct = async (req, res) => {
             .skip(skip)
             .exec();
 
+        // Calculate the effective offer (max of product and category offer)
+        const productsWithEffectiveOffer = allProducts.map(product => {
+            const productOffer = product.productOffer || 0;
+            const categoryOffer = product.category ? product.category.categoryOffer || 0 : 0;
+            const effectiveOffer = Math.max(productOffer, categoryOffer);
+            
+            return {
+                ...product._doc,
+                effectiveOffer,
+                offerSource: effectiveOffer === productOffer && productOffer > 0 ? 'product' : 
+                             effectiveOffer === categoryOffer && categoryOffer > 0 ? 'category' : null
+            };
+        });
+
         res.render("product-list", {
-            products: allProducts,
+            products: productsWithEffectiveOffer,
             currentPage: page,
             totalPages: Math.ceil(totalProducts/limit),
             searchQuery: searchQuery,
@@ -225,7 +238,6 @@ const validateProductData = (data) => {
     return errors;
 };
 
-// Image handling helper
 const handleImageUpdates = async (existingImages, newFiles, uploadsDir) => {
     let updatedImages = [...existingImages];
     
@@ -234,7 +246,6 @@ const handleImageUpdates = async (existingImages, newFiles, uploadsDir) => {
     for (const file of newFiles) {
         const imageIndex = parseInt(file.fieldname.replace('images', '')) - 1;
         
-        // Remove old image if it exists
         if (updatedImages[imageIndex]) {
             const oldImagePath = path.join(uploadsDir, updatedImages[imageIndex]);
             try {
@@ -245,7 +256,6 @@ const handleImageUpdates = async (existingImages, newFiles, uploadsDir) => {
             }
         }
         
-        // Update with new image path
         updatedImages[imageIndex] = `uploads/products/${file.filename}`;
     }
     
@@ -265,7 +275,6 @@ const submittProduct = async (req, res) => {
             color
         } = req.body;
 
-        // Validate input data
         const validationErrors = validateProductData({
             productName,
             category,
@@ -330,66 +339,78 @@ const submittProduct = async (req, res) => {
 };
 
 
-const addOffer = async (req, res) => {
+const addOffer=async(req,res)=>{
     try {
-        const productId = req.params.id;
-        const productOffer = req.body.productOffer;
+        const productId =req.params.id
+        const productOffer=req.body.productOffer
 
-        // Validate productOffer
-        if (typeof productOffer !== 'number' || productOffer < 1 || productOffer > 99) {
+        if(typeof productOffer!== 'number'|| productOffer <1 || productOffer >99){
             return res.status(400).json({
-                success: false,
-                message: "Offer percentage must be a number between 1 and 99"
-            });
+                success:false,
+                message:'Offer percentage must be a number between 1 and 99'
+            })
         }
-
-        const product = await Product.findByIdAndUpdate(
+        const product =await Product.findByIdAndUpdate(
             productId,
-            { $set: { productOffer: productOffer } },
-            { new: true, runValidators: true }
-        );
+            {$set:{productOffer:productOffer}},
+            {new:true,runValidator:true}
+        ).populate('category');
 
-        if (!product) {
+        if(!product){
             return res.status(404).json({
-                success: false,
-                message: "Product not found"
-            });
+                success:false,
+                message:'Product not found'
+            })
         }
 
         return res.status(200).json({
-            success: true,
-            message: "Product offer added successfully"
-        });
+            success:true,
+            message:'Product offer added successfully',
+            effectiveOffer:Math.max(productOffer,product.category?.categoryOffer||0)
+        })
+
     } catch (error) {
-        console.error('Error adding product Offer', error);
+        console.error('Error adding product offer',error)
         return res.status(500).json({
-            success: false,
-            message: 'Internal Server Error',
-            error: error.message // Include the error message for debugging
-        });
+            success:false,
+            message:'Internal Server Error',
+            error:error.message
+        })
+        
     }
 };
 
 
 const removeProductOffer=async(req,res)=>{
-    try {
-        const productId=req.params.id
-        const product=await Product.findById(productId)
+   try {
+    const productId=req.params.id;
+    const product=await Product.findByIdAndUpdate(
+        productId,
+        {$set:{productOffer:0}},
+        {new:true,runValidators:true}
 
-        if(!product){
-            
-            return res.status(404).json({success:false,message:'Product not Found'})
-        }
-        product.productOffer = 0
-        await product.save()
-        return res.status(200).json({success:true,message:'Product Offer Removed SuccessFully'})
+    ).populate('category')
 
-        
-    } catch (error) {
-        console.error('Error removing Product offer:',error)
-        return res.status(500).json({success:false,message:'Internal Server error'})
-        
+    if(!product){
+        return res.status(404).json({
+            success:false,
+            message:'Product not found'
+        })
     }
+    return res.status(200).json({
+        success:true,
+        message:"Product offer removed successfully",
+        effectiiveOffer:product.category?.categoryOffer||0
+    })
+    
+   } catch (error) {
+    console.error('Error removing product Offer', error);
+    return res.status(500).json({
+        success: false,
+        message: 'Internal Server Error',
+        error: error.message
+    });
+   }
 }
 
 

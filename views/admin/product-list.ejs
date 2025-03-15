@@ -199,6 +199,14 @@ body {
     font-weight: bold;
 }
 
+.offer-badge.product {
+    background-color: #28a745;
+}
+
+.offer-badge.category {
+    background-color: #17a2b8;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .table {
@@ -261,8 +269,13 @@ body {
                 <td><%= ele.category ? ele.category.name : 'No Category' %></td>
                 <td>Rs :<%= ele.salePrice.toLocaleString() %></td>
                 <td>
-                    <% if (ele.productOffer > 0) { %>
-                        <span class="offer-badge"><%= ele.productOffer %>% OFF</span>
+                    <% if (ele.effectiveOffer > 0) { %>
+                        <span class="offer-badge <%= ele.offerSource %>">
+                            <%= ele.effectiveOffer %>% OFF
+                            <% if (ele.offerSource === 'category') { %>
+                                (Category)
+                            <% } %>
+                        </span>
                     <% } else { %>
                         No Offer
                     <% } %>

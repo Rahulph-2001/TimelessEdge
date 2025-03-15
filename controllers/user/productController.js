@@ -93,6 +93,20 @@ const addWhishlist = async (req, res) => {
         }
         
         const productId = req.params.id;
+        
+        const cart = await Cart.findOne({
+            userId,
+            items: {
+                $elemMatch: {
+                    productId: productId
+                }
+            }
+        });
+        
+        if (cart) {
+            return res.status(409).json({ message: "Product already in your cart" });
+        }
+        
         let wishlist = await wishList.findOne({ userId });
         
         if (!wishlist) {
@@ -104,7 +118,7 @@ const addWhishlist = async (req, res) => {
         );
         
         if (productExists) {
-            return res.status(200).json({ message: "Product already in wishlist" });
+            return res.status(409).json({ message: "Product already in wishlist" });
         }
         
         wishlist.products.push({ productId });
@@ -116,6 +130,8 @@ const addWhishlist = async (req, res) => {
         return res.status(500).json({ message: "Error adding product to wishlist" });
     }
 };
+
+
 const wishListPage = async (req, res) => {
   try {
       const userId = req.session.user;

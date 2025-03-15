@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Failed</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .payment-failed-container {
+            max-width: 650px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            text-align: center;
+        }
+        
+        .payment-failed-illustration {
+            width: 200px;
+            margin-bottom: 20px;
+        }
+        
+        .payment-failed-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+        
+        .payment-failed-message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #555;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .order-details {
+            margin-top: 30px;
+            text-align: left;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .order-details h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="payment-failed-container">
+            <img src="/img/payment-failed.svg" alt="Payment Failed" class="payment-failed-illustration">
+            <div class="text-danger mb-4" style="font-size: 80px; display: none;">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            
+            <h1 class="payment-failed-title">Payment Failed</h1>
+            <p class="payment-failed-message">
+                We couldn't process your payment for order #<%= orderId %>. 
+                The transaction was declined or interrupted. Don't worry, no money has been deducted from your account.
+            </p>
+            
+            <div class="action-buttons">
+                <button id="retryPaymentBtn" class="btn btn-primary">
+                    <i class="fas fa-redo me-2"></i> Retry Payment
+                </button>
+                <a href="/profile/orders" class="btn btn-outline-secondary">
+                    <i class="fas fa-list me-2"></i> View My Orders
+                </a>
+            </div>
+            
+            <% if (orderFound && order) { %>
+            <div class="order-details">
+                <h3>Order Summary</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Order ID:</span>
+                    <span><%= order.orderId %></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date:</span>
+                    <span><%= new Date(order.createdOn).toLocaleString() %></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Total Amount:</span>
+                    <span>₹<%= order.finalAmount.toFixed(2) %></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Payment Method:</span>
+                    <span><%= order.paymentMethod %></span>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(".payment-failed-illustration").on("error", function() {
+                $(this).hide();
+                $(".text-danger").show();
+            });
+            
+            $("#retryPaymentBtn").click(function() {
+    const orderData = sessionStorage.getItem('failedOrderData');
+    
+    if (!orderData) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Order Data',
+            text: 'Unable to retry payment. Redirecting to checkout.'
+        }).then(() => {
+            window.location.href = "/checkout";
+        });
+        return;
+    }
+    
+    console.log("Retry payment data:", orderData);
+    
+    $.ajax({
+        url: '/order/retry-payment',
+        method: 'POST',
+        data: orderData,  
+        contentType: 'application/json',
+        dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            const options = {
+                                key: response.key_id,
+                                amount: response.amount,
+                                currency: "INR",
+                                name: "Your Store Name",
+                                description: "Purchase Payment",
+                                order_id: response.order_id,
+                                handler: function(response) {
+                                    window.location.href = `/order/verify-retry-payment?razorpay_payment_id=${response.razorpay_payment_id}&razorpay_order_id=${response.razorpay_order_id}&razorpay_signature=${response.razorpay_signature}`;
+                                },
+                                prefill: {
+                                    name: "<%= user?.name || '' %>",
+                                    email: "<%= user?.email || '' %>",
+                                    contact: "<%= user?.phone || '' %>"
+                                },
+                                theme: {
+                                    color: "#007bff"
+                                },
+                                modal: {
+                                    ondismiss: function() {
+                                        Swal.fire({
+                                            icon: 'info',
+                                            title: 'Payment Cancelled',
+                                            text: 'You have cancelled the payment process.'
+                                        });
+                                    }
+                                }
+                            };
+                            
+                            const rzp = new Razorpay(options);
+                            rzp.open();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message || "Could not initialize payment. Please try again."
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error("AJAX Error:", xhr.responseText);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: "Failed to initialize payment. Please try checking out again."
+                        }).then(() => {
+                            window.location.href = "/checkout";
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

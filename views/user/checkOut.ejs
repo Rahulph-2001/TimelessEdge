@@ -159,7 +159,6 @@
 </head>
 <body>
   <div class="container">
-    <!-- Shipping Address Section -->
     <div class="shipping-address">
       <h2>Select Shipping Address</h2>
       <div class="address-list">
@@ -230,6 +229,14 @@
                   </option>
                 <% }); %>
               <% } %>
+              <!-- Add referral coupons -->
+              <% if (referralCoupons && referralCoupons.length > 0) { %>
+                <% referralCoupons.forEach(function(coupon) { %>
+                  <option value="<%= coupon.name %>" data-offer="<%= coupon.offerPrice %>" data-minimum-price="<%= coupon.minimumPrice %>">
+                    <%= coupon.name %> - ₹<%= coupon.offerPrice %> off (Min ₹<%= coupon.minimumPrice %>) [Referral]
+                  </option>
+                <% }); %>
+              <% } %>
             </select>
             <button id="applyCoupon" class="apply-button" type="button">
               <i class="fas fa-tag me-2"></i> Apply
@@ -291,11 +298,9 @@ $(document).ready(function() {
       return;
     }
     
-    // Get selected coupon data
     const selectedOption = $("#coupon-select option:selected");
     const minimumPrice = parseFloat(selectedOption.data("minimum-price"));
     
-    // Validate minimum purchase requirement
     if (originalTotal < minimumPrice) {
       Swal.fire({
         icon: 'error',
@@ -305,7 +310,6 @@ $(document).ready(function() {
       return;
     }
     
-    // Make AJAX request to validate coupon
     $.ajax({
       url: '/validate-coupon',
       method: 'POST',
@@ -412,68 +416,83 @@ $(document).ready(function() {
     
     $("#placeOrderBtn").prop("disabled", true).html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...');
     
-    if (paymentMethod === "Razorpay") {
-      $.ajax({
+if (paymentMethod === "Razorpay") {
+    $.ajax({
         url: '/order/create-razorpay-order',
         method: 'POST',
         data: JSON.stringify(orderData),
         contentType: 'application/json',
         dataType: 'json',
         success: function(response) {
-          if (response.success) {
-            const options = {
-              key: response.key_id,
-              amount: response.amount,
-              currency: "INR",
-              name: "Your Store Name",
-              description: "Purchase Payment",
-              order_id: response.order_id,
-              handler: function(response) {
-                verifyRazorpayPayment(response, orderData);
-              },
-              prefill: {
-                name: "<%= user.name %>",
-                email: "<%= user.email %>",
-                contact: "<%= user.phone %>"
-              },
-              theme: {
-                color: "#007bff"
-              },
-              modal: {
-                ondismiss: function() {
-                  $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
-                  Swal.fire({
-                    icon: 'info',
-                    title: 'Payment Cancelled',
-                    text: 'You have cancelled the payment process.'
-                  });
-                }
-              }
-            };
-            
-            const rzp = new Razorpay(options);
-            rzp.open();
-            
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Order Failed',
-              text: response.message || "Failed to create Razorpay order. Please try again."
-            });
-            $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
-          }
+            if (response.success) {
+                const options = {
+                    key: response.key_id,
+                    amount: response.amount,
+                    currency: "INR",
+                    name: "Your Store Name",
+                    description: "Purchase Payment",
+                    order_id: response.order_id,
+                    handler: function(response) {
+                        verifyRazorpayPayment(response, orderData);
+                    },
+                    prefill: {
+                        name: "<%= user.name %>",
+                        email: "<%= user.email %>",
+                        contact: "<%= user.phone %>"
+                    },
+                    theme: {
+                        color: "#007bff"
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+                            
+                            sessionStorage.setItem('failedOrderData', JSON.stringify(orderData));
+                            
+                            window.location.href = `/order/payment-failed/${response.order_id}`;
+                        }
+                    }
+                };
+                
+                options.on = {
+                    payment: {
+                        failed: function(response) {
+                            console.log("Payment failed response:", response);
+                            sessionStorage.setItem('failedOrderData', JSON.stringify(orderData));
+                            
+                            const failOrderId = 
+                                (response.error && response.error.metadata && response.error.metadata.order_id) || 
+                                response.razorpay_order_id || 
+                                response.order_id;
+                            
+                            window.location.href = `/order/payment-failed/${failOrderId}`;
+                        }
+                    }
+                };
+                
+                const rzp = new Razorpay(options);
+                rzp.open();
+                
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Order Failed',
+                    text: response.message || "Failed to create Razorpay order. Please try again."
+                });
+                $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+            }
         },
         error: function(xhr) {
-          console.error("AJAX Error:", xhr.responseText);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: "Failed to initialize payment. Please try again."
-          });
-          $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+            console.error("AJAX Error:", xhr.responseText);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: "Failed to initialize payment. Please try again."
+            });
+            $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
         }
-      });
-    } else {
+    });
+} else {
       $.ajax({
         url: '/order/place',
         method: 'POST',
@@ -594,43 +613,40 @@ if (paymentMethod === "Wallet") {
   });
 }
   
-  function verifyRazorpayPayment(paymentData, orderData) {
+  
+function verifyRazorpayPayment(paymentData, orderData) {
     const verificationData = {
-      ...orderData,
-      razorpay_payment_id: paymentData.razorpay_payment_id,
-      razorpay_order_id: paymentData.razorpay_order_id,
-      razorpay_signature: paymentData.razorpay_signature
+        ...orderData,
+        razorpay_payment_id: paymentData.razorpay_payment_id,
+        razorpay_order_id: paymentData.razorpay_order_id,
+        razorpay_signature: paymentData.razorpay_signature
     };
     
     $.ajax({
-      url: '/order/verify-payment',
-      method: 'POST',
-      data: JSON.stringify(verificationData),
-      contentType: 'application/json',
-      dataType: 'json',
-      success: function(response) {
-        if (response.success) {
-          window.location.href = `/order/confirmation/${response.order._id}`;
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Payment Failed',
-            text: response.message || "Payment verification failed. Please try again or contact support."
-          });
-          $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+        url: '/order/verify-payment',
+        method: 'POST',
+        data: JSON.stringify(verificationData),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                window.location.href = `/order/confirmation/${response.order._id}`;
+            } else {
+                const failOrderId = response.orderId || paymentData.razorpay_order_id;
+                window.location.href = `/order/payment-failed/${failOrderId}`;
+            }
+        },
+        error: function(xhr) {
+            console.error("AJAX Error:", xhr.responseText);
+            
+            const failOrderId = paymentData.razorpay_order_id || orderData.addressId + "_" + Date.now();
+            
+            sessionStorage.setItem('failedOrderData', JSON.stringify(orderData));
+            
+            window.location.href = `/order/payment-failed/${failOrderId}`;
         }
-      },
-      error: function(xhr) {
-        console.error("AJAX Error:", xhr.responseText);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: "An error occurred during payment verification."
-        });
-        $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
-      }
     });
-  }
+}
 });
   </script>
 </body>

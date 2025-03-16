@@ -427,7 +427,6 @@
         }
     }
 </style>
-
 <section class="content-main">
     <div class="content-header d-flex justify-content-between align-items-center">
         <div>
@@ -475,6 +474,7 @@
                             <th scope="col">Date</th>
                             <th scope="col">Customer</th>
                             <th scope="col">Product</th>
+                            <th scope="col">Quantity</th>
                             <th scope="col">Price</th>
                             <th scope="col">Status</th>
                             <th scope="col">Total (₹)</th>
@@ -485,112 +485,109 @@
                     </thead>
                     <tbody>
                         <% for(let i=0; i<orders.length; i++) { %>
-                            <% let rowspanCount = 0; %>
-                            <% orders[i].orderedItems.forEach(item => { rowspanCount += item.quantity; }); %>
+                            <% let itemsCount = orders[i].orderedItems.length; %>
                             <% let isFirstRow = true; %>
-                            <% let itemCounter = 0; %>
                             
                             <% orders[i].orderedItems.forEach((item, itemIndex) => { %>
-                                <% for(let quantityIndex = 0; quantityIndex < item.quantity; quantityIndex++) { %>
-                                    <tr>
-                                        <% if (isFirstRow) { %>
-                                            <td class="clickable" onclick="viewOrderDetails('<%= orders[i]._id %>')" rowspan="<%= rowspanCount %>"><%= orders[i].orderId %></td>
-                                            <td rowspan="<%= rowspanCount %>"><%= new Date(orders[i].createdOn).toLocaleDateString('en-US', {
-                                                year: 'numeric',
-                                                month: 'short',
-                                                day: 'numeric'
-                                            }) %></td>
-                                            <td rowspan="<%= rowspanCount %>">
-                                                <b>
-                                                    <% if(orders[i].addressDetails && orders[i].addressDetails.name) { %>
-                                                        <%= orders[i].addressDetails.name %>
-                                                    <% } else { %>
-                                                        User not found
-                                                    <% } %>
-                                                </b>
-                                            </td>
-                                            <% isFirstRow = false; %>
+                                <tr>
+                                    <% if (isFirstRow) { %>
+                                        <td class="clickable" onclick="viewOrderDetails('<%= orders[i]._id %>')" rowspan="<%= itemsCount %>"><%= orders[i].orderId %></td>
+                                        <td rowspan="<%= itemsCount %>"><%= new Date(orders[i].createdOn).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric'
+                                        }) %></td>
+                                        <td rowspan="<%= itemsCount %>">
+                                            <b>
+                                                <% if(orders[i].addressDetails && orders[i].addressDetails.name) { %>
+                                                    <%= orders[i].addressDetails.name %>
+                                                <% } else { %>
+                                                    User not found
+                                                <% } %>
+                                            </b>
+                                        </td>
+                                        <% isFirstRow = false; %>
+                                    <% } %>
+                                    
+                                    <td><%= item.product ? item.product.productName : 'Product not found' %></td>
+                                    <td><span class="badge bg-dark"><%= item.quantity %></span></td>
+                                    <td>₹<%= item.price.toLocaleString() %></td>
+                                    <td>
+                                        <% if (item.status === 'Return Request') { %>
+                                            <select 
+                                                data-order-id="<%= orders[i].orderId %>"
+                                                data-item-id="<%= item._id %>"
+                                                data-current-status="<%= item.status %>"
+                                                onchange="updateItemStatus(this.dataset.orderId, this.dataset.itemId, this.value, this.dataset.currentStatus)"
+                                                class="status-select status-return-request"
+                                            >
+                                                <option value="Return Request" selected>Return Request</option>
+                                                <option value="Returned">Returned</option>
+                                            </select>
+                                        <% } else if (item.status === 'Delivered' || item.status === 'Cancelled' || item.status === 'Returned') { %>
+                                            <!-- For terminal states, just show non-editable dropdown -->
+                                            <select
+                                                class="status-select status-<%= item.status.toLowerCase().replace(/ /g, '-') %>"
+                                                disabled
+                                            >
+                                                <option value="<%= item.status %>" selected><%= item.status %></option>
+                                            </select>
+                                        <% } else { %>
+                                            <!-- For normal states, show editable dropdown -->
+                                            <select 
+                                                data-order-id="<%= orders[i].orderId %>"
+                                                data-item-id="<%= item._id %>"
+                                                data-current-status="<%= item.status %>"
+                                                onchange="updateItemStatus(this.dataset.orderId, this.dataset.itemId, this.value, this.dataset.currentStatus)"
+                                                class="status-select status-<%= item.status.toLowerCase().replace(/ /g, '-') %>"
+                                            >
+                                                <option value="Pending" <%= item.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                                <option value="Processing" <%= item.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                                <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                                <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                                <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                                <option value="Return Request" <%= item.status === 'Return Request' ? 'selected' : '' %>>Return Request</option>
+                                            </select>
                                         <% } %>
-                                        
-                                        <td><%= item.product ? item.product.productName : 'Product not found' %></td>                                        <td>₹<%= item.price.toLocaleString() %></td>
-                                        <td>
-                                            <% if (item.status === 'Return Request') { %>
-                                                <select 
-                                                    data-order-id="<%= orders[i].orderId %>"
-                                                    data-item-id="<%= item._id %>"
-                                                    data-current-status="<%= item.status %>"
-                                                    onchange="updateItemStatus(this.dataset.orderId, this.dataset.itemId, this.value, this.dataset.currentStatus)"
-                                                    class="status-select status-return-request"
-                                                >
-                                                    <option value="Return Request" selected>Return Request</option>
-                                                    <option value="Returned">Returned</option>
-                                                </select>
-                                            <% } else if (item.status === 'Delivered' || item.status === 'Cancelled' || item.status === 'Returned') { %>
-                                                <!-- For terminal states, just show non-editable dropdown -->
-                                                <select
-                                                    class="status-select status-<%= item.status.toLowerCase().replace(/ /g, '-') %>"
-                                                    disabled
-                                                >
-                                                    <option value="<%= item.status %>" selected><%= item.status %></option>
-                                                </select>
+                                    </td>
+                                    
+                                    <% if (isFirstRow || itemIndex === 0) { %>
+                                        <td rowspan="<%= itemsCount %>"><span class="fw-bold">₹<%= orders[i].finalAmount.toLocaleString() %></span></td>
+                                        <td rowspan="<%= itemsCount %>">
+                                            <% if (orders[i].paymentMethod === 'COD') { %>
+                                                <span class="badge bg-secondary">COD</span>
+                                            <% } else if (orders[i].paymentMethod === 'Razorpay') { %>
+                                                <span class="badge bg-success">Razorpay</span>
                                             <% } else { %>
-                                                <!-- For normal states, show editable dropdown -->
-                                                <select 
-                                                    data-order-id="<%= orders[i].orderId %>"
-                                                    data-item-id="<%= item._id %>"
-                                                    data-current-status="<%= item.status %>"
-                                                    onchange="updateItemStatus(this.dataset.orderId, this.dataset.itemId, this.value, this.dataset.currentStatus)"
-                                                    class="status-select status-<%= item.status.toLowerCase().replace(/ /g, '-') %>"
-                                                >
-                                                    <option value="Pending" <%= item.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                                    <option value="Processing" <%= item.status === 'Processing' ? 'selected' : '' %>>Processing</option>
-                                                    <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                                                    <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                                                    <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                                                    <option value="Return Request" <%= item.status === 'Return Request' ? 'selected' : '' %>>Return Request</option>
-                                                </select>
+                                                <span class="badge bg-primary"><%= orders[i].paymentMethod %></span>
                                             <% } %>
                                         </td>
-                                        
-                                        <% if (isFirstRow || itemCounter === 0) { %>
-                                            <td rowspan="<%= rowspanCount %>"><span class="fw-bold">₹<%= orders[i].finalAmount.toLocaleString() %></span></td>
-                                            <td rowspan="<%= rowspanCount %>">
-                                                <% if (orders[i].paymentMethod === 'COD') { %>
-                                                    <span class="badge bg-secondary">COD</span>
-                                                <% } else if (orders[i].paymentMethod === 'Razorpay') { %>
-                                                    <span class="badge bg-success">Razorpay</span>
-                                                <% } else { %>
-                                                    <span class="badge bg-primary"><%= orders[i].paymentMethod %></span>
-                                                <% } %>
-                                            </td>
-                                            <td rowspan="<%= rowspanCount %>">
-                                                <!-- Order-level status display (read-only) -->
-                                                <span class="badge bg-<%= 
-                                                    orders[i].status === 'Pending' ? 'warning' : 
-                                                    orders[i].status === 'Processing' ? 'info' :
-                                                    orders[i].status === 'Shipped' ? 'primary' :
-                                                    orders[i].status === 'Delivered' ? 'success' :
-                                                    orders[i].status === 'Cancelled' ? 'danger' :
-                                                    orders[i].status === 'Return Request' ? 'secondary' :
-                                                    orders[i].status === 'Returned' ? 'dark' : 'light'
-                                                %>"><%= orders[i].status %></span>
-                                            </td>
-                                            <td rowspan="<%= rowspanCount %>">
-                                                <div class="dropdown">
-                                                    <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                        <i class="material-icons md-more_horiz"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu">
-                                                        <li><a class="dropdown-item" href="#" onclick="viewOrderDetails('<%= orders[i]._id %>')">View details</a></li>
-                                                        <!-- <li><a class="dropdown-item" href="#" onclick="printInvoice('<%= orders[i].orderId %>')">Print invoice</a></li>
-                                                        <li><a class="dropdown-item text-danger" href="#" onclick="deleteOrder('<%= orders[i].orderId %>')">Delete</a></li> -->
-                                                    </ul>
-                                                </div>
-                                            </td>
-                                        <% } %>
-                                    </tr>
-                                    <% itemCounter++; %>
-                                <% } %>
+                                        <td rowspan="<%= itemsCount %>">
+                                            <!-- Order-level status display (read-only) -->
+                                            <span class="badge bg-<%= 
+                                                orders[i].status === 'Pending' ? 'warning' : 
+                                                orders[i].status === 'Processing' ? 'info' :
+                                                orders[i].status === 'Shipped' ? 'primary' :
+                                                orders[i].status === 'Delivered' ? 'success' :
+                                                orders[i].status === 'Cancelled' ? 'danger' :
+                                                orders[i].status === 'Return Request' ? 'secondary' :
+                                                orders[i].status === 'Returned' ? 'dark' : 'light'
+                                            %>"><%= orders[i].status %></span>
+                                        </td>
+                                        <td rowspan="<%= itemsCount %>">
+                                            <div class="dropdown">
+                                                <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="material-icons md-more_horiz"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#" onclick="viewOrderDetails('<%= orders[i]._id %>')">View details</a></li>
+                                                    <!-- <li><a class="dropdown-item" href="#" onclick="printInvoice('<%= orders[i].orderId %>')">Print invoice</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#" onclick="deleteOrder('<%= orders[i].orderId %>')">Delete</a></li> -->
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    <% } %>
+                                </tr>
                             <% }); %>
                         <% } %>
                     </tbody>

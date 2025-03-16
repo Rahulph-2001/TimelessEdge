@@ -360,32 +360,35 @@ const verifyOtp = async (req, res) => {
 
                 const referralTransaction = new ReferralTransaction({
                     referrer: referrer._id,
-                    referred: newUser._id,
-                    reward: 100, 
+                    referred: newUser._id, 
+                    reward: 100,
                     status: 'pending'
                 });
+
+                await newUser.save();
+                referralTransaction.referred = newUser._id;
                 await referralTransaction.save();
                 console.log('Referral transaction created:', referralTransaction);
 
-                const couponCode = `REF${referrer.referralCode}${Date.now().toString().slice(-4)}`; 
+                const couponCode = `REF${referrer.referralCode}${Date.now().toString().slice(-4)}`;
                 const newCoupon = new Coupon({
                     name: couponCode,
                     userId: [referrer._id], 
+                    referrer: referrer._id, 
                     createdOn: new Date(),
                     expireOn: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                    offerPrice: 100, 
-                    minimumPrice: 500, 
-                    isList: false 
+                    offerPrice: 100,
+                    minimumPrice: 500,
+                    isList: false
                 });
                 await newCoupon.save();
                 console.log('Generated referral coupon for referrer:', newCoupon);
             } else {
                 console.log('Invalid referral code:', userData.referralCode);
             }
+        } else {
+            await newUser.save();
         }
-
-        await newUser.save();
-        console.log('New user saved:', newUser);
 
         req.session.user = newUser._id;
         delete req.session.userOtp;
@@ -396,7 +399,7 @@ const verifyOtp = async (req, res) => {
         console.error("Error Verifying OTP:", error);
         res.status(500).json({ success: false, message: 'An error occurred during OTP verification' });
     }
-}
+};
 
 const resendOtp = async (req, res) => {
     try {

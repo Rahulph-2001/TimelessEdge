@@ -747,18 +747,30 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="/path/to/your/cart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
     <script>
       document.addEventListener("DOMContentLoaded", () => {
+        const MAX_LIMIT = 10;
+    
         document.querySelectorAll("[data-input-counter-increment]").forEach(button => {
           button.addEventListener("click", async () => {
             const inputId = button.getAttribute("data-input-counter-increment");
             const input = document.getElementById(inputId);
-            let newValue = parseInt(input.value, 10) + 1;
+            let currentValue = parseInt(input.value, 10);
+            
+            if (currentValue >= MAX_LIMIT) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Maximum Limit Reached',
+                text: `You can only add a maximum of ${MAX_LIMIT} units for this product.`
+              });
+              return;
+            }
+    
+            let newValue = currentValue + 1;
             updateCart(inputId, newValue);
           });
         });
-  
+    
         document.querySelectorAll("[data-input-counter-decrement]").forEach(button => {
           button.addEventListener("click", async () => {
             const inputId = button.getAttribute("data-input-counter-decrement");
@@ -769,31 +781,42 @@
             }
           });
         });
-  
+    
         async function updateCart(inputId, newQuantity) {
           const itemId = inputId.replace("counter-input-", "");
-          const response = await fetch("/cart/update-cart", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ itemId, quantity: newQuantity })
-          });
-          if (response.ok) {
-            location.reload();
-          } else {
+          try {
+            const response = await fetch("/cart/update-cart", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ itemId, quantity: newQuantity })
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+              location.reload();
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: data.error || 'Error updating cart quantity'
+              });
+            }
+          } catch (error) {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Error: The item is out of stock.'
+              text: 'Something went wrong while updating the cart'
             });
           }
         }
       });
-  
+    
       $(document).on('click', '.remove', function (){
         const itemId = $(this).data('id');
-  
+    
         $.ajax({
           url: '/cart/remove',
           type: 'POST',
@@ -816,11 +839,13 @@
           }
         });
       });
-  
+    
       $(document).ready(function () {
+        const MAX_LIMIT = 10;
+    
         $(".related-grid").on("click", ".button-primary", function () {
           const productId = $(this).closest(".product-card").find("a").attr("href").split("=")[1]; 
-  
+    
           $.ajax({
             url: "/cart/add",
             type: "POST",
@@ -834,10 +859,14 @@
               });
             },
             error: function (xhr) {
+              let errorMsg = xhr.responseJSON?.error || "Failed to add product to cart.";
+              if (errorMsg.includes("maximum")) {
+                errorMsg = `You can only add a maximum of ${MAX_LIMIT} units for this product.`;
+              }
               Swal.fire({
                 icon: "error",
                 title: "Oops...",
-                text: xhr.responseJSON?.error || "Failed to add product to cart.",
+                text: errorMsg,
               });
             },
           });

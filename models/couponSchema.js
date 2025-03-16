@@ -38,6 +38,11 @@ const couponSchema= new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
       }],
+      referrer: { 
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+    }
 
 })
 

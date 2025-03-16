@@ -55,11 +55,11 @@ router.put('/addProductOffer/:id',productController.addOffer)
 router.put('/removeProductOffer/:id',productController.removeProductOffer)
 
 
-router.get('/AdminOrder',orderController.getAllOrders)
-router.post('/orders/update-item-status', orderController.updateItemStatus);
-router.get('/orders/view/:id',orderController.viewOrderDetails)
-router.put('/orders/approve-return',orderController.approveReturn)
-router.put('/orders/reject-return',orderController.rejectReturn)
+router.get('/AdminOrder',adminAuth,orderController.getAllOrders)
+router.post('/orders/update-item-status', adminAuth,orderController.updateItemStatus);
+router.get('/orders/view/:id',adminAuth,orderController.viewOrderDetails)
+router.put('/orders/approve-return',adminAuth,orderController.approveReturn)
+router.put('/orders/reject-return',adminAuth,orderController.rejectReturn)
 
 router.get('/coupon',adminAuth,couponController.getCoupon)
 router.post('/createCoupon',adminAuth,couponController.createCoupon)
@@ -68,9 +68,9 @@ router.put('/unblockcoupon/:couponId',adminAuth,couponController.unblockCoupon)
 router.get('/editcoupon/:id',adminAuth,couponController.getEditCoupon)
 router.put('/updatecoupon',adminAuth,couponController.updateCoupon)
 
-router.get('/sales-report', salesReportController.getSalesReport);
-router.get('/sales-report/pdf', salesReportController.exportSalesPdf);
-router.get('/sales-report/excel', salesReportController.exportSalesExcel);
+router.get('/sales-report',adminAuth, salesReportController.getSalesReport);
+router.get('/sales-report/pdf', adminAuth,salesReportController.exportSalesPdf);
+router.get('/sales-report/excel', adminAuth,salesReportController.exportSalesExcel);
 
 
 module.exports = router;

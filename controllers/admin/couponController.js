@@ -55,13 +55,32 @@ const validateCouponData = (data) => {
 
 const getCoupon = async (req, res) => {
     try {
-        const coupons = await Coupon.find().sort({ createdOn: -1 });
-        return res.render('couponManagement', { coupons });
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10; 
+        const skip = (page - 1) * limit;
+
+        const totalCoupons = await Coupon.countDocuments();
+        const coupons = await Coupon.find()
+            .sort({ createdOn: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalPages = Math.ceil(totalCoupons / limit);
+
+        return res.render('couponManagement', { 
+            coupons,
+            currentPage: page,
+            totalPages,
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1
+        });
     } catch (error) {
         console.error("Error getting coupons:", error);
         return res.redirect('/pageNotFound');
     }
 }
+
+
 const createCoupon = async (req, res) => {
     try {
         console.log("Request Body:", req.body);

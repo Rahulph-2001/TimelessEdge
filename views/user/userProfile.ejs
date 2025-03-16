@@ -10,7 +10,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- SweetAlert2 CSS and JS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -35,6 +35,7 @@
         .nav-link {
             transition: all 0.2s ease;
         }
+
 
         .nav-link.active {
             background-color: #4F46E5;
@@ -559,44 +560,41 @@
                     </section>
                     <section id="referrals" class="mb-10 section-card">
                         <div class="bg-white shadow-md rounded-xl p-6">
-                            <h2 class="text-2xl font-semibold mb-6 text-gray-800 flex items-center">
+                            <h2 class="text-2xl font-semibold mb-6 text-black flex items-center">
                                 <i data-lucide="users" class="w-6 h-6 mr-2 text-indigo-600"></i>
                                 My Referrals
                             </h2>
 
                             <!-- Referral Code Card -->
-                            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 mb-8 text-white">
-                                <h3 class="text-xl font-semibold mb-2">Your Referral Code</h3>
-                                <p class="text-sm mb-4 text-indigo-100">Share this code with friends to earn rewards!
-                                </p>
-
+                            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 mb-8">
+                                <h3 class="text-xl font-semibold mb-2 text-black">Your Referral Code</h3>
+                                <p class="text-sm mb-4 text-black">Share this code with friends to earn rewards!</p>
                                 <div class="flex items-center">
                                     <div class="bg-white bg-opacity-20 rounded-lg p-3 flex-grow mr-2">
-                                        <p class="text-xl font-mono text-center select-all">
+                                        <p class="text-xl font-mono text-center select-all text-black">
                                             <%= user.referralCode %>
                                         </p>
                                     </div>
                                     <button id="copyReferralBtn"
-                                        class="bg-white text-indigo-600 hover:bg-indigo-50 font-medium py-3 px-4 rounded-lg transition-colors duration-200">
+                                        class="bg-white text-black hover:bg-indigo-50 font-medium py-3 px-4 rounded-lg transition-colors duration-200">
                                         <i data-lucide="copy" class="w-5 h-5"></i>
                                     </button>
                                 </div>
-
                                 <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div class="bg-white bg-opacity-20 rounded-lg p-4 text-center">
-                                        <p class="text-sm text-indigo-100">Total Referrals</p>
-                                        <p class="text-2xl font-bold">
+                                        <p class="text-sm text-black">Total Referrals</p>
+                                        <p class="text-2xl font-bold text-black">
                                             <%= user.referralCount || 0 %>
                                         </p>
                                     </div>
                                     <div class="bg-white bg-opacity-20 rounded-lg p-4 text-center">
-                                        <p class="text-sm text-indigo-100">Total Earned</p>
-                                        <p class="text-2xl font-bold">₹<%= totalReferralEarnings || 0 %>
+                                        <p class="text-sm text-black">Total Earned</p>
+                                        <p class="text-2xl font-bold text-black">₹<%= totalReferralEarnings || 0 %>
                                         </p>
                                     </div>
                                     <div class="bg-white bg-opacity-20 rounded-lg p-4 text-center">
-                                        <p class="text-sm text-indigo-100">Reward Per Referral</p>
-                                        <p class="text-2xl font-bold">₹<%= referralReward || 100 %>
+                                        <p class="text-sm text-black">Reward Per Referral</p>
+                                        <p class="text-2xl font-bold text-black">₹<%= referralReward || 100 %>
                                         </p>
                                     </div>
                                 </div>
@@ -627,7 +625,18 @@
 
                             <!-- Referral History -->
                             <div>
-                                <h3 class="text-lg font-semibold mb-4 text-gray-700">Referral History</h3>
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-lg font-semibold text-gray-700">Referral History</h3>
+                                    <div class="flex items-center">
+                                        <select id="referralFilter"
+                                            class="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                            <option value="all">All Referrals</option>
+                                            <option value="completed">Completed</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="rejected">Rejected</option>
+                                        </select>
+                                    </div>
+                                </div>
                                 <% if (referralTransactions && referralTransactions.length> 0) { %>
                                     <div class="overflow-x-auto">
                                         <table class="min-w-full divide-y divide-gray-200">
@@ -647,9 +656,10 @@
                                                         Status</th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="bg-white divide-y divide-gray-200">
+                                            <tbody class="bg-white divide-y divide-gray-200" id="referralsTable">
                                                 <% referralTransactions.forEach(transaction=> { %>
-                                                    <tr class="hover:bg-gray-50">
+                                                    <tr class="hover:bg-gray-50 referral-row"
+                                                        data-status="<%= transaction.status %>">
                                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                             <%= new Date(transaction.createdAt).toLocaleDateString() %>
                                                         </td>
@@ -663,9 +673,9 @@
                                                         </td>
                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                                <%= transaction.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                                                                   transaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                                                   'bg-red-100 text-red-800' %>">
+                                            <%= transaction.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                                               transaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                               'bg-red-100 text-red-800' %>">
                                                                 <%= transaction.status.charAt(0).toUpperCase() +
                                                                     transaction.status.slice(1) %>
                                                             </span>
@@ -675,13 +685,117 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <% } else { %>
-                                        <div class="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
-                                            <i data-lucide="users" class="w-12 h-12 mx-auto text-gray-400 mb-4"></i>
-                                            <p class="text-gray-600">No referrals yet. Share your code to start earning
-                                                rewards!</p>
+
+                                    <!-- Mobile Referral Cards -->
+                                    <div class="md:hidden space-y-4 mt-4">
+                                        <% referralTransactions.forEach(transaction=> { %>
+                                            <div class="bg-white border rounded-lg shadow-sm p-4 referral-card"
+                                                data-status="<%= transaction.status %>">
+                                                <div class="flex justify-between items-start mb-3">
+                                                    <div>
+                                                        <span class="text-xs text-gray-500">Referred User</span>
+                                                        <h3 class="font-medium">
+                                                            <%= transaction.referred ? transaction.referred.name
+                                                                : 'Unknown User' %>
+                                                        </h3>
+                                                    </div>
+                                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        <%= transaction.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                                           transaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                           'bg-red-100 text-red-800' %>">
+                                                        <%= transaction.status.charAt(0).toUpperCase() +
+                                                            transaction.status.slice(1) %>
+                                                    </span>
+                                                </div>
+                                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                                    <div>
+                                                        <span class="text-xs text-gray-500">Date</span>
+                                                        <p>
+                                                            <%= new Date(transaction.createdAt).toLocaleDateString() %>
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-xs text-gray-500">Reward</span>
+                                                        <p class="font-medium">₹<%= transaction.reward %>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <% }) %>
+                                    </div>
+
+                                    <!-- Pagination for Referrals -->
+                                    <% if (referralPagination && referralPagination.totalPages> 1) { %>
+                                        <div
+                                            class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4">
+                                            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                                <div>
+                                                    <p class="text-sm text-gray-700">
+                                                        Showing
+                                                        <span class="font-medium">
+                                                            <%= (referralPagination.page - 1) * referralPagination.limit
+                                                                + 1 %>
+                                                        </span>
+                                                        to
+                                                        <span class="font-medium">
+                                                            <%= Math.min(referralPagination.page *
+                                                                referralPagination.limit,
+                                                                referralPagination.totalReferrals) %>
+                                                        </span>
+                                                        of
+                                                        <span class="font-medium">
+                                                            <%= referralPagination.totalReferrals %>
+                                                        </span>
+                                                        referrals
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                                                        aria-label="Pagination">
+                                                        <a href="?refPage=<%= referralPagination.page > 1 ? (referralPagination.page - 1) : 1 %>"
+                                                            class="<%= referralPagination.page <= 1 ? 'cursor-not-allowed bg-gray-100' : 'hover:bg-gray-50' %> relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500">
+                                                            <span class="sr-only">Previous</span>
+                                                            <i data-lucide="chevron-left" class="h-5 w-5"></i>
+                                                        </a>
+                                                        <% for(let i=1; i <=referralPagination.totalPages; i++) { %>
+                                                            <a href="?refPage=<%= i %>"
+                                                                class="<%= referralPagination.page === i ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50' %> relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                                                <%= i %>
+                                                            </a>
+                                                            <% } %>
+                                                                <a href="?refPage=<%= referralPagination.page < referralPagination.totalPages ? (referralPagination.page + 1) : referralPagination.totalPages %>"
+                                                                    class="<%= referralPagination.page >= referralPagination.totalPages ? 'cursor-not-allowed bg-gray-100' : 'hover:bg-gray-50' %> relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500">
+                                                                    <span class="sr-only">Next</span>
+                                                                    <i data-lucide="chevron-right" class="h-5 w-5"></i>
+                                                                </a>
+                                                    </nav>
+                                                </div>
+                                            </div>
+                                            <div class="flex justify-between items-center sm:hidden mt-4">
+                                                <a href="?refPage=<%= referralPagination.page > 1 ? (referralPagination.page - 1) : 1 %>"
+                                                    class="<%= referralPagination.page <= 1 ? 'opacity-50 cursor-not-allowed' : '' %> relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                                    Previous
+                                                </a>
+                                                <span class="text-sm text-gray-700">
+                                                    Page <%= referralPagination.page %> of <%=
+                                                            referralPagination.totalPages %>
+                                                </span>
+                                                <a href="?refPage=<%= referralPagination.page < referralPagination.totalPages ? (referralPagination.page + 1) : referralPagination.totalPages %>"
+                                                    class="<%= referralPagination.page >= referralPagination.totalPages ? 'opacity-50 cursor-not-allowed' : '' %> ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                                    Next
+                                                </a>
+                                            </div>
                                         </div>
                                         <% } %>
+                                            <% } else { %>
+                                                <div
+                                                    class="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                                                    <i data-lucide="users"
+                                                        class="w-12 h-12 mx-auto text-gray-400 mb-4"></i>
+                                                    <p class="text-gray-600">No referrals yet. Share your code to start
+                                                        earning rewards!</p>
+                                                </div>
+                                                <% } %>
                             </div>
                         </div>
                     </section>
@@ -920,54 +1034,54 @@
                         });
                     }
                 });
-document.addEventListener('DOMContentLoaded', function () {
-    const referralCode = userReferralCode; 
-    const referralUrl = `${siteUrl}/register?ref=${referralCode}`;
+                document.addEventListener('DOMContentLoaded', function () {
+                    const referralCode = userReferralCode;
+                    const referralUrl = `${siteUrl}/register?ref=${referralCode}`;
 
-    const whatsappBtn = document.getElementById('whatsappShareBtn');
-    if (whatsappBtn) {
-        const whatsappText = `Shop with my referral code ${referralCode} at TimelessEdge and get a discount on your first order!`;
-        whatsappBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            window.open(`https://wa.me/?text=${encodeURIComponent(whatsappText + ' ' + referralUrl)}`, '_blank');
-        });
-    }
+                    const whatsappBtn = document.getElementById('whatsappShareBtn');
+                    if (whatsappBtn) {
+                        const whatsappText = `Shop with my referral code ${referralCode} at TimelessEdge and get a discount on your first order!`;
+                        whatsappBtn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            window.open(`https://wa.me/?text=${encodeURIComponent(whatsappText + ' ' + referralUrl)}`, '_blank');
+                        });
+                    }
 
-    const facebookBtn = document.getElementById('facebookShareBtn');
-    if (facebookBtn) {
-        facebookBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralUrl)}`, '_blank');
-        });
-    }
+                    const facebookBtn = document.getElementById('facebookShareBtn');
+                    if (facebookBtn) {
+                        facebookBtn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralUrl)}`, '_blank');
+                        });
+                    }
 
-    const twitterBtn = document.getElementById('twitterShareBtn');
-    if (twitterBtn) {
-        const tweetText = `Join TimelessEdge with my referral code ${referralCode} and get amazing discounts!`;
-        twitterBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(referralUrl)}`, '_blank');
-        });
-    }
+                    const twitterBtn = document.getElementById('twitterShareBtn');
+                    if (twitterBtn) {
+                        const tweetText = `Join TimelessEdge with my referral code ${referralCode} and get amazing discounts!`;
+                        twitterBtn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(referralUrl)}`, '_blank');
+                        });
+                    }
 
-    const emailBtn = document.getElementById('emailShareBtn');
-    if (emailBtn) {
-        const emailSubject = 'Join TimelessEdge with my referral code';
-        const emailBody = `Use my referral code ${referralCode} to get a discount on your first order at TimelessEdge! Sign up here: ${referralUrl}`;
-        emailBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            window.location.href = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-        });
-    }
-});
+                    const emailBtn = document.getElementById('emailShareBtn');
+                    if (emailBtn) {
+                        const emailSubject = 'Join TimelessEdge with my referral code';
+                        const emailBody = `Use my referral code ${referralCode} to get a discount on your first order at TimelessEdge! Sign up here: ${referralUrl}`;
+                        emailBtn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            window.location.href = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+                        });
+                    }
+                });
 
 
-function debugReferralData() {
-    console.log('Referral Code:', userReferralCode);
-    console.log('Site URL:', siteUrl);
-    console.log('Referral Transactions:', document.querySelectorAll('tbody tr').length);
-    console.log('Total Referral Earnings:', document.querySelector('.bg-white.bg-opacity-20:nth-child(2) .text-2xl').textContent);
-}
+                function debugReferralData() {
+                    console.log('Referral Code:', userReferralCode);
+                    console.log('Site URL:', siteUrl);
+                    console.log('Referral Transactions:', document.querySelectorAll('tbody tr').length);
+                    console.log('Total Referral Earnings:', document.querySelector('.bg-white.bg-opacity-20:nth-child(2) .text-2xl').textContent);
+                }
 
 
             </script>

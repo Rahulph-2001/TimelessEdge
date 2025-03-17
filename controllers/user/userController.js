@@ -77,13 +77,162 @@ const loadSignup = async (req, res) => {
 }
 
 
+// const loadShopping = async (req, res) => {
+//     try {
+//         const blockedBrands = await Brand.find({ isBlocked: true }).select('_id');
+//         const categories = await Category.find({ isListed: true });
+
+//         const page = parseInt(req.query.page) || 1;
+//         const limit = 6;
+//         const skip = (page - 1) * limit;
+
+//         const listedCategories = categories.map(cat => cat._id);
+
+//         let query = {
+//             isBlocked: false,
+//             category: { $in: listedCategories },
+//             brand: { $nin: blockedBrands.map(brand => brand._id) }
+//         };
+
+//         let searchQuery = req.query.search || "";
+//         let priceMin = req.query.priceMin || "";
+//         let priceMax = req.query.priceMax || "";
+//         let category = req.query.category || "";
+//         let brand = req.query.brand || "";
+//         let sort = req.query.sort || "asc";
+
+//         if (searchQuery) {
+//             query.$or = [
+//                 { productName: { $regex: searchQuery, $options: "i" } },
+//                 { description: { $regex: searchQuery, $options: "i" } }
+//             ];
+//         }
+
+//         if (priceMin && priceMax) {
+//             query.salePrice = {
+//                 $gte: parseInt(priceMin),
+//                 $lte: parseInt(priceMax)
+//             };
+//         } else if (priceMin) {
+//             query.salePrice = { $gte: parseInt(priceMin) };
+//         } else if (priceMax) {
+//             query.salePrice = { $lte: parseInt(priceMax) };
+//         }
+
+//         if (category) {
+//             query.category = category;
+//         }
+
+//         if (brand) {
+//             if (!blockedBrands.map(b => b._id.toString()).includes(brand)) {
+//                 query.brand = brand;
+//             } else {
+//                 query.brand = null;
+//             }
+//         }
+
+//         let sortOption = {};
+//         if (sort === "asc") {
+//             sortOption = { productName: 1 };
+//         } else if (sort === "desc") {
+//             sortOption = { productName: -1 };
+//         } else if (sort === "price_low") {
+//             sortOption = { salePrice: 1 };
+//         } else if (sort === "price_high") {
+//             sortOption = { salePrice: -1 };
+//         } else if (sort === "newest") {
+//             sortOption = { createdOn: -1 };
+//         } else {
+//             sortOption = { productName: 1 };
+//         }
+
+//         const totalProducts = await Product.countDocuments(query);
+//         const products = await Product.find(query)
+//             .populate("category")
+//             .populate("brand")
+//             .skip(skip)
+//             .limit(limit)
+//             .sort(sortOption);
+
+//             const processedProducts = products.map(product => {
+//                 const categoryOffer = product.category ? product.category.categoryOffer || 0 : 0;
+                
+//                 const productOffer = product.productOffer || 0;
+                
+//                 const bestOffer = Math.max(categoryOffer, productOffer);
+                
+//                 let finalPrice = product.salePrice;
+//                 let offerPrice = null;
+//                 let savedAmount = null;
+//                 let offerType = null;
+                
+//                 if (bestOffer > 0) {
+//                     offerPrice = Math.round(product.salePrice * (1 - bestOffer/100));
+//                     savedAmount = product.salePrice - offerPrice;
+//                     offerType = productOffer > categoryOffer ? 'product' : 'category';
+//                 }
+                
+//                 return {
+//                     ...product._doc,
+//                     image: product.productImages && product.productImages.length > 0
+//                         ? product.productImages[0]
+//                         : "/img/default-product.jpg",
+//                     categoryOffer,
+//                     productOffer,
+//                     bestOffer,
+//                     offerPrice,
+//                     savedAmount,
+//                     offerType
+//                 };
+//             })
+
+//         const totalPages = Math.ceil(totalProducts / limit);
+
+//         const user = req.session.user || null;
+//         const userId = user ? user._id : null;
+
+//         let activeUser = null;
+//         if (userId) {
+//             activeUser = await User.findById(userId);
+
+//             if (!activeUser || activeUser.isBlocked) {
+//                 req.session.destroy();
+//                 return res.redirect('/login');
+//             }
+//         }
+
+//         res.render("shop", {
+//             user: activeUser || user,
+//             products: processedProducts,
+//             categories: categories,
+//             brands: await Brand.find({ isBlocked: false }),
+//             totalPages,
+//             currentPage: page,
+//             itemsPerPage: limit,
+//             totalItems: totalProducts,
+//             query: {
+//                 search: searchQuery,
+//                 priceMin,
+//                 priceMax,
+//                 category,
+//                 brand,
+//                 sort
+//             }
+//         });
+//     } catch (error) {
+//         console.error("Error loading shopping page:", error);
+//         res.status(500).send("Server Error");
+//     }
+// };
+
+
 const loadShopping = async (req, res) => {
     try {
         const blockedBrands = await Brand.find({ isBlocked: true }).select('_id');
         const categories = await Category.find({ isListed: true });
 
-        const page = parseInt(req.query.page) || 1;
-        const limit = 6;
+        const page = Math.max(parseInt(req.query.page) || 1, 1); 
+        const limit = parseInt(req.query.limit) || 6;
         const skip = (page - 1) * limit;
 
         const listedCategories = categories.map(cat => cat._id);
@@ -94,11 +243,11 @@ const loadShopping = async (req, res) => {
             brand: { $nin: blockedBrands.map(brand => brand._id) }
         };
 
-        let searchQuery = req.query.search || "";
-        let priceMin = req.query.priceMin || "";
-        let priceMax = req.query.priceMax || "";
-        let category = req.query.category || "";
-        let brand = req.query.brand || "";
+        let searchQuery = req.query.search ? req.query.search.trim() : "";
+        let priceMin = req.query.priceMin ? parseInt(req.query.priceMin) : null;
+        let priceMax = req.query.priceMax ? parseInt(req.query.priceMax) : null;
+        let categoryId = req.query.category ? req.query.category.trim() : "";
+        let brandId = req.query.brand ? req.query.brand.trim() : "";
         let sort = req.query.sort || "asc";
 
         if (searchQuery) {
@@ -108,85 +257,122 @@ const loadShopping = async (req, res) => {
             ];
         }
 
-        if (priceMin && priceMax) {
+        if (priceMin !== null && priceMax !== null) {
             query.salePrice = {
-                $gte: parseInt(priceMin),
-                $lte: parseInt(priceMax)
+                $gte: priceMin,
+                $lte: priceMax
             };
-        } else if (priceMin) {
-            query.salePrice = { $gte: parseInt(priceMin) };
-        } else if (priceMax) {
-            query.salePrice = { $lte: parseInt(priceMax) };
+        } else if (priceMin !== null) {
+            query.salePrice = { $gte: priceMin };
+        } else if (priceMax !== null) {
+            query.salePrice = { $lte: priceMax };
         }
 
-        if (category) {
-            query.category = category;
+        if (categoryId) {
+            if (mongoose.Types.ObjectId.isValid(categoryId)) {
+                const isCategoryListed = listedCategories.some(id => id.toString() === categoryId);
+                if (isCategoryListed) {
+                    query.category = categoryId;
+                }
+            }
         }
 
-        if (brand) {
-            if (!blockedBrands.map(b => b._id.toString()).includes(brand)) {
-                query.brand = brand;
-            } else {
-                query.brand = null;
+        if (brandId) {
+            if (mongoose.Types.ObjectId.isValid(brandId)) {
+                if (!blockedBrands.map(b => b._id.toString()).includes(brandId)) {
+                    query.brand = brandId;
+                }
             }
         }
 
         let sortOption = {};
-        if (sort === "asc") {
-            sortOption = { productName: 1 };
-        } else if (sort === "desc") {
-            sortOption = { productName: -1 };
-        } else if (sort === "price_low") {
-            sortOption = { salePrice: 1 };
-        } else if (sort === "price_high") {
-            sortOption = { salePrice: -1 };
-        } else if (sort === "newest") {
-            sortOption = { createdOn: -1 };
-        } else {
-            sortOption = { productName: 1 };
+        switch (sort) {
+            case "desc":
+                sortOption = { productName: -1 };
+                break;
+            case "price_low":
+                sortOption = { salePrice: 1 };
+                break;
+            case "price_high":
+                sortOption = { salePrice: -1 };
+                break;
+            case "newest":
+                sortOption = { createdAt: -1 };
+                break;
+            case "asc":
+            default:
+                sortOption = { productName: 1 };
+                break;
         }
 
         const totalProducts = await Product.countDocuments(query);
+
+        if (totalProducts === 0) {
+            const brands = await Brand.find({ isBlocked: false });
+            return res.render("shop", {
+                user: null,
+                products: [],
+                categories,
+                brands,
+                totalPages: 0,
+                currentPage: page,
+                itemsPerPage: limit,
+                totalItems: 0,
+                query: {
+                    search: searchQuery,
+                    priceMin: priceMin || '',
+                    priceMax: priceMax || '',
+                    category: categoryId,
+                    brand: brandId,
+                    sort
+                }
+            });
+        }
+
+        const totalPages = Math.ceil(totalProducts / limit);
+        
+        const adjustedPage = page > totalPages ? 1 : page;
+        const adjustedSkip = (adjustedPage - 1) * limit;
+
         const products = await Product.find(query)
             .populate("category")
             .populate("brand")
-            .skip(skip)
+            .skip(adjustedSkip)
             .limit(limit)
-            .sort(sortOption);
+            .sort(sortOption)
+            .lean(); 
 
-            const processedProducts = products.map(product => {
-                const categoryOffer = product.category ? product.category.categoryOffer || 0 : 0;
-                
-                const productOffer = product.productOffer || 0;
-                
-                const bestOffer = Math.max(categoryOffer, productOffer);
-                
-                let finalPrice = product.salePrice;
-                let offerPrice = null;
-                let savedAmount = null;
-                let offerType = null;
-                
-                if (bestOffer > 0) {
-                    offerPrice = Math.round(product.salePrice * (1 - bestOffer/100));
-                    savedAmount = product.salePrice - offerPrice;
-                    offerType = productOffer > categoryOffer ? 'product' : 'category';
-                }
-                
-                return {
-                    ...product._doc,
-                    image: product.productImages && product.productImages.length > 0
-                        ? product.productImages[0]
-                        : "/img/default-product.jpg",
-                    categoryOffer,
-                    productOffer,
-                    bestOffer,
-                    offerPrice,
-                    savedAmount,
-                    offerType
-                };
-            })
-
-        const totalPages = Math.ceil(totalProducts / limit);
+        const processedProducts = products.map(product => {
+            const categoryOffer = product.category ? product.category.categoryOffer || 0 : 0;
+            
+            const productOffer = product.productOffer || 0;
+            
+            const bestOffer = Math.max(categoryOffer, productOffer);
+            
+            let finalPrice = product.salePrice;
+            let offerPrice = null;
+            let savedAmount = null;
+            let offerType = null;
+            
+            if (bestOffer > 0) {
+                offerPrice = Math.round(product.salePrice * (1 - bestOffer/100));
+                savedAmount = product.salePrice - offerPrice;
+                offerType = productOffer > categoryOffer ? 'product' : 'category';
+            }
+            
+            return {
+                ...product,
+                image: product.productImages && product.productImages.length > 0
+                    ? product.productImages[0]
+                    : "/img/default-product.jpg",
+                categoryOffer,
+                productOffer,
+                bestOffer,
+                offerPrice,
+                savedAmount,
+                offerType
+            };
+        });
 
         const user = req.session.user || null;
         const userId = user ? user._id : null;
@@ -201,21 +387,23 @@ const loadShopping = async (req, res) => {
             }
         }
 
+        const brands = await Brand.find({ isBlocked: false });
+
         res.render("shop", {
             user: activeUser || user,
             products: processedProducts,
-            categories: categories,
-            brands: await Brand.find({ isBlocked: false }),
+            categories,
+            brands,
             totalPages,
-            currentPage: page,
+            currentPage: adjustedPage,
             itemsPerPage: limit,
             totalItems: totalProducts,
             query: {
                 search: searchQuery,
-                priceMin,
-                priceMax,
-                category,
-                brand,
+                priceMin: priceMin || '',
+                priceMax: priceMax || '',
+                category: categoryId,
+                brand: brandId,
                 sort
             }
         });
@@ -224,7 +412,6 @@ const loadShopping = async (req, res) => {
         res.status(500).send("Server Error");
     }
 };
-
 
 const loadHomepage = async (req, res) => {
     try {

@@ -31,7 +31,6 @@ const adminAuth = async (req, res, next) => {
       }
       req.admin = activeAdmin;
   
-      // Using req.originalUrl to check the complete URL
       if (req.originalUrl === '/admin/login') {
         return res.redirect('/admin');
       }

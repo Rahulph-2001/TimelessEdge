@@ -68,6 +68,7 @@ router.post('/profile/update', upload.single('profile_image'),profileController.
 
 
 router.get('/productDetails',productController.productDetails)
+router.post('/submit-review',productController.submitReview)
 router.post('/wishlist/add/:id',productController.addWhishlist)
 router.get('/wishlist',productController.wishListPage)
 router.delete('/wishlist/remove/:productId',productController.removeWishlist)

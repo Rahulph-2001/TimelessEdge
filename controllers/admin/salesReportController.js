@@ -248,7 +248,8 @@ const exportSalesExcel = async (req, res) => {
           createdOn: {
               $gte: start,
               $lte: end
-          }
+          },
+          status: 'Delivered' 
       };
 
       const orders = await Order.find(dateFilter)
@@ -293,7 +294,6 @@ const exportSalesExcel = async (req, res) => {
       worksheet.mergeCells('A2:G2');
       worksheet.getCell('A2').alignment = { horizontal: 'center' };
       
-      
       worksheet.addRow(['']);
       const summaryRow = worksheet.addRow(['Summary']);
       summaryRow.font = { bold: true };
@@ -302,7 +302,6 @@ const exportSalesExcel = async (req, res) => {
       worksheet.addRow(['Total Discount:', `₹${totalDiscount.toLocaleString()}`]);
       worksheet.addRow(['Unique Customers:', uniqueCustomers]);
       worksheet.addRow(['']);
-      
       
       const headerRow = worksheet.addRow([
           'Sl No', 'Order ID', 'Customer', 'Products', 'Date', 'Discount Amount', 'Final Amount'
@@ -322,13 +321,11 @@ const exportSalesExcel = async (req, res) => {
           };
       });
       
-     
       const customersMap = new Map();
       await Promise.all(orders.map(async (order) => {
           customersMap.set(order._id.toString(), await getCustomerNameFromOrder(order));
       }));
       
-     
       orders.forEach((order, index) => {
           const products = order.orderedItems.map(item => 
               `${item.product ? item.product.productName : 'Unknown Product'} (${item.quantity})`
@@ -383,7 +380,7 @@ const exportSalesPdf = async (req, res) => {
               $gte: start,
               $lte: end
           },
-          status: { $nin: ['Returned', 'Cancelled'] }
+          status: 'Delivered' 
       };
 
       const orders = await Order.find(dateFilter)
@@ -414,7 +411,6 @@ const exportSalesPdf = async (req, res) => {
           });
       };
       
-      // Get all customer names before creating the PDF
       const customersMap = new Map();
       await Promise.all(orders.map(async (order) => {
           customersMap.set(order._id.toString(), await getCustomerNameFromOrder(order));

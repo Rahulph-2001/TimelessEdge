@@ -6,6 +6,9 @@ const Product = require('../../models/productSchema');
 const Review = require('../../models/reviewSchema');
 const wishList=require('../../models/whishlistSchema');
 const Cart = require('../../models/cartSchema');
+const Order = require('../../models/orderSchema');
+const Address=require('../../models/addressSchema')
+
 
 const productDetails = async (req, res) => {
     try {
@@ -311,12 +314,88 @@ const addToCartFromWishlist = async (req, res) => {
   }
   
 
+
+  const submitReview = async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.status(401).json({ success: false, message: 'Please login to submit Review' });
+        }
+
+        const userId = req.session.user._id;
+        const { productId, review, rating } = req.body;
+
+        console.log('Received data:', { userId, productId, review, rating });
+
+        if (!productId || !review || !rating) {
+            return res.status(400).json({ success: false, message: 'ProductId, Rating, and Review text are required' });
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        const addressDocs = await Address.find({ userId: userId });
+        const addressIds = [];
+        
+        addressDocs.forEach(doc => {
+            if (doc.address && Array.isArray(doc.address)) {
+                doc.address.forEach(addr => {
+                    addressIds.push(addr._id);
+                });
+            }
+        });
+
+        console.log('User address IDs:', addressIds);
+
+        const order = await Order.findOne({
+            address: { $in: addressIds }, 
+            'orderedItems.product': productId,
+            'orderedItems.status': 'Delivered'
+        });
+
+        console.log('Order found:', order ? order : 'No matching order found');
+
+        if (!order) {
+            return res.status(403).json({ success: false, message: 'You can only review products you have purchased and received' });
+        }
+
+        const existingReview = await Review.findOne({
+            user: userId,
+            product: productId
+        });
+
+        if (existingReview) {
+            return res.status(400).json({ success: false, message: 'You have already reviewed this product' });
+        }
+
+        const newReview = new Review({
+            user: userId,
+            product: productId,
+            rating: parseInt(rating),
+            review: review.trim()
+        });
+
+        await newReview.save();
+
+        return res.status(200).json({ success: true, message: 'Review submitted successfully' });
+
+    } catch (error) {
+        console.error('Error submitting Review:', error);
+        return res.status(500).json({ success: false, message: 'Error submitting review. Please try again later.' });
+    }
+};
+    
+
+
+
 module.exports = {
     productDetails,
     addWhishlist,
     wishListPage,
     addToCartFromWishlist,
-    removeWishlist
+    removeWishlist,
+    submitReview
     
 };
 

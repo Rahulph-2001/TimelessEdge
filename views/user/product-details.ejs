@@ -1330,36 +1330,28 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 
-                // Visual feedback - change the text to indicate loading
                 const heartIcon = this.querySelector('i');
                 heartIcon.className = 'fas fa-spinner fa-spin';
                 
-                // Make the API request to the wishlist endpoint
                 const response = await fetch(`/wishlist/add/${productId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     }
-                    // No need to send body for this endpoint as it uses the ID from params
                 });
                 
-                // Reset icon
                 heartIcon.className = 'far fa-heart';
                 
-                // Check if the request was successful
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.message || 'Failed to add product to wishlist');
                 }
                 
-                // Process the successful response
                 const data = await response.json();
                 
-                // Provide visual feedback for success
                 heartIcon.className = 'fas fa-heart';
                 heartIcon.style.color = 'red';
                 
-                // Show success message
                 Swal.fire({
                     title: 'Success!',
                     text: data.message || "Product added to wishlist successfully",
@@ -1377,10 +1369,8 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (error) {
                 console.error('Error:', error);
                 
-                // Reset icon
                 this.querySelector('i').className = 'far fa-heart';
                 
-                // Check for authentication errors
                 if (error.message && (
                     error.message.includes('not authenticated') || 
                     error.message.includes('not logged in') ||
@@ -1401,7 +1391,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     });
                 } else {
-                    // General error handling
                     Swal.fire({
                         title: 'Error',
                         text: error.message || "Error adding product to wishlist",
@@ -1414,69 +1403,76 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Handle review form submission
+    
     const reviewForm = document.getElementById('reviewForm');
-    if (reviewForm) {
-        reviewForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const rating = formData.get('rating');
-            const review = formData.get('review');
-            
-            if (!rating) {
-                alert('Please select a rating');
-                return;
-            }
+if (reviewForm) {
+    reviewForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const rating = formData.get('rating');
+        const review = formData.get('review');
+        const productId = '<%= product.stockCode %>'; // This matches your productData.stockCode
 
-            try {
-                const response = await fetch('/submit-review', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        productId: '<%= product.stockCode %>',
-                        rating: parseInt(rating),
-                        review: review
-                    })
+        if (!rating) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Please select a rating',
+                icon: 'error',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#3BB77E'
+            });
+            return;
+        }
+
+        try {
+            const response = await fetch('/submit-review', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    productId: productId,
+                    rating: parseInt(rating),
+                    review: review
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: data.message || 'Review submitted successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3BB77E'
+                }).then(() => {
+                    location.reload();
                 });
-
-                const data = await response.json();
-                
-                if (data.success) {
-                    Swal.fire({
-                        title: 'Success!',
-                        text: 'Review submitted successfully!',
-                        icon: 'success',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#3BB77E'
-                    }).then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        title: 'Error',
-                        text: data.message || 'Error submitting review',
-                        icon: 'error',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#3BB77E'
-                    });
-                }
-            } catch (error) {
-                console.error('Error:', error);
+            } else {
                 Swal.fire({
                     title: 'Error',
-                    text: 'An error occurred while submitting your review. Please try again.',
+                    text: data.message || 'Error submitting review',
                     icon: 'error',
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#3BB77E'
                 });
             }
-        });
-    }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'An error occurred while submitting your review. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#3BB77E'
+            });
+        }
+    });
 
-    // Star rating interaction enhancement
+}
+    
     const starLabels = document.querySelectorAll('.star-rating label');
     starLabels.forEach(label => {
         label.addEventListener('mouseover', function() {
@@ -1500,7 +1496,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Handle quantity update in cart
+    
     const updateCartButtons = document.querySelectorAll('.update-cart-btn');
     
     if (updateCartButtons.length > 0) {
@@ -1544,7 +1540,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#3BB77E'
                     }).then(() => {
-                        location.reload(); // Refresh to show updated cart
+                        location.reload(); 
                     });
                     
                 } catch (error) {

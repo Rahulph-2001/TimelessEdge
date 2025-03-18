@@ -11,7 +11,7 @@ const productController = require("../controllers/admin/productController");
 const orderController=require('../controllers/admin/orderController')
 const couponController=require('../controllers/admin/couponController')
 const salesReportController=require('../controllers/admin/salesReportController')
-
+const walletController=require('../controllers/admin/walletController')
 
 
 // Admin routes
@@ -71,6 +71,8 @@ router.put('/updatecoupon',adminAuth,couponController.updateCoupon)
 router.get('/sales-report',adminAuth, salesReportController.getSalesReport);
 router.get('/sales-report/pdf', adminAuth,salesReportController.exportSalesPdf);
 router.get('/sales-report/excel', adminAuth,salesReportController.exportSalesExcel);
+
+router.get('/Wallet',adminAuth,walletController.walletPage)
 
 
 module.exports = router;

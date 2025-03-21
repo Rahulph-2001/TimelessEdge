@@ -77,153 +77,6 @@ const loadSignup = async (req, res) => {
 }
 
 
-// const loadShopping = async (req, res) => {
-//     try {
-//         const blockedBrands = await Brand.find({ isBlocked: true }).select('_id');
-//         const categories = await Category.find({ isListed: true });
-
-//         const page = parseInt(req.query.page) || 1;
-//         const limit = 6;
-//         const skip = (page - 1) * limit;
-
-//         const listedCategories = categories.map(cat => cat._id);
-
-//         let query = {
-//             isBlocked: false,
-//             category: { $in: listedCategories },
-//             brand: { $nin: blockedBrands.map(brand => brand._id) }
-//         };
-
-//         let searchQuery = req.query.search || "";
-//         let priceMin = req.query.priceMin || "";
-//         let priceMax = req.query.priceMax || "";
-//         let category = req.query.category || "";
-//         let brand = req.query.brand || "";
-//         let sort = req.query.sort || "asc";
-
-//         if (searchQuery) {
-//             query.$or = [
-//                 { productName: { $regex: searchQuery, $options: "i" } },
-//                 { description: { $regex: searchQuery, $options: "i" } }
-//             ];
-//         }
-
-//         if (priceMin && priceMax) {
-//             query.salePrice = {
-//                 $gte: parseInt(priceMin),
-//                 $lte: parseInt(priceMax)
-//             };
-//         } else if (priceMin) {
-//             query.salePrice = { $gte: parseInt(priceMin) };
-//         } else if (priceMax) {
-//             query.salePrice = { $lte: parseInt(priceMax) };
-//         }
-
-//         if (category) {
-//             query.category = category;
-//         }
-
-//         if (brand) {
-//             if (!blockedBrands.map(b => b._id.toString()).includes(brand)) {
-//                 query.brand = brand;
-//             } else {
-//                 query.brand = null;
-//             }
-//         }
-
-//         let sortOption = {};
-//         if (sort === "asc") {
-//             sortOption = { productName: 1 };
-//         } else if (sort === "desc") {
-//             sortOption = { productName: -1 };
-//         } else if (sort === "price_low") {
-//             sortOption = { salePrice: 1 };
-//         } else if (sort === "price_high") {
-//             sortOption = { salePrice: -1 };
-//         } else if (sort === "newest") {
-//             sortOption = { createdOn: -1 };
-//         } else {
-//             sortOption = { productName: 1 };
-//         }
-
-//         const totalProducts = await Product.countDocuments(query);
-//         const products = await Product.find(query)
-//             .populate("category")
-//             .populate("brand")
-//             .skip(skip)
-//             .limit(limit)
-//             .sort(sortOption);
-
-//             const processedProducts = products.map(product => {
-//                 const categoryOffer = product.category ? product.category.categoryOffer || 0 : 0;
-                
-//                 const productOffer = product.productOffer || 0;
-                
-//                 const bestOffer = Math.max(categoryOffer, productOffer);
-                
-//                 let finalPrice = product.salePrice;
-//                 let offerPrice = null;
-//                 let savedAmount = null;
-//                 let offerType = null;
-                
-//                 if (bestOffer > 0) {
-//                     offerPrice = Math.round(product.salePrice * (1 - bestOffer/100));
-//                     savedAmount = product.salePrice - offerPrice;
-//                     offerType = productOffer > categoryOffer ? 'product' : 'category';
-//                 }
-                
-//                 return {
-//                     ...product._doc,
-//                     image: product.productImages && product.productImages.length > 0
-//                         ? product.productImages[0]
-//                         : "/img/default-product.jpg",
-//                     categoryOffer,
-//                     productOffer,
-//                     bestOffer,
-//                     offerPrice,
-//                     savedAmount,
-//                     offerType
-//                 };
-//             })
-
-//         const totalPages = Math.ceil(totalProducts / limit);
-
-//         const user = req.session.user || null;
-//         const userId = user ? user._id : null;
-
-//         let activeUser = null;
-//         if (userId) {
-//             activeUser = await User.findById(userId);
-
-//             if (!activeUser || activeUser.isBlocked) {
-//                 req.session.destroy();
-//                 return res.redirect('/login');
-//             }
-//         }
-
-//         res.render("shop", {
-//             user: activeUser || user,
-//             products: processedProducts,
-//             categories: categories,
-//             brands: await Brand.find({ isBlocked: false }),
-//             totalPages,
-//             currentPage: page,
-//             itemsPerPage: limit,
-//             totalItems: totalProducts,
-//             query: {
-//                 search: searchQuery,
-//                 priceMin,
-//                 priceMax,
-//                 category,
-//                 brand,
-//                 sort
-//             }
-//         });
-//     } catch (error) {
-//         console.error("Error loading shopping page:", error);
-//         res.status(500).send("Server Error");
-//     }
-// };
 
 
 const loadShopping = async (req, res) => {
@@ -537,33 +390,36 @@ const verifyOtp = async (req, res) => {
             wallet: 0,
         });
 
-        let referrer = null;
+        await newUser.save();
+
         if (userData.referralCode) {
-            referrer = await User.findOne({ referralCode: userData.referralCode });
+            const referrer = await User.findOne({ referralCode: userData.referralCode });
             if (referrer) {
                 newUser.referredBy = referrer._id;
+                await newUser.save();
+                
+               
                 referrer.referralCount = (referrer.referralCount || 0) + 1;
                 await referrer.save();
 
+               
                 const referralTransaction = new ReferralTransaction({
                     referrer: referrer._id,
-                    referred: newUser._id, 
+                    referred: newUser._id,  
                     reward: 100,
                     status: 'pending'
                 });
-
-                await newUser.save();
-                referralTransaction.referred = newUser._id;
                 await referralTransaction.save();
                 console.log('Referral transaction created:', referralTransaction);
 
                 const couponCode = `REF${referrer.referralCode}${Date.now().toString().slice(-4)}`;
                 const newCoupon = new Coupon({
                     name: couponCode,
-                    userId: [referrer._id], 
-                    referrer: referrer._id, 
+                    userId: [referrer._id],
+                    referrer: referrer._id,
+                    referred: newUser._id, 
                     createdOn: new Date(),
-                    expireOn: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                    expireOn: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 
                     offerPrice: 100,
                     minimumPrice: 500,
                     isList: false
@@ -573,8 +429,6 @@ const verifyOtp = async (req, res) => {
             } else {
                 console.log('Invalid referral code:', userData.referralCode);
             }
-        } else {
-            await newUser.save();
         }
 
         req.session.user = newUser._id;

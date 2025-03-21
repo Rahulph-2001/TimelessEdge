@@ -280,7 +280,6 @@ const getCart = async (req, res) => {
       }).limit(4);
     }
     
-    // Return JSON for AJAX updates or render for initial load
     if (req.xhr || req.headers.accept.includes('json')) {
       return res.json({
         cart: cartData,
@@ -490,6 +489,8 @@ const removeItem = async (req, res) => {
       if (!userId) {
         return res.redirect('/login');
       }
+      console.log('User ID:', userId); 
+        console.log('Fetching referral coupons for user:', userId);
   
       const cart = await Cart.findOne({ userId: userId })
       .populate({
@@ -546,6 +547,7 @@ const removeItem = async (req, res) => {
         expireOn: { $gt: new Date() },
         usedBy: { $nin: [userId] } 
       }).lean();
+      console.log('Found referral coupons:', referralCoupons)
   
       const originalPrice = cart.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
       const savings = 0;
@@ -614,6 +616,7 @@ const removeItem = async (req, res) => {
   
       let appliedCouponId = null;
       let validatedDiscount = 0;
+      let couponDoc = null;
   
       const newOrder = new Order({
         userId,
@@ -635,7 +638,7 @@ const removeItem = async (req, res) => {
       });
   
       if (coupon && couponApplied) {
-        const couponDoc = await Coupon.findOne({
+        couponDoc = await Coupon.findOne({
           name: coupon,
           createdOn: { $lte: new Date() },
           expireOn: { $gt: new Date() }
@@ -646,13 +649,13 @@ const removeItem = async (req, res) => {
         }
   
         const isAdminCoupon = couponDoc.isList;
-        const isReferralCoupon = couponDoc.userId && couponDoc.userId.includes(userId);
+        const isUserCoupon = couponDoc.userId && couponDoc.userId.some(id => id.toString() === userId.toString());
   
-        if (!isAdminCoupon && !isReferralCoupon) {
+        if (!isAdminCoupon && !isUserCoupon) {
           return res.status(400).json({ error: "You are not authorized to use this coupon." });
         }
   
-        if (couponDoc.usedBy && couponDoc.usedBy.includes(userId)) {
+        if (couponDoc.usedBy && couponDoc.usedBy.some(id => id.toString() === userId.toString())) {
           return res.status(400).json({ error: "You have already used this coupon." });
         }
   
@@ -674,7 +677,7 @@ const removeItem = async (req, res) => {
           $addToSet: { usedBy: userId }
         });
   
-        if (couponDoc.referrer) {
+        if (couponDoc && couponDoc.referrer) {
           const referral = await ReferralTransaction.findOne({
             referrer: couponDoc.referrer,
             referred: userId,
@@ -683,15 +686,15 @@ const removeItem = async (req, res) => {
   
           if (referral) {
             referral.status = 'completed';
-            referral.orderId = newOrder._id; 
+            referral.orderId = newOrder._id;
             await referral.save();
   
             const referrer = await User.findById(couponDoc.referrer);
-            referrer.referralCount += 1;
-            referrer.wallet += referral.reward;
-            await referrer.save();
-  
-            console.log(`Referral completed for ${referrer.email} by ${userId} with order ${newOrder._id}`);
+            if (referrer) {
+              referrer.wallet += referral.reward;
+              await referrer.save();
+              console.log(`Referral completed for ${referrer.email} by ${userId} with order ${newOrder._id}`);
+            }
           } else {
             console.log(`No pending referral found for referrer ${couponDoc.referrer} and user ${userId}`);
           }
@@ -709,7 +712,31 @@ const removeItem = async (req, res) => {
       const user = await User.findById(userId);
       const referredBy = user.referredBy;
       if (referredBy) {
-        await User.findByIdAndUpdate(referredBy, { $inc: { wallet: 100 } });
+        const existingReferralTransaction = await ReferralTransaction.findOne({
+          referrer: referredBy,
+          referred: userId,
+          status: { $in: ['completed', 'rejected'] }
+        });
+  
+        if (!existingReferralTransaction) {
+          const pendingReferral = await ReferralTransaction.findOne({
+            referrer: referredBy,
+            referred: userId,
+            status: 'pending'
+          });
+  
+          if (pendingReferral) {
+            pendingReferral.status = 'completed';
+            pendingReferral.orderId = newOrder._id;
+            await pendingReferral.save();
+  
+            await User.findByIdAndUpdate(referredBy, { 
+              $inc: { wallet: pendingReferral.reward }
+            });
+            
+            console.log(`Referral bonus processed for new user's first order. Referrer: ${referredBy}, User: ${userId}`);
+          }
+        }
       }
   
       return res.json({
@@ -725,59 +752,59 @@ const removeItem = async (req, res) => {
 
   const validateCoupon = async (req, res) => {
     try {
-      if (!req.user) {
-        return res.status(401).json({ success: false, message: 'User not authenticated' });
-      }
-  
-      const { couponCode, cartTotal } = req.body;
-      const userId = req.user._id;
-  
-      if (!couponCode || typeof cartTotal === 'undefined') {
-        return res.status(400).json({ success: false, message: 'Coupon code or cart total missing' });
-      }
-  
-      const parsedCartTotal = parseFloat(cartTotal);
-      if (isNaN(parsedCartTotal)) {
-        return res.status(400).json({ success: false, message: 'Invalid cart total' });
-      }
-  
-      const coupon = await Coupon.findOne({ 
-        name: couponCode.trim(),
-        createdOn:{$lte:new Date()},
-        expireOn: { $gt: new Date() }
-      });
-  
-      if (!coupon) {
-        return res.status(400).json({ success: false, message: 'Invalid or expired coupon code' });
-      }
-  
-      const isAdminCoupon = coupon.isList;
-      const isReferralCoupon = coupon.userId && coupon.userId.includes(userId);
-  
-      if (!isAdminCoupon && !isReferralCoupon) {
-        return res.status(400).json({ success: false, message: "You are not authorized to use this coupon" });
-      }
-  
-      if (coupon.usedBy && coupon.usedBy.includes(userId)) {
-        return res.status(400).json({ success: false, message: 'You have already used this coupon' });
-      }
-  
-      if (parsedCartTotal < coupon.minimumPrice) {
-        return res.status(400).json({ success: false, message: `This coupon requires a minimum purchase of ₹${coupon.minimumPrice}` });
-      }
-  
-      res.json({
-        success: true,
-        coupon: {
-          name: coupon.name,
-          discount: coupon.offerPrice
+        if (!req.user) {
+            return res.status(401).json({ success: false, message: 'User not authenticated' });
         }
-      });
+  
+        const { couponCode, cartTotal } = req.body;
+        const userId = req.user._id;
+  
+        if (!couponCode || typeof cartTotal === 'undefined') {
+            return res.status(400).json({ success: false, message: 'Coupon code or cart total missing' });
+        }
+  
+        const parsedCartTotal = parseFloat(cartTotal);
+        if (isNaN(parsedCartTotal)) {
+            return res.status(400).json({ success: false, message: 'Invalid cart total' });
+        }
+  
+        const coupon = await Coupon.findOne({ 
+            name: couponCode.trim(),
+            createdOn: { $lte: new Date() },
+            expireOn: { $gt: new Date() }
+        });
+  
+        if (!coupon) {
+            return res.status(400).json({ success: false, message: 'Invalid or expired coupon code' });
+        }
+  
+        const isAdminCoupon = coupon.isList;
+        const isUserCoupon = coupon.userId && coupon.userId.some(id => id.toString() === userId.toString());
+  
+        if (!isAdminCoupon && !isUserCoupon) {
+            return res.status(400).json({ success: false, message: "You are not authorized to use this coupon" });
+        }
+  
+        if (coupon.usedBy && coupon.usedBy.includes(userId)) {
+            return res.status(400).json({ success: false, message: 'You have already used this coupon' });
+        }
+  
+        if (parsedCartTotal < coupon.minimumPrice) {
+            return res.status(400).json({ success: false, message: `This coupon requires a minimum purchase of ₹${coupon.minimumPrice}` });
+        }
+  
+        res.json({
+            success: true,
+            coupon: {
+                name: coupon.name,
+                discount: coupon.offerPrice
+            }
+        });
     } catch (error) {
-      console.error('Coupon validation error:', error.message, error.stack);
-      res.status(500).json({ success: false, message: 'An error occurred while validating the coupon' });
+        console.error('Coupon validation error:', error.message, error.stack);
+        res.status(500).json({ success: false, message: 'An error occurred while validating the coupon' });
     }
-  };
+};
 
 
 const createRazorpayOrder = async (req, res) => {

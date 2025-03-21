@@ -20,6 +20,8 @@ router.get("/login", adminController.loadLogin);
 router.post("/login", redirectIfadminLoggedIn,adminController.login);
 router.get("/dashboard", adminAuth, adminController.loadDashboard);
 router.get("/logout", adminController.logout);
+router.get('/api/orders-data', adminController.getOrdersDataAPI);
+router.get('/api/ledger-data', adminController.getLedgerDataAPI);
 
 // Customer management  
 router.get("/users", adminAuth, customerController.customerInfo);

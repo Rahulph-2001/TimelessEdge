@@ -18,16 +18,46 @@ const path = require('path');
 
 const walletPage=async(req,res)=>{
     try {
-        const wallets = await Wallet.find()
-            .populate('userId', 'username email') 
-            .sort({ 'transactions.transactionDate': -1 }); 
 
-        res.render('walletManagement', {
-            wallets: wallets
-        });
+
+       const wallets=await Wallet.find()
+       .populate('userId','username email createdAt')
+       .populate('transactions.orderId')
+       .sort({'updatedAt':-1})
+
+       let transactionCount=0
+       let debitTotal=0
+       let creditTotal=0
+       let uniqueUsers=new Set()
+
+       wallets.forEach((wallet=>{
+        uniqueUsers.add(wallet.userId?wallet.userId.toString():null)
+        wallet.transactions.forEach(txn=>{
+
+            transactionCount++
+            if(txn.transactionType==="credit"){
+                creditTotal+=txn.transactionAmount
+            }
+            if(txn.transactionType=='debit'){
+                debitTotal+=txn.transactionAmount
+            }
+        })
+       }))
+       res.render('walletManagement',{
+        wallets,
+        stats:{
+            transactionCount,
+            debitTotal,
+            creditTotal,
+            uniqueUsers:uniqueUsers.size
+        }
+       })
+
+        
     } catch (error) {
-        console.error('Error fetching wallet data:', error);
-        res.status(500).send('Server Error');
+        console.error('Error fetching wallet Data:',error)
+        res.status(500).send('Internal Server Error')
+        
     }
 }
 

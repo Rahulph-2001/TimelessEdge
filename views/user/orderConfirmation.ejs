@@ -47,10 +47,10 @@
     <h1 class="mb-4">Thank You For Your Order!</h1>
     <p>Your order has been placed successfully.</p>
 
-    <!-- Display Order ID -->
+    
     <h3 class="mt-4">Order ID: <%= order.orderId %></h3>
 
-    <!-- Order Summary -->
+    
     <div class="order-details mt-4">
       <h4>Order Summary</h4>
       <p><strong>Total Price:</strong> Rs:<%= order.totalPrice.toFixed(2) %></p>
@@ -59,7 +59,7 @@
       <p><strong>Payment Status:</strong> <%= order.status %></p>
       <p><strong>Invoice Date:</strong> <%= order.invoiceDate ? order.invoiceDate.toLocaleDateString() : 'N/A' %></p>
 
-      <!-- Display shipping address details -->
+      
       <p><strong>Shipping Address:</strong></p>
       <p>
         <% if (address) { %>
@@ -74,17 +74,15 @@
       </p>
     </div>
 
-    <!-- Add this near the top of your EJS template for debugging -->
+    
     <div style="display: none">
       <p>Debug: Order Address: <%= JSON.stringify(order.address) %></p>
       <p>Debug: Address Variable: <%= JSON.stringify(address) %></p>
     </div>
 
-    <!-- Action Buttons -->
+    
     <div class="mt-4">
-      <!-- <a href="/invoice/<%= order.orderId %>" class="btn btn-info me-2">
-        <i class="fas fa-file-invoice me-2"></i>Download Invoice
-      </a> -->
+      
       <a href="/userProfile#orders" class="btn btn-primary me-2">
         <i class="fas fa-truck me-2"></i>Track Order
       </a>

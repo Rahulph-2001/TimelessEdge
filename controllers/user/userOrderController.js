@@ -11,6 +11,7 @@ const Wallet=require('../../models/walletSchema')
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
+const { Transaction } = require('mongodb');
 
 const confirmOrder = async (req, res) => {
   try {
@@ -72,48 +73,52 @@ const addFunds = async (req, res) => {
     res.redirect('/wallet');
   }
 }
-
 const getWalletPage = async (req, res) => {
   try {
-      const userId = req.user._id;
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
-      const skip = (page - 1) * limit;
-      
-      let wallet = await Wallet.findOne({ userId });
-      
-      if (!wallet) {
-          wallet = new Wallet({
-              userId,
-              walletBalance: 0,
-              transactions: []
-          });
-          await wallet.save();
-      }
-      
-      const totalTransactions = wallet.transactions.length;
-      const totalPages = Math.ceil(totalTransactions / limit);
-      
-      const transactions = wallet.transactions
-          .sort((a, b) => b.transactionDate - a.transactionDate)
-          .slice(skip, skip + limit);
-      
-      res.render('Wallet', {
-          title: 'My Wallet',
-          walletBalance: wallet.walletBalance.toFixed(2),
-          transactions,
-          currentPage: page,
-          totalPages,
-          totalTransactions,
-          limit,
-          user:req.user
-      });
-  } catch (error) {
-      console.error('Error fetching wallet:', error);
-      res.redirect('/userProfile');
-  }
-};
+    const userId = req.user._id.toString()
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const skip = (page - 1) * limit
 
+    let wallet = await Wallet.findOne({ userId: req.user._id })
+    if (!wallet) {
+      wallet = new Wallet({
+        userId,
+        walletBalance: 0,
+        transactions: []
+      })
+      await wallet.save()
+    }
+
+    const sortedTransactions = wallet.transactions.sort((a, b) => 
+      b.transactionDate - a.transactionDate
+    )
+
+    const creditTransactions = sortedTransactions.filter(transaction => 
+      transaction.transactionType === "credit"
+    )
+
+    const totalTransactions = creditTransactions.length
+    const totalPages = Math.ceil(totalTransactions / limit)
+
+    const transactions = creditTransactions.slice(skip, skip + limit)
+
+    res.render('Wallet', {
+      title: 'My Wallet',
+      walletBalance: wallet.walletBalance.toFixed(2),
+      transactions,
+      currentPage: page,
+      totalPages,
+      totalTransactions: totalTransactions,
+      limit,
+      user: req.user
+    })
+    
+  } catch (error) {
+    console.error("Error fetching wallet:", error)
+    res.redirect('/userProfile')
+  }
+}
 
 const getOrderDetails = async (req, res) => {
   try {
@@ -182,59 +187,57 @@ const getOrderDetails = async (req, res) => {
 };
 
 
+
 const cancelOrder = async (req, res) => {
   try {
     if (!req.user || !req.user._id) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         success: false,
-        message: "Unauthorized. Please log in." 
+        message: "Unauthorized Please login"
       });
     }
-    
+
     const orderId = req.params.orderId;
     const { reason } = req.body;
-    
     if (!reason) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: "Cancellation reason is required." 
+        message: "Cancellation reason is required"
       });
     }
-    
+
     const addresses = await Address.find({ userId: req.user._id });
     if (!addresses || addresses.length === 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: "No addresses found for user." 
+        message: "No addresses Found for User."
       });
     }
-    
+
     const allowedAddressIds = [];
-    addresses.forEach(doc => {
+    addresses.forEach((doc) => {
       if (doc.address && Array.isArray(doc.address)) {
         doc.address.forEach(addr => allowedAddressIds.push(addr._id));
       }
       allowedAddressIds.push(doc._id);
     });
-    
+
     const order = await Order.findOne({
       _id: orderId,
       address: { $in: allowedAddressIds }
     });
-    
     if (!order) {
-      return res.status(404).json({ 
+      return res.status(400).json({
         success: false,
-        message: "Order not found or you are not authorized to cancel this order." 
+        message: "Order not found or you are not authorized to cancel this order"
       });
     }
-    
-    // Check if any item has a non-cancellable status
+
     const nonCancellableStatuses = ['Delivered', 'Cancelled', 'Return Request', 'Returned'];
-    const hasNonCancellableItem = order.orderedItems.some(item => 
+    const hasNonCancellableItem = order.orderedItems.some(item =>
       nonCancellableStatuses.includes(item.status)
     );
-    
+
     if (hasNonCancellableItem) {
       return res.status(400).json({
         success: false,
@@ -244,77 +247,109 @@ const cancelOrder = async (req, res) => {
 
     const cancellableStatuses = ['Pending', 'Processing', 'Paid'];
     if (!cancellableStatuses.includes(order.status)) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: "This order cannot be cancelled anymore." 
+        message: "This order cannot be cancelled anymore"
       });
     }
-    
+
     order.status = "Cancelled";
     order.cancellationReason = reason;
     order.cancellationDate = new Date();
 
     let refundAmount = 0;
-
-    for(const item of order.orderedItems){
-
+    
+    for (const item of order.orderedItems) {
       if (cancellableStatuses.includes(item.status)) {
-        item.status = 'Cancelled';
+        item.status = "Cancelled";
         item.cancellationReason = reason;
         item.cancelledAt = new Date();
 
         const product = await Product.findById(item.product);
-        if(product) {
+        if (product) {
           product.quantity += item.quantity;
           await product.save();
         }
-
-        if (order.paymentMethod === 'Razorpay') {
+        if (order.paymentMethod === "Razorpay" || order.paymentMethod === "Wallet") {
           refundAmount += item.price * item.quantity;
         }
       }
     }
 
-    if(order.paymentMethod === 'Razorpay' && refundAmount > 0){
-      let wallet = await Wallet.findOne({userId: req.user._id});
-      if(!wallet){
-        wallet = new Wallet({
+    if (refundAmount > 0) {
+      let userWallet = await Wallet.findOne({ userId: req.user._id });
+      if (!userWallet) {
+        userWallet = new Wallet({
           userId: req.user._id,
-          walletBalance: 0,
+          walletBalance: 0, 
           transactions: []
         });
       }
-
       const discountProportion = refundAmount / order.totalPrice;
       const finalRefundAmount = refundAmount - (order.discount * discountProportion);
 
-      const refundTransaction = {
+      const userRefundTransaction = { 
         orderId: order._id,
         transactionType: 'credit',
         transactionAmount: finalRefundAmount,
         transactionDescription: `Refund for cancelled order #${order.orderId}`
       };
+      userWallet.transactions.push(userRefundTransaction);
+      userWallet.walletBalance += finalRefundAmount;
+      await userWallet.save();
 
-      wallet.transactions.push(refundTransaction);
-      await wallet.save();
+      await User.findByIdAndUpdate(
+        req.user._id,
+        { $set: { wallet: userWallet.walletBalance } },
+        { new: true }
+      );
+
+      const admin = await User.findOne({ isAdmin: true });
+      if (admin) {
+        let adminWallet = await Wallet.findOne({ userId: admin._id });
+        if (!adminWallet) {
+          adminWallet = new Wallet({
+            userId: admin._id,
+            walletBalance: 0,
+            transactions: []
+          });
+        }
+
+        const adminDebitTransaction = {  
+          orderId: order._id,
+          transactionType: "debit",
+          transactionAmount: finalRefundAmount,
+          transactionDescription: `Refund issued for cancelled order #${order.orderId}`
+        };
+
+        adminWallet.transactions.push(adminDebitTransaction);
+        adminWallet.walletBalance -= finalRefundAmount;
+        await adminWallet.save();
+
+        await User.findByIdAndUpdate(
+          admin._id,
+          { $set: { wallet: adminWallet.walletBalance } },
+          { new: true }
+        );
+      }
     }
 
     await order.save();
-
     res.status(200).json({
       success: true,
-      message: "Order cancelled successfully and refund processed to wallet if applicable"
+      message: 'Order cancelled successfully and refund processed'
     });
-
   } catch (error) {
-    console.error("Error cancelling order:", error);
-    res.status(500).json({ 
+    console.error("Error cancelling order", error);
+    res.status(500).json({
       success: false,
-      message: "Server error", 
-      error: error.message 
+      message: "Internal Server Error",
+      error: error.message
     });
   }
 };
+
+
 const cancelOrderItem = async (req, res) => {
   try {
       if (!req.user || !req.user._id) {
@@ -395,28 +430,62 @@ const cancelOrderItem = async (req, res) => {
       
 
       if (order.paymentMethod === 'Razorpay' && order.finalAmount > 0) {
-          const itemAmount = item.price * item.quantity;
-          const refundAmount = itemAmount - (itemAmount / order.totalPrice * order.discount);
+        const itemAmount = item.price * item.quantity;
+        const refundAmount = itemAmount - (itemAmount / order.totalPrice * order.discount);
+        
+        let userWallet = await Wallet.findOne({ userId: req.user._id });
+        if (!userWallet) {
+          userWallet = new Wallet({
+            userId: req.user._id,
+            walletBalance: 0,
+            transactions: []
+          });
+        }
           
-          let wallet = await Wallet.findOne({ userId: req.user._id });
-          if (!wallet) {
-              wallet = new Wallet({ 
-                  userId: req.user._id,
-                  walletBalance: 0,
-                  transactions: []
-              });
+        const refundTransaction = {
+          orderId: order._id,
+          transactionType: 'credit',
+          transactionAmount: refundAmount,
+          transactionDescription: `Refund for cancelled item in order #${order.orderId}`
+        };
+          
+        userWallet.transactions.push(refundTransaction);
+        userWallet.walletBalance += refundAmount;
+        await userWallet.save();
+      
+        await User.findByIdAndUpdate(
+          req.user._id,
+          { $set: { wallet: userWallet.walletBalance } },
+          { new: true }
+        );
+          
+        const admin = await User.findOne({ isAdmin: true }); 
+          let adminWallet = await Wallet.findOne({ userId: admin._id });
+          if (!adminWallet) {
+            adminWallet = new Wallet({
+              userId: admin._id,
+              walletBalance: 0,
+              transactions: []
+            });
           }
-          
-          const refundTransaction = {
-              orderId: order._id,
-              transactionType: 'credit',
-              transactionAmount: refundAmount,
-              transactionDescription: `Refund for cancelled item in order #${order.orderId}`
+          const adminDebitTransaction = {
+            orderId: order._id,
+            transactionType: 'debit',
+            transactionAmount: refundAmount,
+            transactionDescription: `Refund issued for cancelled item in order #${order.orderId}`
           };
-          
-          wallet.transactions.push(refundTransaction);
-          await wallet.save(); 
+          adminWallet.transactions.push(adminDebitTransaction);
+          adminWallet.walletBalance -= refundAmount;
+          await adminWallet.save();
+
+
+          await User.findByIdAndUpdate(
+            admin._id,
+            {$set:{wallet:adminWallet.walletBalance}},
+            {new:true}
+          )
       }
+    
       
       const allItemsCancelled = order.orderedItems.every(
           item => item.status === "Cancelled"

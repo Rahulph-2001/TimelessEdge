@@ -256,10 +256,10 @@
     const timerElement = $('#otpTimer');
     const resendButton = $('#resendOtp');
 
-    // Clear any existing interval
+
     clearInterval(otpTimerInterval);
     
-    // If timer is already expired
+ 
     if (timer <= 0) {
       timerElement.text('Expired');
       timerElement.css('backgroundColor', '#dc3545');
@@ -295,7 +295,7 @@
   }
 
   $(document).ready(function() {
-    startOtpTimer(); // Start timer directly with the server-provided value
+    startOtpTimer(); 
     handleOtpInput();
 
     $('#otpForm').submit(function(e) {
@@ -348,8 +348,8 @@
         method: 'POST',
         success: function(response) {
           if (response.success) {
-            timer = 60; // Reset timer
-            startOtpTimer(); // Restart timer
+            timer = 60; 
+            startOtpTimer(); 
             showAlert('New OTP has been sent to your email', 'success');
           } else {
             showAlert(response.message);

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Order #<%= order.orderId %> - TimelessEdge</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
-  <!-- Include SweetAlert2 -->
+  
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://unpkg.com/lucide@0.294.0/dist/umd/lucide.min.js" defer></script>
   <style>
@@ -345,7 +345,7 @@
       margin-top: 0.75rem;
     }
     
-    /* Modal Styles */
+   
     .modal {
       display: none;
       position: fixed;
@@ -478,7 +478,7 @@
       color: #4b5563;
     }
     
-    /* Timeline styles */
+  
     .timeline {
       position: relative;
       margin: 1.5rem 0;
@@ -525,7 +525,7 @@
       font-size: 0.875rem;
     }
     
-    /* Reason display */
+
     .reason-box {
       background-color: #f9fafb;
       border-radius: 0.5rem;
@@ -619,7 +619,7 @@
       </div>
     </div>
     
-    <!-- Order Information -->
+ 
     <div class="card">
       <div class="card-header">
         <h2 class="card-title">
@@ -665,7 +665,7 @@
       </div>
     </div>
     
-    <!-- Shipping Information -->
+
     <div class="card">
       <div class="card-header">
         <h2 class="card-title">
@@ -694,7 +694,7 @@
       </div>
     </div>
     
-    <!-- Order Items -->
+
     <div class="card">
       <div class="card-header">
         <h2 class="card-title">
@@ -790,7 +790,7 @@
       </div>
     </div>
     
-    <!-- Order Summary -->
+    
     <div class="card">
       <div class="card-header">
         <h2 class="card-title">
@@ -812,7 +812,7 @@
       </div>
     </div>
     
-  <!-- Order Actions -->
+  
   <% if (['Pending', 'Processing', 'Paid'].includes(order.status) && 
          order.status !== 'Cancelled' && 
          order.status !== 'Return Request' && 
@@ -858,7 +858,7 @@
   <% } %>
   </div>
   
-  <!-- Cancel Order Modal -->
+  
   <div id="cancelOrderModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -891,7 +891,7 @@
     </div>
   </div>
   
-  <!-- Cancel Item Modal -->
+  
   <div id="cancelItemModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -925,7 +925,7 @@
     </div>
   </div>
   
-  <!-- Return Item Modal -->
+  
   <div id="returnItemModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -1221,7 +1221,7 @@
             icon: 'success',
             confirmButtonColor: '#4f46e5'
           }).then(() => {
-            // Reload the page to show updated status
+            
             window.location.reload();
           });
         } else {

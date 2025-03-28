@@ -372,7 +372,7 @@
 
         <script>
             $(document).ready(function () {
-                // Handle remove from wishlist functionality
+                
                 $('.remove-btn').click(function () {
                     const productId = $(this).data('product-id');
 
@@ -386,7 +386,7 @@
                         confirmButtonText: 'Yes, remove it!'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            // Send AJAX request to remove item
+                           
                             $.ajax({
                                 url: `/wishlist/remove/${productId}`,
                                 type: 'DELETE',
@@ -411,7 +411,7 @@
                     });
                 });
 
-                // Handle add to cart functionality
+                
                 $('.btn-add-to-cart').click(function () {
                     if ($(this).prop('disabled')) {
                         return;
@@ -419,11 +419,11 @@
 
                     const productId = $(this).data('product-id');
                     const productName = $(this).data('product-name');
-                    const currentRow = $(this).closest('tr'); // Get the current row for later removal
+                    const currentRow = $(this).closest('tr'); 
 
-                    // Send AJAX request to add item to cart and remove from wishlist
+                    
                     $.ajax({
-                        url: '/cart/add-from-wishlist',  // New endpoint for this combined operation
+                        url: '/cart/add-from-wishlist', 
                         type: 'POST',
                         data: {
                             productId: productId,
@@ -443,11 +443,9 @@
                                 if (result.isConfirmed) {
                                     window.location.href = '/cart';
                                 } else {
-                                    // Remove the item from the wishlist UI
                                     currentRow.fadeOut(300, function () {
                                         $(this).remove();
 
-                                        // Check if wishlist is now empty and show empty state if needed
                                         if ($('.wishlist-table tbody tr').length === 0) {
                                             $('.wishlist-table').replaceWith(`
                                 <div class="empty-state">
@@ -483,7 +481,7 @@
 
 
             $('.remove-btn').click(function () {
-    const productId = $(this).data('product-id'); // Ensure your button has data-product-id
+    const productId = $(this).data('product-id'); 
 
     Swal.fire({
         title: 'Remove Item?',
@@ -496,7 +494,7 @@
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `/wishlist/remove/${productId}`, // Ensure this matches the backend route
+                url: `/wishlist/remove/${productId}`, 
                 type: 'DELETE',
                 success: function (response) {
                     Swal.fire(

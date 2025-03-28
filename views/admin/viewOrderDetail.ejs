@@ -1,10 +1,30 @@
 <%- include("../../views/partials/admin/header") %>
-
 <style>
-  /* Modern dashboard styling */
+ 
+  :root {
+    --primary-color: #4361ee;
+    --secondary-color: #3f37c9;
+    --success-color: #0bb07b;
+    --info-color: #2196f3;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --dark-color: #1e293b;
+    --light-color: #f8fafc;
+    --border-color: #e2e8f0;
+    --text-color: #334155;
+    --text-muted: #64748b;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --transition: all 0.3s ease;
+  }
+  
+  body {
+    background-color: #f1f5f9;
+    color: var(--text-color);
+  }
+  
   .content-main {
     padding: 2rem;
-    background-color: #f8f9fa;
+    background-color: #f1f5f9;
   }
   
   .content-header {
@@ -15,65 +35,77 @@
   }
   
   .content-title {
-    color: #344767;
+    color: var(--dark-color);
     margin-bottom: 0.25rem;
     font-weight: 700;
+    font-size: 1.75rem;
   }
   
   .order-detail-card {
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
     margin-bottom: 1.5rem;
     border: none;
     overflow: hidden;
+    transition: var(--transition);
+  }
+  
+  .order-detail-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
   
   .order-detail-header {
     background-color: #fff;
-    padding: 1.25rem;
-    border-bottom: 1px solid #f1f1f1;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   
   .order-detail-header h5 {
     margin: 0;
     font-weight: 600;
-    color: #344767;
+    color: var(--dark-color);
+    font-size: 1.1rem;
   }
   
   .order-detail-body {
-    padding: 1.25rem;
+    padding: 1.5rem;
     background-color: #fff;
   }
   
-  /* Status badges */
+  
   .status-badge {
     display: inline-block;
-    padding: 0.35rem 0.75rem;
-    font-size: 0.85rem;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
     font-weight: 500;
-    border-radius: 20px;
+    border-radius: 30px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
   }
   
-  /* Order info */
+ 
   .order-info {
     padding: 0.5rem 0;
   }
   
   .order-id {
-    font-weight: 600;
-    font-size: 1.1rem;
-    color: #344767;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--dark-color);
   }
   
-  /* Timeline styling */
+  
   .order-timeline {
     margin-top: 1.5rem;
   }
   
   .timeline-item {
     position: relative;
-    padding-left: 25px;
-    padding-bottom: 20px;
+    padding-left: 30px;
+    padding-bottom: 25px;
     border-left: 2px solid #e9ecef;
     margin-left: 10px;
   }
@@ -91,50 +123,56 @@
     height: 18px;
     border-radius: 50%;
     background: #fff;
-    border: 2px solid #6c757d;
+    border: 2px solid #cbd5e1;
+    z-index: 1;
   }
   
   .timeline-item.active:before {
-    background: #5c60f5;
-    border-color: #5c60f5;
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.2);
   }
   
   .timeline-date {
     font-size: 0.8rem;
-    color: #6c757d;
+    color: var(--text-muted);
     margin-bottom: 0.25rem;
+    font-weight: 500;
   }
   
   .timeline-title {
     font-weight: 600;
-    color: #344767;
+    color: var(--dark-color);
     margin-bottom: 0.25rem;
   }
   
   .timeline-content {
     font-size: 0.9rem;
-    color: #6c757d;
+    color: var(--text-muted);
   }
   
-  /* Address card */
+ 
   .address-card {
-    background-color: #f8f9fa;
-    padding: 1rem;
-    border-radius: 8px;
+    background-color: #f8fafc;
+    padding: 1.25rem;
+    border-radius: 10px;
+    border-left: 4px solid var(--primary-color);
   }
   
   .address-card h6 {
-    color: #344767;
+    color: var(--dark-color);
     font-weight: 600;
+    margin-bottom: 0.75rem;
   }
   
-  /* Product image */
+  
   .product-image {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     object-fit: cover;
-    border-radius: 8px;
-    margin-right: 12px;
+    border-radius: 10px;
+    margin-right: 15px;
+    border: 1px solid var(--border-color);
   }
   
   .product-details {
@@ -142,26 +180,36 @@
     flex-direction: column;
   }
   
-  /* Tables */
+  
   .table {
     border-collapse: separate;
     border-spacing: 0;
+    width: 100%;
   }
   
   .table thead th {
-    background-color: #f8f9fa;
-    color: #344767;
+    background-color: #f8fafc;
+    color: var(--dark-color);
     font-weight: 600;
     border-top: none;
-    padding: 0.75rem 1rem;
+    padding: 1rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   
   .table tbody td {
-    padding: 1rem;
+    padding: 1.25rem 1rem;
     vertical-align: middle;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-color);
   }
   
-  /* Amounts table */
+  .table tbody tr:hover {
+    background-color: #f8fafc;
+  }
+  
+  
   .amounts-table {
     width: 100%;
     max-width: 400px;
@@ -169,61 +217,101 @@
   }
   
   .amount-label {
-    padding: 0.5rem 0;
-    color: #6c757d;
-  }
-  
-  .amount-value {
-    padding: 0.5rem 0;
-    text-align: right;
+    padding: 0.75rem 0;
+    color: var(--text-muted);
     font-weight: 500;
   }
   
+  .amount-value {
+    padding: 0.75rem 0;
+    text-align: right;
+    font-weight: 600;
+    color: var(--dark-color);
+  }
+  
   .total-row {
-    border-top: 1px solid #e9ecef;
+    border-top: 2px solid var(--border-color);
   }
   
   .total-row .amount-label {
     font-weight: 700;
-    color: #344767;
+    color: var(--dark-color);
+    font-size: 1.05rem;
   }
   
   .total-row .amount-value {
     font-weight: 700;
-    color: #344767;
-    font-size: 1.2rem;
+    color: var(--primary-color);
+    font-size: 1.25rem;
   }
   
-  /* Buttons */
+  
+  .btn {
+    padding: 0.6rem 1.5rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: var(--transition);
+    letter-spacing: 0.3px;
+  }
+  
   .btn-primary {
-    background-color: #5c60f5;
-    border-color: #5c60f5;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
   }
   
   .btn-primary:hover {
-    background-color: #4a4dcc;
-    border-color: #4a4dcc;
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
   }
   
   .btn-light {
-    background-color: #f8f9fa;
-    border-color: #e9ecef;
-    color: #6c757d;
+    background-color: #fff;
+    border-color: var(--border-color);
+    color: var(--text-color);
+  }
+  
+  .btn-light:hover {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+    color: var(--dark-color);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   }
   
   .action-buttons {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
   
-  /* Form elements */
-  .form-select {
+  
+  .payment-method p {
+    background-color: #f8fafc;
+    padding: 0.75rem 1rem;
     border-radius: 8px;
-    padding: 0.5rem;
-    border-color: #e9ecef;
+    font-weight: 500;
+    border-left: 4px solid var(--primary-color);
+    margin-bottom: 0;
   }
   
-  /* Responsive adjustments */
+ 
+  .customer-info p {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .customer-info p strong {
+    min-width: 80px;
+    display: inline-block;
+  }
+  
+  
+  @media (max-width: 992px) {
+    .content-main {
+      padding: 1.5rem;
+    }
+  }
+  
   @media (max-width: 768px) {
     .content-header {
       flex-direction: column;
@@ -238,86 +326,132 @@
     .btn {
       flex: 1;
     }
+    
+    .order-detail-header {
+      padding: 1.25rem;
+    }
+    
+    .order-detail-body {
+      padding: 1.25rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .content-main {
+      padding: 1rem;
+    }
+    
+    .table thead {
+      display: none;
+    }
+    
+    .table tbody td {
+      display: block;
+      text-align: right;
+      padding: 0.75rem;
+      position: relative;
+      padding-left: 50%;
+    }
+    
+    .table tbody td:before {
+      content: attr(data-label);
+      position: absolute;
+      left: 0.75rem;
+      width: 45%;
+      padding-right: 10px;
+      white-space: nowrap;
+      text-align: left;
+      font-weight: 600;
+    }
+    
+    .table tbody tr {
+      display: block;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    
+    .table tbody td:first-child {
+      border-top: none;
+    }
+    
+    .product-image {
+      margin-right: 0;
+      margin-bottom: 0.5rem;
+    }
+    
+    .d-flex.align-items-center {
+      flex-direction: column;
+      align-items: flex-end !important;
+    }
   }
 </style>
 
 <section class="content-main">
-    <!-- Header section -->
+
     <div class="content-header">
         <div>
             <h2 class="content-title">Order Details</h2>
             <p class="text-muted">Order #<%= order.orderId %></p>
         </div>
-        <div class="action-buttons">
-            <a href="/admin/AdminOrder" class="btn btn-light">Back to Orders</a>
-            <a href="/admin/orders/invoice/<%= order.orderId %>" class="btn btn-primary" target="_blank">Print Invoice</a>
-        </div>
+        
     </div>
-    
+
     <div class="row">
-        <!-- Order Status Column -->
+
         <div class="col-lg-4">
             <div class="order-detail-card">
                 <div class="order-detail-header">
                     <h5>Order Status</h5>
+                    <span class="status-badge 
+                        <%= order.status === 'Pending' ? 'bg-warning text-dark' : 
+                           order.status === 'Processing' ? 'bg-info text-white' : 
+                           order.status === 'Shipped' ? 'bg-primary text-white' :
+                           order.status === 'Delivered' ? 'bg-success text-white' :
+                           order.status === 'Cancelled' ? 'bg-danger text-white' :
+                           order.status === 'Return Request' ? 'bg-secondary text-white' :
+                           order.status === 'Returned' ? 'bg-dark text-white' : 'bg-secondary text-white' %>">
+                        <%= order.status %>
+                    </span>
                 </div>
                 <div class="order-detail-body">
                     <div class="order-info mb-4">
                         <p class="order-id mb-2">Order #<%= order.orderId %></p>
-                        <p class="mb-1"><span class="text-muted">Date: </span> <%= new Date(order.createdOn).toLocaleDateString('en-US', { 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
-                        }) %></p>
-                        
-                        <!-- Status Badge -->
-                        <span class="status-badge 
-                            <%= order.status === 'Pending' ? 'bg-warning text-dark' : 
-                               order.status === 'Processing' ? 'bg-info text-white' : 
-                               order.status === 'Shipped' ? 'bg-primary text-white' :
-                               order.status === 'Delivered' ? 'bg-success text-white' :
-                               order.status === 'Cancelled' ? 'bg-danger text-white' :
-                               order.status === 'Return Request' ? 'bg-secondary text-white' :
-                               order.status === 'Returned' ? 'bg-dark text-white' : 'bg-secondary text-white' %>">
-                            <%= order.status %>
-                        </span>
-                        
-                        <!-- Status Update Form -->
-                        <form action="/admin/orders/update-status" method="POST" class="mt-4">
-                            <input type="hidden" name="orderId" value="<%= order.orderId %>">                            <div class="mb-3">
-                                <label class="form-label">Update Status</label>
-                                <select name="status" class="form-select">
-                                    <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                    <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
-                                    <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                                    <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                                    <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                                    <option value="Return Request" <%= order.status === 'Return Request' ? 'selected' : '' %>>Return Request</option>
-                                    <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
-                                </select>
-                            </div>
-                            <button type="button" class="btn btn-primary w-100" onclick="updateOrderStatus('<%= order.orderId %>')">Update Status</button>                        </form>
+                        <p class="mb-1">
+                            <i class="far fa-calendar-alt me-2 text-muted"></i>
+                            <%= new Date(order.createdOn).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            }) %>
+                        </p>
                     </div>
                     
-                    <!-- Timeline -->
+
                     <div class="order-timeline mt-4">
-                        <h6 class="mb-3">Order Timeline</h6>
+                        <h6 class="mb-3 fw-bold">Order Timeline</h6>
                         
                         <div class="timeline-item <%= order.status === 'Pending' || order.status === 'Processing' || order.status === 'Shipped' || order.status === 'Delivered' ? 'active' : '' %>">
-                            <div class="timeline-date"><%= new Date(order.createdOn).toLocaleDateString('en-US', { 
-                                year: 'numeric', 
-                                month: 'short', 
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            }) %></div>
+                            <div class="timeline-date">
+                                <i class="far fa-clock me-1"></i>
+                                <%= new Date(order.createdOn).toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }) %>
+                            </div>
                             <div class="timeline-title">Order Placed</div>
                             <div class="timeline-content">Order has been placed successfully.</div>
                         </div>
                         
                         <% if(order.status !== 'Pending') { %>
                         <div class="timeline-item <%= order.status === 'Processing' || order.status === 'Shipped' || order.status === 'Delivered' ? 'active' : '' %>">
-                            <div class="timeline-date">-</div>
+                            <div class="timeline-date">
+                                <i class="far fa-clock me-1"></i>
+                                -
+                            </div>
                             <div class="timeline-title">Order Processing</div>
                             <div class="timeline-content">Order is being processed.</div>
                         </div>
@@ -325,7 +459,10 @@
                         
                         <% if(order.status === 'Shipped' || order.status === 'Delivered') { %>
                         <div class="timeline-item <%= order.status === 'Shipped' || order.status === 'Delivered' ? 'active' : '' %>">
-                            <div class="timeline-date">-</div>
+                            <div class="timeline-date">
+                                <i class="far fa-clock me-1"></i>
+                                -
+                            </div>
                             <div class="timeline-title">Order Shipped</div>
                             <div class="timeline-content">Order has been shipped.</div>
                         </div>
@@ -333,7 +470,10 @@
                         
                         <% if(order.status === 'Delivered') { %>
                         <div class="timeline-item active">
-                            <div class="timeline-date">-</div>
+                            <div class="timeline-date">
+                                <i class="far fa-clock me-1"></i>
+                                -
+                            </div>
                             <div class="timeline-title">Order Delivered</div>
                             <div class="timeline-content">Order has been delivered successfully.</div>
                         </div>
@@ -341,7 +481,10 @@
                         
                         <% if(order.status === 'Cancelled') { %>
                         <div class="timeline-item active">
-                            <div class="timeline-date">-</div>
+                            <div class="timeline-date">
+                                <i class="far fa-clock me-1"></i>
+                                -
+                            </div>
                             <div class="timeline-title">Order Cancelled</div>
                             <div class="timeline-content">Order has been cancelled.</div>
                         </div>
@@ -349,7 +492,10 @@
                         
                         <% if(order.status === 'Return Request') { %>
                         <div class="timeline-item active">
-                            <div class="timeline-date">-</div>
+                            <div class="timeline-date">
+                                <i class="far fa-clock me-1"></i>
+                                -
+                            </div>
                             <div class="timeline-title">Return Requested</div>
                             <div class="timeline-content">Customer has requested a return.</div>
                         </div>
@@ -357,7 +503,10 @@
                         
                         <% if(order.status === 'Returned') { %>
                         <div class="timeline-item active">
-                            <div class="timeline-date">-</div>
+                            <div class="timeline-date">
+                                <i class="far fa-clock me-1"></i>
+                                -
+                            </div>
                             <div class="timeline-title">Item Returned</div>
                             <div class="timeline-content">Item has been returned successfully.</div>
                         </div>
@@ -366,29 +515,31 @@
                 </div>
             </div>
             
-            <!-- Customer Information -->
+          
             <div class="order-detail-card">
                 <div class="order-detail-header">
                     <h5>Customer Information</h5>
                 </div>
                 <div class="order-detail-body">
-                    <% if (userData) { %>
-                        <p><strong>Name:</strong> <%= userData.name %></p>
-                        <p><strong>Email:</strong> <%= userData.email %></p>
-                        <p><strong>Phone:</strong> <%= userData.phone %></p>
-                    <% } else { %>
-                        <p>Customer information not available.</p>
-                    <% } %>
+                    <div class="customer-info">
+                        <% if (userData) { %>
+                            <p><strong>Name:</strong> <%= userData.name %></p>
+                            <p><strong>Email:</strong> <a href="mailto:<%= userData.email %>"><%= userData.email %></a></p>
+                            <p><strong>Phone:</strong> <a href="tel:<%= userData.phone %>"><%= userData.phone %></a></p>
+                        <% } else { %>
+                            <p>Customer information not available.</p>
+                        <% } %>
+                    </div>
                     
-                    <div class="address-card mt-3">
+                    <div class="address-card mt-4">
                         <h6 class="mb-2">Shipping Address</h6>
                         <% if (addressDetails) { %>
-                            <p class="mb-1"><%= addressDetails.name %></p>
-                            <p class="mb-1"><%= addressDetails.phone %></p>
-                            <p class="mb-1">
-                                <%= addressDetails.landMark || '' %>
-                            </p>
-                            <p class="mb-1">
+                            <p class="mb-1"><i class="fas fa-user me-2 text-muted"></i><%= addressDetails.name %></p>
+                            <p class="mb-1"><i class="fas fa-phone me-2 text-muted"></i><%= addressDetails.phone %></p>
+                            <% if (addressDetails.landMark) { %>
+                                <p class="mb-1"><i class="fas fa-map-marker-alt me-2 text-muted"></i><%= addressDetails.landMark %></p>
+                            <% } %>
+                            <p class="mb-1"><i class="fas fa-map me-2 text-muted"></i>
                                 <%= addressDetails.city %>, 
                                 <%= addressDetails.state %> - <%= addressDetails.pincode %>
                             </p>
@@ -400,9 +551,9 @@
             </div>
         </div>
         
-        <!-- Order Details Column -->
+      
         <div class="col-lg-8">
-            <!-- Order Items Table -->
+          
             <div class="order-detail-card">
                 <div class="order-detail-header">
                     <h5>Order Items</h5>
@@ -416,14 +567,13 @@
                                     <th>Quantity</th>
                                     <th>Price</th>
                                     <th>Status</th>
-                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <% if (order && order.orderedItems && order.orderedItems.length > 0) { %>
                                     <% order.orderedItems.forEach(function(item) { %>
                                         <tr>
-                                            <td>
+                                            <td data-label="Product">
                                                 <div class="d-flex align-items-center">
                                                     <% if (item.product && item.product.productImages && item.product.productImages.length > 0) { %>
                                                         <img src="<%= item.product.productImages[0] %>" 
@@ -436,12 +586,13 @@
                                                     <% } %>
                                                     <div class="product-details">
                                                         <div class="fw-bold"><%= item.product.productName %></div>
+                                                        <small class="text-muted">SKU: <%= item.product._id || 'N/A' %></small>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td><%= item.quantity %></td>
-                                            <td>₹<%= item.price.toLocaleString() %></td>
-                                            <td>
+                                            <td data-label="Quantity"><%= item.quantity %></td>
+                                            <td data-label="Price">₹<%= item.price.toLocaleString() %></td>
+                                            <td data-label="Status">
                                                 <span class="status-badge 
                                                     <%= order.status === 'Pending' ? 'bg-warning text-dark' : 
                                                        order.status === 'Processing' ? 'bg-info text-white' : 
@@ -453,19 +604,11 @@
                                                     <%= order.status %>
                                                 </span>
                                             </td>
-                                            <td>
-                                                <% if (order.status === 'Return Request') { %>
-                                                    <div class="d-flex flex-column">
-                                                        <button class="btn btn-sm btn-primary mb-1" onclick="approveReturn('<%= order._id %>')">Approve</button>
-                                                        <button class="btn btn-sm btn-danger" onclick="rejectReturn('<%= order._id %>')">Reject</button>
-                                                    </div>
-                                                <% } %>
-                                            </td>
                                         </tr>
                                     <% }); %>
                                 <% } else { %>
                                     <tr>
-                                        <td colspan="5" class="text-center">No items found</td>
+                                        <td colspan="4" class="text-center">No items found</td>
                                     </tr>
                                 <% } %>
                             </tbody>
@@ -474,7 +617,7 @@
                 </div>
             </div>
 
-            <!-- Payment Information -->
+           
             <div class="order-detail-card">
                 <div class="order-detail-header">
                     <h5>Payment Information</h5>
@@ -483,184 +626,41 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="payment-method">
-                                <h6 class="mb-2">Payment Method</h6>
-                                <p class="bg-light p-2 rounded"><%= order.paymentMethod || 'Not specified' %></p>
+                                <h6 class="mb-3">Payment Method</h6>
+                                <p>
+                                    <i class="fas <%= order.paymentMethod === 'COD' ? 'fa-money-bill-wave' : 
+                                                    order.paymentMethod === 'Card' ? 'fa-credit-card' : 
+                                                    order.paymentMethod === 'UPI' ? 'fa-mobile-alt' : 
+                                                    'fa-wallet' %> me-2"></i>
+                                    <%= order.paymentMethod || 'Not specified' %>
+                                </p>
                             </div>
                         </div>
                         <div class="col-md-6">
+                            <h6 class="mb-3">Order Summary</h6>
                             <table class="amounts-table">
                                 <tr>
                                     <td class="amount-label">Subtotal</td>
-                                    <td class="amount-value">Rs:<%= order.totalPrice.toLocaleString() %></td>
+                                    <td class="amount-value">₹<%= order.totalPrice.toLocaleString() %></td>
                                 </tr>
                                 <% if (order.discount > 0) { %>
                                 <tr>
                                     <td class="amount-label">Discount</td>
-                                    <td class="amount-value text-success">-Rs:<%= order.discount.toLocaleString() %></td>
+                                    <td class="amount-value text-success">-₹<%= order.discount.toLocaleString() %></td>
                                 </tr>
                                 <% } %>
                                 <tr class="total-row">
                                     <td class="amount-label pt-3">Total</td>
-                                    <td class="amount-value pt-3">Rs:<%= order.finalAmount.toLocaleString() %></td>
+                                    <td class="amount-value pt-3">₹<%= order.finalAmount.toLocaleString() %></td>
                                 </tr>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
+            
+          
         </div>
     </div>
 </section>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-function updateOrderStatus(orderId) {
-    const status = document.querySelector('select[name="status"]').value;
-    
-    Swal.fire({
-        title: 'Update Status?',
-        text: `Are you sure you want to change the order status to ${status}?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#5c60f5',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, update it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const displayedOrderId = document.querySelector('.order-id').textContent.split('#')[1].trim();
-            
-            fetch('/admin/orders/update-status', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    orderId: displayedOrderId,
-                    status: status 
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire(
-                        'Updated!',
-                        'Order status has been updated.',
-                        'success'
-                    ).then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire(
-                        'Error!',
-                        data.message || 'Failed to update order status.',
-                        'error'
-                    );
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire(
-                    'Error!',
-                    'An error occurred while processing the request.',
-                    'error'
-                );
-            });
-        }
-    });
-}
-function approveReturn(orderId) {
-    Swal.fire({
-        title: 'Approve Return?',
-        text: 'Are you sure you want to approve this return request?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#5c60f5',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, approve it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('/admin/orders/approve-return', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ orderId: orderId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire(
-                        'Approved!',
-                        'Return request has been approved.',
-                        'success'
-                    ).then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire(
-                        'Error!',
-                        data.message || 'Failed to approve return request.',
-                        'error'
-                    );
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire(
-                    'Error!',
-                    'An error occurred while processing the request.',
-                    'error'
-                );
-            });
-        }
-    });
-}
-    function rejectReturn(orderId) {
-        Swal.fire({
-            title: 'Reject Return?',
-            text: 'Are you sure you want to reject this return request?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#5c60f5',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, reject it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch('/admin/orders/reject-return', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ orderId: orderId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire(
-                            'Rejected!',
-                            'Return request has been rejected.',
-                            'success'
-                        ).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire(
-                            'Error!',
-                            data.message || 'Failed to reject return request.',
-                            'error'
-                        );
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire(
-                        'Error!',
-                        'An error occurred while processing the request.',
-                        'error'
-                    );
-                });
-            }
-        });
-    }
-</script>
-
 <%- include("../../views/partials/admin/footer") %>

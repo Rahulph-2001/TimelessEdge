@@ -1,7 +1,7 @@
 <%- include('../partials/admin/header') %>
 
 <style>
-    /* Global Container */
+   
     .card-body {
         background-color: #f8fafc;
         padding: 2rem;
@@ -55,7 +55,7 @@
         border-radius: 4px;
     }
 
-    /* Export Buttons */
+    
     .export-buttons {
         display: flex;
         gap: 0.75rem;
@@ -102,7 +102,7 @@
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
 
-    /* Date Filter Section */
+    
     .filter-section {
         background: white;
         border-radius: 10px;
@@ -187,7 +187,7 @@
         box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
 
-    /* Summary Cards */
+   
     .summary-cards {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -276,7 +276,7 @@
         letter-spacing: -0.025em;
     }
 
-    /* Custom Colors */
+    
     .bg-primary-light { background-color: #eff6ff; }
     .bg-success-light { background-color: #ecfdf5; }
     .bg-warning-light { background-color: #fffbeb; }
@@ -287,7 +287,7 @@
     .text-warning { color: #f59e0b; }
     .text-info { color: #0ea5e9; }
 
-    /* Table Styles */
+    
     .table-responsive {
         background: white;
         border-radius: 10px;
@@ -347,7 +347,7 @@
         font-size: 0.95rem;
     }
 
-    /* Status Badges */
+    
     .badge {
         padding: 0.5rem 0.75rem;
         border-radius: 9999px;
@@ -378,7 +378,7 @@
         color: white;
     }
 
-    /* Pagination */
+    
     .pagination-area {
         margin-top: 2rem;
     }
@@ -429,7 +429,7 @@
         border-color: #e2e8f0;
     }
     
-    /* Empty State */
+    
     .text-center {
         text-align: center;
         padding: 2rem;
@@ -437,7 +437,7 @@
         font-style: italic;
     }
     
-    /* Responsive Design */
+    
     @media (max-width: 1200px) {
         .summary-cards {
             grid-template-columns: repeat(2, 1fr);
@@ -533,7 +533,7 @@
 </style>
 
 <div class="card-body">
-    <!-- Header section with export buttons -->
+    
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4>Sales Report</h4>
         <div class="export-buttons">
@@ -546,7 +546,7 @@
         </div>
     </div>
 
-    <!-- Date Filter Section -->
+   
     <div class="filter-section mb-4">
         <form id="filterForm" action="/admin/sales-report" method="GET">
             <div class="filter-container">
@@ -572,7 +572,7 @@
         </form>
     </div>
 
-    <!-- Summary Cards -->
+    
     <div class="summary-cards">
         <div class="summary-card">
             <div class="card-content">
@@ -620,7 +620,7 @@
         </div>
     </div>
 
-    <!-- Transaction Table -->
+    
     <div class="table-responsive">
         <table class="table">
             <thead>
@@ -666,7 +666,7 @@
         </table>
     </div>
 
-    <!-- Pagination -->
+    
     <% if (totalPages > 1) { %>
         <div class="pagination-area">
             <ul class="pagination">
@@ -712,25 +712,25 @@
         const exportPdfBtn = document.getElementById('exportPdf');
         const exportExcelBtn = document.getElementById('exportExcel');
         
-        // Ensure all cards have the same height
+     
         const equalizeCardHeights = () => {
             const cards = document.querySelectorAll('.summary-card');
             let maxHeight = 0;
             
-            // Reset heights
+            
             cards.forEach(card => {
                 card.style.height = 'auto';
                 const height = card.offsetHeight;
                 maxHeight = Math.max(maxHeight, height);
             });
             
-            // Set equal heights
+           
             cards.forEach(card => {
                 card.style.height = `${maxHeight}px`;
             });
         }
         
-        // Call on load and resize
+        
         window.addEventListener('load', equalizeCardHeights);
         window.addEventListener('resize', equalizeCardHeights);
         

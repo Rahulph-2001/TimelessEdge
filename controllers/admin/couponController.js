@@ -222,14 +222,12 @@ const updateCoupon = async (req, res) => {
         );
   
         if (!updatedCoupon) {
-            console.log("Coupon not found:", couponId);
             return res.status(404).json({
                 success: false,
                 message: "Coupon not found"
             });
         }
   
-        console.log("Coupon updated successfully:", updatedCoupon);
         return res.status(200).json({ 
             success: true,
             message: "Coupon updated successfully", 

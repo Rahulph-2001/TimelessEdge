@@ -19,7 +19,7 @@
        --radius: 0.5rem;
    }
 
-   /* Main Layout */
+   
    .wallet-container {
        max-width: 1200px;
        margin: 0 auto;
@@ -27,7 +27,7 @@
        font-family: 'Inter', system-ui, -apple-system, sans-serif;
    }
 
-   /* Header Styling */
+   
    .page-header {
        background-position: center;
        background-size: cover;
@@ -58,7 +58,7 @@
        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
    }
 
-   /* Wallet Header Card */
+  
    .wallet-header {
        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
        border-radius: var(--radius);
@@ -104,7 +104,7 @@
        margin-right: 0.25rem;
    }
 
-   /* Wallet Actions */
+  
    .wallet-actions {
        display: flex;
        gap: 1rem;
@@ -147,7 +147,7 @@
        color: white;
    }
 
-   /* Transaction Section */
+   
    .transactions-section {
        background-color: white;
        border-radius: var(--radius);
@@ -176,7 +176,7 @@
        border-radius: 2px;
    }
 
-   /* Transaction Table */
+   
    .transaction-table {
        width: 100%;
        border-collapse: separate;
@@ -299,7 +299,7 @@
        color: var(--danger-color);
    }
 
-   /* Pagination */
+   
    .pagination {
        display: flex;
        justify-content: center;
@@ -333,7 +333,7 @@
        border-color: var(--primary-color);
    }
 
-   /* Empty State */
+   
    .no-transactions {
        text-align: center;
        padding: 4rem 2rem;
@@ -348,7 +348,7 @@
        opacity: 0.5;
    }
 
-   /* Back Button */
+   
    .back-button {
        display: inline-flex;
        align-items: center;
@@ -373,7 +373,7 @@
        box-shadow: var(--shadow);
    }
 
-   /* Breadcrumbs */
+   
    .breadcrumb-nav {
        background-color: transparent;
        padding: 1.5rem 0;
@@ -421,7 +421,7 @@
        font-weight: 500;
    }
 
-   /* Modal Styling */
+   
    .modal-content {
        border: none;
        border-radius: var(--radius);
@@ -476,7 +476,7 @@
        width: 100%;
    }
 
-   /* Responsive Design */
+   
    @media (max-width: 768px) {
        .wallet-container {
            padding: 1rem;
@@ -590,14 +590,9 @@
                         <div class="wallet-balance"><%= walletBalance %></div>
                     </div>
                     
-                    <!-- Action buttons section -->
+                   
                     <div class="wallet-actions">
-                        <!-- <button class="btn btn-primary" data-toggle="modal" data-target="#addFundsModal">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
-                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                            </svg>
-                            Add Funds
-                        </button> -->
+                     
                     </div>
                     
                     <h4>Transaction History</h4>
@@ -664,7 +659,7 @@
                             </tbody>
                         </table>
                         
-                        <!-- Pagination -->
+                       
                         <% if (totalPages > 1) { %>
                             <div class="pagination">
                                 <% if (currentPage > 1) { %>
@@ -718,7 +713,7 @@
     </div>
 </main>
 
-<!-- Add Funds Modal -->
+
 <div class="modal fade" id="addFundsModal" tabindex="-1" role="dialog" aria-labelledby="addFundsModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">

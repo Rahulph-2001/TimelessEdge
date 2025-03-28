@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- SweetAlert2 CSS and JS -->
+    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -71,7 +71,7 @@
             <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center md:text-left">My Account</h1>
 
             <div class="flex flex-col lg:flex-row gap-8">
-                <!-- Sidebar Navigation -->
+               
                 <aside class="w-full lg:w-1/4">
                     <div class="bg-white shadow-md rounded-xl p-6 sticky-sidebar">
                         <div class="flex items-center space-x-4 mb-8 pb-6 border-b border-gray-100">
@@ -158,9 +158,9 @@
                     </div>
                 </aside>
 
-                <!-- Main Content Area -->
+                
                 <div class="w-full lg:w-3/4">
-                    <!-- Account Overview Section -->
+                   
                     <section id="overview" class="mb-10 section-card">
                         <div class="bg-white shadow-md rounded-xl p-6">
                             <h2 class="text-2xl font-semibold mb-6 text-gray-800 flex items-center">
@@ -316,7 +316,7 @@
                                     </table>
                                 </div>
 
-                                <!-- Order Summary Cards for Mobile -->
+                                
                                 <div class="md:hidden space-y-4 mt-4">
                                     <% orders.forEach(order=> { %>
                                         <div class="bg-white border rounded-lg shadow-sm p-4 order-card"
@@ -369,7 +369,7 @@
                                         <% }) %>
                                 </div>
 
-                                <!-- Pagination Controls -->
+                                
                                 <% if (pagination && pagination.totalPages> 1) { %>
                                     <div
                                         class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4">
@@ -395,14 +395,14 @@
                                             <div>
                                                 <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
                                                     aria-label="Pagination">
-                                                    <!-- Previous Page Button -->
+                                                   
                                                     <a href="<%= pagination.page > 1 ? '?page=' + (pagination.page - 1) : '#' %>"
                                                         class="<%= pagination.page <= 1 ? 'cursor-not-allowed bg-gray-100' : 'hover:bg-gray-50' %> relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500">
                                                         <span class="sr-only">Previous</span>
                                                         <i data-lucide="chevron-left" class="h-5 w-5"></i>
                                                     </a>
 
-                                                    <!-- Page Numbers -->
+                                                   
                                                     <% for(let i=1; i <=pagination.totalPages; i++) { %>
                                                         <a href="?page=<%= i %>"
                                                             class="<%= pagination.page === i ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50' %> relative inline-flex items-center px-4 py-2 border text-sm font-medium">
@@ -410,7 +410,7 @@
                                                         </a>
                                                         <% } %>
 
-                                                            <!-- Next Page Button -->
+                                                            
                                                             <a href="<%= pagination.page < pagination.totalPages ? '?page=' + (pagination.page + 1) : '#' %>"
                                                                 class="<%= pagination.page >= pagination.totalPages ? 'cursor-not-allowed bg-gray-100' : 'hover:bg-gray-50' %> relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500">
                                                                 <span class="sr-only">Next</span>
@@ -419,7 +419,7 @@
                                                 </nav>
                                             </div>
                                         </div>
-                                        <!-- Mobile Pagination -->
+                                        
                                         <div class="flex justify-between items-center sm:hidden mt-4">
                                             <a href="<%= pagination.page > 1 ? '?page=' + (pagination.page - 1) : '#' %>"
                                                 class="<%= pagination.page <= 1 ? 'opacity-50 cursor-not-allowed' : '' %> relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
@@ -448,7 +448,7 @@
                         </div>
                     </section>
 
-                    <!-- Addresses Section -->
+                 
                     <section id="addresses" class="mb-10 section-card">
                         <div class="bg-white shadow-md rounded-xl p-6">
                             <div class="flex justify-between items-center mb-6">
@@ -565,7 +565,7 @@
                                 My Referrals
                             </h2>
 
-                            <!-- Referral Code Card -->
+                           
                             <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 mb-8">
                                 <h3 class="text-xl font-semibold mb-2 text-black">Your Referral Code</h3>
                                 <p class="text-sm mb-4 text-black">Share this code with friends to earn rewards!</p>
@@ -600,7 +600,7 @@
                                 </div>
                             </div>
 
-                            <!-- Share Referral Links -->
+                           
                             <div class="mb-8">
                                 <h3 class="text-lg font-semibold mb-4 text-gray-700">Share Your Referral Link</h3>
                                 <div class="flex flex-wrap gap-2">
@@ -623,7 +623,7 @@
                                 </div>
                             </div>
 
-                            <!-- Referral History -->
+                            
                             <div>
                                 <div class="flex justify-between items-center mb-4">
                                     <h3 class="text-lg font-semibold text-gray-700">Referral History</h3>
@@ -724,7 +724,7 @@
                                             <% }) %>
                                     </div>
 
-                                    <!-- Pagination for Referrals -->
+                                   
                                     <% if (referralPagination && referralPagination.totalPages> 1) { %>
                                         <div
                                             class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4">

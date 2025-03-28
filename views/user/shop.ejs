@@ -525,7 +525,7 @@
   display: block;
 }
 
-/* Filter section icons */
+
 .filter-icon {
   display: inline-block;
   width: 20px;
@@ -534,7 +534,7 @@
   vertical-align: middle;
 }
 
-/* Product count badge */
+
 .product-count {
   text-align: center;
   margin: 1rem 0;
@@ -685,12 +685,12 @@
                               </svg>
                           </button>
                           
-                          <!-- Offer badge if available -->
+                         
                           <% if (product.bestOffer > 0) { %>
                               <div class="offer-badge <%= product.offerType %>-offer">
                                   <%= product.bestOffer %>% OFF
                               </div>
-                              <!-- Hover tooltip with offer details -->
+                             
                               <div class="offer-details">
                                   <% if (product.offerType === 'product') { %>
                                       Product offer: <%= product.productOffer %>% off
@@ -706,7 +706,6 @@
                           <h4><%= product.productName %></h4>
                           <p><%= product.description ? (product.description.length > 60 ? product.description.substring(0, 60) + '...' : product.description) : '' %></p>
                           
-                          <!-- Price display with offer if available -->
                           <p class="price-section">
                               <% if (product.offerPrice) { %>
                                   <span class="sale-price">₹<%= product.offerPrice %></span>
@@ -844,7 +843,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const applyFiltersBtn = document.getElementById('applyFilters');
   const clearFiltersBtn = document.getElementById('clearFilters');
 
-  // Debounce function to limit the rate at which a function is executed
+  
   function debounce(func, wait) {
       let timeout;
       return function(...args) {
@@ -892,7 +891,7 @@ document.addEventListener('DOMContentLoaded', function() {
       categoryInput.value = categoryFilter.value;
       brandInput.value = brandFilter.value;
       sortInput.value = sortOrder.value;
-      pageInput.value = 1; // Reset to page 1 when filters change
+      pageInput.value = 1; 
   }
 
   function applyFilters() {
@@ -900,7 +899,7 @@ document.addEventListener('DOMContentLoaded', function() {
       filterForm.submit();
   }
 
-  // Use debounce for price input changes
+ 
   minPriceInput.addEventListener('input', debounce(function() {
       if (maxPriceInput.value && parseInt(this.value) > parseInt(maxPriceInput.value)) {
           this.value = maxPriceInput.value;
@@ -1027,7 +1026,7 @@ document.addEventListener('DOMContentLoaded', function() {
           try {
               const productId = this.getAttribute('data-product');
               
-              // Show loading state
+             
               const originalHTML = this.innerHTML;
               this.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 6v6l4 2"></path></svg>';
               

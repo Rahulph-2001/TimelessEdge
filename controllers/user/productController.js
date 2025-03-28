@@ -346,7 +346,6 @@ const addToCartFromWishlist = async (req, res) => {
             }
         });
 
-        console.log('User address IDs:', addressIds);
 
         const order = await Order.findOne({
             address: { $in: addressIds }, 
@@ -354,7 +353,6 @@ const addToCartFromWishlist = async (req, res) => {
             'orderedItems.status': 'Delivered'
         });
 
-        console.log('Order found:', order ? order : 'No matching order found');
 
         if (!order) {
             return res.status(403).json({ success: false, message: 'You can only review products you have purchased and received' });

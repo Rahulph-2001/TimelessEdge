@@ -50,7 +50,6 @@ const sendVerificationEmail = async (email, otp) => {
         };
 
         const info = await transporter.sendMail(mailOptions);
-        console.log('Email sent:', info.messageId);
         return true;
     } catch (error) {
         console.error('Error sending email:', error);
@@ -314,100 +313,6 @@ const searchProducts=async (req,res)=>{
 }
 
 
-// const userProfile = async (req, res) => {
-//     try {
-//         if (!req.user) {
-//             return res.redirect('/pageNotFound');
-//         }
-
-//         let user = await User.findById(req.user._id);
-//         if (!user) {
-//             return res.redirect('/pageNotFound');
-//         }
-
-//         if (!user.referralCode) {
-//             const timestamp = new Date().getTime().toString();
-//             const hash = crypto.createHash('md5').update(user.email + timestamp).digest('hex');
-//             user.referralCode = hash.substring(0, 8).toUpperCase();
-//             await user.save();
-//             console.log('Generated referralCode for existing user:', user.referralCode);
-//         }
-
-//         const addresses = await Address.find({ userId: user._id });
-
-//         const allAddressIds = [];
-//         addresses.forEach(doc => {
-//             if (doc.address && doc.address.length > 0) {
-//                 doc.address.forEach(addr => {
-//                     allAddressIds.push(addr._id);
-//                 });
-//             }
-//             allAddressIds.push(doc._id);
-//         });
-
-//         const page = parseInt(req.query.page) || 1;
-//         const limit = 5;
-//         const skip = (page - 1) * limit;
-
-//         const totalOrders = await Order.countDocuments({ address: { $in: allAddressIds } });
-//         const totalPages = Math.ceil(totalOrders / limit);
-
-//         const orders = await Order.find({ address: { $in: allAddressIds } })
-//             .sort({ createdOn: -1 })
-//             .skip(skip)
-//             .limit(limit);
-
-//         const refPage = parseInt(req.query.refPage) || 1;
-//         const refLimit = 5;
-//         const refSkip = (refPage - 1) * refLimit;
-
-//         const totalReferrals = await ReferralTransaction.countDocuments({ referrer: user._id });
-//         const totalReferralPages = Math.ceil(totalReferrals / refLimit);
-
-//         const referralTransactions = await ReferralTransaction.find({ referrer: user._id })
-//             .populate('referred', 'name email')
-//             .sort({ createdAt: -1 })
-//             .skip(refSkip)
-//             .limit(refLimit);
-
-//         const totalReferralEarnings = await ReferralTransaction.aggregate([
-//             { $match: { referrer: user._id, status: 'completed' } },
-//             { $group: { _id: null, total: { $sum: '$reward' } } }
-//         ]).then(result => result[0]?.total || 0);
-
-//         const referralReward = 100;
-//         const siteUrl = process.env.SITE_URL || 'https://yourdomain.com';
-//         const referralUrl = `${siteUrl}/register?ref=${user.referralCode}`;
-//         console.log('Referral URL:', referralUrl);
-
-//         res.render('userProfile', {
-//             user,
-//             orders,
-//             addresses,
-//             referralTransactions,
-//             totalReferralEarnings,
-//             referralReward,
-//             siteUrl,
-//             pagination: {
-//                 page,
-//                 limit,
-//                 totalPages,
-//                 totalOrders
-//             },
-//             referralPagination: {
-//                 page: refPage,
-//                 limit: refLimit,
-//                 totalPages: totalReferralPages,
-//                 totalReferrals
-//             }
-//         });
-//         console.log('userdata fetched');
-
-//     } catch (error) {
-//         console.log(error, { message: "Internal server error" });
-//         res.status(500).send('Internal Server Error');
-//     }
-// };
 const userProfile = async (req, res) => {
     try {
       if (!req.user) {
@@ -424,7 +329,6 @@ const userProfile = async (req, res) => {
         const hash = crypto.createHash('md5').update(user.email + timestamp).digest('hex');
         user.referralCode = hash.substring(0, 8).toUpperCase();
         await user.save();
-        console.log('Generated referralCode for existing user:', user.referralCode);
       }
   
       const addresses = await Address.find({ userId: user._id });
@@ -480,7 +384,6 @@ const userProfile = async (req, res) => {
       const referralReward = 100;
       const siteUrl = process.env.SITE_URL || 'https://yourdomain.com';
       const referralUrl = `${siteUrl}/register?ref=${user.referralCode}`;
-      console.log('Referral URL:', referralUrl);
   
       res.render('userProfile', {
         user,
@@ -503,7 +406,6 @@ const userProfile = async (req, res) => {
           totalReferrals
         }
       });
-      console.log('User data fetched for profile');
     } catch (error) {
       console.error('User profile error:', error);
       res.status(500).send('Internal Server Error');
@@ -660,7 +562,6 @@ const updateAddress = async (req, res) => {
         }
 
         const { id } = req.params;
-        console.log("Updating address with id:", id);
 
         const { 
             addressType,  
@@ -796,10 +697,8 @@ const blockAddress=async(req,res)=>{
         try {
             const docId = req.params.docId;
             const addressId = req.params.addressId;
-            console.log(`Unblocking address: docId=${docId}, addressId=${addressId}`);
     
             const addressDoc = await Address.findById(docId);
-            console.log('Address Document:', addressDoc);
     
             if (!addressDoc) {
                 return res.status(404).json({ success: false, message: 'Address document not found' });
@@ -815,7 +714,6 @@ const blockAddress=async(req,res)=>{
             address.isBlocked = false;
             console.log('Address before save:', address);
             await addressDoc.save();
-            console.log('Address after save:', address);
     
             return res.status(200).json({ success: true, message: 'Address unblocked successfully' });
         } catch (error) {

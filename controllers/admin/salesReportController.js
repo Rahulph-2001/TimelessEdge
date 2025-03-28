@@ -65,7 +65,6 @@ const getDateRange = (dateRange, startDate, endDate) => {
     return { start, end };
 };
 
-// Helper function to get customer name - reusable across all report functions
 const getCustomerNameFromOrder = async (order) => {
     try {
         if (!order.address) {

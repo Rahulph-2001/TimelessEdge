@@ -229,12 +229,12 @@
     </div>
   </div>
 
-  <!-- jQuery and SweetAlert2 libraries -->
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.3/sweetalert2.all.min.js"></script>
   <script>
     $(document).ready(function() {
-      // Toggle password visibility
+      
       $('.password-toggle-icon').click(function() {
         const targetId = $(this).data('target');
         const inputField = $('#' + targetId);
@@ -249,7 +249,7 @@
         }
       });
       
-      // Password validation function
+      
       function checkPasswordRequirements(password) {
         const requirements = {
           length: password.length >= 8,
@@ -259,7 +259,7 @@
           special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
         };
         
-        // Update requirement indicators
+        
         $('#req-length').toggleClass('fa-check-circle requirement-met', requirements.length)
                         .toggleClass('fa-circle', !requirements.length);
         $('#req-uppercase').toggleClass('fa-check-circle requirement-met', requirements.uppercase)
@@ -274,21 +274,21 @@
         return Object.values(requirements).every(Boolean);
       }
       
-      // Check password requirements on input
+    
       $('#newPassword').on('input', function() {
         checkPasswordRequirements($(this).val());
       });
       
-      // Form submission using AJAX and SweetAlert2
+      
       $('#changePasswordForm').submit(function(e) {
         e.preventDefault();
         
-        // Get form values
+       
         const currentPassword = $('#currentPassword').val();
         const newPassword = $('#newPassword').val();
         const confirmNewPassword = $('#confirmNewPassword').val();
         
-        // Client-side validations
+        
         if (!currentPassword) {
           Swal.fire({
             icon: 'error',
@@ -316,7 +316,7 @@
           return;
         }
         
-        // Submit the form data via AJAX
+        
         $.ajax({
           url: '/change-password',
           method: 'POST',
@@ -331,7 +331,7 @@
               title: 'Success',
               text: response.message
             }).then(() => {
-              // Optionally, you can redirect or simply reload the page
+          
               window.location.reload();
             });
           },

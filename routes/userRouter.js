@@ -93,10 +93,7 @@ router.get('/wallet',userOrderController.getWalletPage)
 
 
 router.post('/user/wallet/add-funds',userOrderController.addFunds);
-
-
 router.get('/orders/:orderId',userOrderController.getOrderDetails)
-
 router.post('/api/orders/:orderId/cancel', userAuth, userOrderController.cancelOrder);
 router.post('/api/orders/:orderId/items/:itemId/cancel', userAuth, userOrderController.cancelOrderItem);
 router.post('/api/orders/:orderId/items/:itemId/return', userAuth, userOrderController.returnOrderItem);

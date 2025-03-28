@@ -17,14 +17,14 @@
         --transition: all 0.3s ease;
     }
 
-    /* Main Layout */
+    
     .main {
         background-color: var(--light-bg);
         min-height: 100vh;
         padding-bottom: 50px;
     }
 
-    /* Breadcrumb Styles */
+    
     .breadcrumb-wrap {
         padding: 15px 0;
         background-color: #fff;
@@ -63,7 +63,7 @@
         margin-bottom: 30px;
     }
 
-    /* Product Gallery */
+    
     .detail-gallery {
         position: relative;
         background-color: #fff;
@@ -144,7 +144,7 @@
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
     }
 
-    /* Product Info */
+    
     .detail-info {
         background-color: #fff;
         padding: 30px;
@@ -361,7 +361,7 @@
         font-weight: 600;
     }
 
-    /* Zoom & Gallery Styles */
+    
     .product-image-container {
         position: relative;
         width: 100%;
@@ -413,7 +413,7 @@
         }
     }
 
-    /* Review Section Styles */
+    
     .review-section {
         margin-top: 40px;
         background-color: #fff;
@@ -598,7 +598,7 @@
         text-decoration: underline;
     }
 
-    /* Related Products Section Styles */
+    
     .related-products {
         background-color: #fff;
         padding: 30px;
@@ -735,7 +735,7 @@
         box-shadow: 0 5px 15px rgba(59, 183, 126, 0.3);
     }
 
-    /* Responsive Styles */
+    
     @media (max-width: 992px) {
         .detail-gallery, .detail-info {
             margin-bottom: 30px;
@@ -788,7 +788,7 @@
         }
     }
 
-    /* Button Styles */
+   
     .add-to-cart-btn {
         background-color: var(--primary);
         color: #fff;
@@ -903,9 +903,7 @@
                                             <ins><span class="text-brand">Rs:<%= product.price %></span></ins>
                                             <% if (product.regularPrice && product.regularPrice > product.price) { %>
                                                 <ins><span class="old-price font-md ml-15">Rs:<%= product.regularPrice %></span></ins>
-                                                <!-- <span class="save-price">
-                                                    <%= Math.round((product.regularPrice - product.price) / product.regularPrice * 100) %>% Off
-                                                </span> -->
+                                                
                                             <% } %>
                                             <% if (product.categoryOffer > 0 || product.productOffer > 0) { %>
                                                 <span class="save-price">
@@ -1033,7 +1031,7 @@
         </div>
     </section>
 
-    <!-- Related Products Section -->
+
     <section class="related-products container">
         <h3 class="related-title">People also bought</h3>
         <% if (relatedProducts && relatedProducts.length > 0) { %>
@@ -1073,7 +1071,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Handle image thumbnails
+   
     const thumbnails = document.querySelectorAll('.slider-nav-thumbnails img');
     const mainImage = document.querySelector('.product-image-slider img');
 
@@ -1089,7 +1087,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Handle image zoom
+    
     const zoomIcon = document.querySelector('.zoom-icon');
     const productImage = document.querySelector('.product-image-slider');
     
@@ -1099,19 +1097,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Get product stock information
-    let maxQuantity = 10; // Default max quantity limit - matches your controller's maxLimit
+    let maxQuantity = 10; 
     
-    // If we have product data, extract the real stock quantity
+   
     const inStockElement = document.querySelector('.in-stock');
     if (inStockElement && inStockElement.dataset.quantity) {
         const stockQuantity = parseInt(inStockElement.dataset.quantity);
         if (!isNaN(stockQuantity) && stockQuantity > 0) {
-            maxQuantity = Math.min(stockQuantity, 10); // Use the smaller of stock quantity or max limit
+            maxQuantity = Math.min(stockQuantity, 10); 
         }
     }
 
-    // Handle quantity increment/decrement
+    
     const qtyDown = document.querySelector('.qty-down');
     const qtyUp = document.querySelector('.qty-up');
     const qtyVal = document.querySelector('.qty-val');
@@ -1119,27 +1116,27 @@ document.addEventListener('DOMContentLoaded', function() {
     if (qtyDown && qtyVal) {
         qtyDown.addEventListener('click', function(e) {
             e.preventDefault();
-            e.stopPropagation(); // Stop event bubbling
+            e.stopPropagation();
             
             let currentQty = parseInt(qtyVal.textContent);
             if (currentQty > 1) {
                 qtyVal.textContent = (currentQty - 1).toString();
             }
             
-            return false; // Additional safeguard against default behavior
+            return false; 
         });
     }
 
     if (qtyUp && qtyVal) {
         qtyUp.addEventListener('click', function(e) {
             e.preventDefault();
-            e.stopPropagation(); // Stop event bubbling
+            e.stopPropagation();
             
             let currentQty = parseInt(qtyVal.textContent);
             if (currentQty < maxQuantity) {
                 qtyVal.textContent = (currentQty + 1).toString();
             } else {
-                // Optional: Show max quantity message
+                
                 Swal.fire({
                     title: 'Maximum Quantity',
                     text: `You can only add up to ${maxQuantity} of this item.`,
@@ -1149,16 +1146,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
             
-            return false; // Additional safeguard against default behavior
+            return false; 
         });
     }
     
-    // Handle product image zoom functionality
+   
     const container = document.querySelector('.product-image-container');
     const zoomImage = document.querySelector('.product-image-slider img');
     
     if (container && zoomImage) {
-        // Zoom functionality
+       
         const lens = document.createElement('div');
         lens.className = 'zoom-lens';
         const zoomResult = document.createElement('div');
@@ -1214,21 +1211,21 @@ document.addEventListener('DOMContentLoaded', function() {
         container.addEventListener('mousemove', moveLens);
     }
 
-    // Handle add to cart functionality - UPDATED TO MATCH CONTROLLER
+    
     const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
     
     addToCartButtons.forEach(function(button) {
         button.addEventListener('click', async function(e) {
             e.preventDefault();
             
-            // Get the product ID from the data attribute
+            
             const productId = this.getAttribute('data-product');
             if (!productId) {
                 console.error("Product ID not found on the button.");
                 return;
             }
             
-            // Get quantity value - for primary product use the qty-val, for related products use 1
+            
             let quantity = 1;
             if (this.closest('.detail-info')) {
                 const qtyVal = document.querySelector('.qty-val');
@@ -1237,13 +1234,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // Update the button state to show a loading indicator
+            
             const originalText = this.innerHTML;
             this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
             this.disabled = true;
 
             try {
-                // FIXED URL to match controller - matches the router.post('/cart/add')
+                
                 const response = await fetch('/cart/add', {
                     method: 'POST',
                     headers: {
@@ -1255,7 +1252,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                 });
 
-                // Check for HTTP errors
+               
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.error || 'Failed to add product to cart');
@@ -1281,7 +1278,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 let errorMessage = "Error adding product to cart";
                 
-                // Check for authentication errors
+                
                 if (error.message && (
                     error.message.includes('not authenticated') || 
                     error.message.includes('not logged in') ||
@@ -1311,14 +1308,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
             } finally {
-                // Reset the button state
+                
                 this.innerHTML = originalText;
                 this.disabled = false;
             }
         });
     });
     
-    // Handle wishlist functionality
+ 
     const wishlistBtn = document.querySelector('.wishlist-btn');
     
     if (wishlistBtn) {
@@ -1412,7 +1409,7 @@ if (reviewForm) {
         const formData = new FormData(this);
         const rating = formData.get('rating');
         const review = formData.get('review');
-        const productId = '<%= product.stockCode %>'; // This matches your productData.stockCode
+        const productId = '<%= product.stockCode %>'; 
 
         if (!rating) {
             Swal.fire({

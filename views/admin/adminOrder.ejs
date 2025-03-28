@@ -440,29 +440,7 @@
     
     <div class="card">
         <header class="card-header">
-            <div class="filter-container row gx-3">
-                <div class="col-lg-3 col-md-6 mb-2 mb-lg-0">
-                    <select class="filter-select" id="statusFilter">
-                        <option value="">All Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Processing">Processing</option>
-                        <option value="Shipped">Shipped</option>
-                        <option value="Delivered">Delivered</option>
-                        <option value="Cancelled">Cancelled</option>
-                        <option value="Return Request">Return Request</option>
-                        <option value="Returned">Returned</option>
-                    </select>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-2 mb-lg-0">
-                    <input type="date" class="date-input form-control" placeholder="Start date">
-                </div>
-                <div class="col-lg-3 col-md-6 mb-2 mb-lg-0">
-                    <input type="date" class="date-input form-control" placeholder="End date">
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <button class="btn btn-primary w-100" id="applyFilters">Apply Filters</button>
-                </div>
-            </div>
+            
         </header>
         
         <div class="card-body p-0">
@@ -525,7 +503,6 @@
                                                 <option value="Returned">Returned</option>
                                             </select>
                                         <% } else if (item.status === 'Delivered' || item.status === 'Cancelled' || item.status === 'Returned') { %>
-                                            <!-- For terminal states, just show non-editable dropdown -->
                                             <select
                                                 class="status-select status-<%= item.status.toLowerCase().replace(/ /g, '-') %>"
                                                 disabled
@@ -533,7 +510,6 @@
                                                 <option value="<%= item.status %>" selected><%= item.status %></option>
                                             </select>
                                         <% } else { %>
-                                            <!-- For normal states, show editable dropdown -->
                                             <select 
                                                 data-order-id="<%= orders[i].orderId %>"
                                                 data-item-id="<%= item._id %>"
@@ -563,7 +539,6 @@
                                             <% } %>
                                         </td>
                                         <td rowspan="<%= itemsCount %>">
-                                            <!-- Order-level status display (read-only) -->
                                             <span class="badge bg-<%= 
                                                 orders[i].status === 'Pending' ? 'warning' : 
                                                 orders[i].status === 'Processing' ? 'info' :
@@ -581,8 +556,7 @@
                                                 </button>
                                                 <ul class="dropdown-menu">
                                                     <li><a class="dropdown-item" href="#" onclick="viewOrderDetails('<%= orders[i]._id %>')">View details</a></li>
-                                                    <!-- <li><a class="dropdown-item" href="#" onclick="printInvoice('<%= orders[i].orderId %>')">Print invoice</a></li>
-                                                    <li><a class="dropdown-item text-danger" href="#" onclick="deleteOrder('<%= orders[i].orderId %>')">Delete</a></li> -->
+                                                   
                                                 </ul>
                                             </div>
                                         </td>
@@ -599,7 +573,6 @@
     <div class="pagination-area mt-4">
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-start">
-                <!-- Previous Button -->
                 <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
                     <a class="page-link" 
                     href="<%= currentPage === 1 ? '#' : `?page=${currentPage - 1}` %>"
@@ -608,7 +581,6 @@
                     </a>
                 </li>
 
-                <!-- Page Numbers -->
                 <% 
                 let startPage = Math.max(1, currentPage - 2);
                 let endPage = Math.min(totalPages, startPage + 4);
@@ -645,7 +617,6 @@
                     </li>
                 <% } %>
 
-                <!-- Next Button -->
                 <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
                     <a class="page-link" 
                     href="<%= currentPage === totalPages ? '#' : `?page=${currentPage + 1}` %>"

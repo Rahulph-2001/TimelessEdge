@@ -73,7 +73,7 @@
         <div class="w-full max-w-3xl mx-auto">
             <div class="bg-white shadow-md rounded-xl p-8 section-card">
                 <form id="edit-profile-form" action="/profile/update" method="POST" enctype="multipart/form-data">
-                    <!-- Profile Image Section -->
+                    
                     <div class="mb-8 text-center">
                         <div class="profile-image-container mb-4">
                             <img id="image-preview" src="<%= user.profile_image || '/ui/dprofile.jpg' %>" alt="User Profile Picture">
@@ -85,7 +85,7 @@
                         <p class="text-sm text-gray-500">Click the camera icon to upload a new profile picture</p>
                     </div>
                     
-                    <!-- Profile Information -->
+                  
                     <div class="space-y-6">
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
@@ -128,7 +128,7 @@
     <script>
         lucide.createIcons();
 
-        // Handle profile image preview
+        
         const profileImageUpload = document.getElementById('profile-image-upload');
         const imagePreview = document.getElementById('image-preview');
 
@@ -143,13 +143,13 @@
             }
         });
 
-        // Form validation
+       
         const editProfileForm = document.getElementById('edit-profile-form');
         editProfileForm.addEventListener('submit', function(event) {
             const nameField = document.getElementById('name');
             const phoneField = document.getElementById('phone');
             
-            // Basic form validation
+           
             if (!nameField.value.trim()) {
                 event.preventDefault();
                 alert('Please enter your name');
@@ -157,9 +157,9 @@
                 return;
             }
             
-            // Phone validation (optional field, but validate format if provided)
+            
             if (phoneField.value.trim()) {
-                const phonePattern = /^\d{10}$/;  // Simple 10-digit validation
+                const phonePattern = /^\d{10}$/;
                 if (!phonePattern.test(phoneField.value.trim())) {
                     event.preventDefault();
                     alert('Please enter a valid 10-digit mobile number');
@@ -168,7 +168,7 @@
                 }
             }
         });
-        // Function to handle address unblocking with SweetAlert2
+        
 async function unblockAddress(docId, addressId) {
     Swal.fire({
         title: 'Unblock Address',

@@ -2,14 +2,14 @@
  <%- include("../../views/partials/user/header") %>
 
  <style>
-  /* Reset and base styles */
+ 
   body {
     margin: 0;
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Layout */
+  
   .section {
     background-color: white;
     padding: 32px 0;
@@ -45,7 +45,7 @@
     }
   }
 
-  /* Cart layout */
+
   .cart-container {
     margin-top: 24px;
   }
@@ -70,7 +70,7 @@
     }
   }
 
-  /* Cart items section */
+ 
   .cart-items {
     width: 100%;
     margin: 0 auto;
@@ -124,7 +124,7 @@
     }
   }
 
-  /* Product image */
+ 
   .product-image-link {
     flex-shrink: 0;
   }
@@ -141,7 +141,7 @@
     object-fit: cover;
   }
 
-  /* Quantity controls */
+ 
   .quantity-section {
     display: flex;
     align-items: center;
@@ -197,7 +197,7 @@
     box-shadow: none;
   }
 
-  /* Price display */
+  
   .price-display {
     text-align: end;
   }
@@ -215,7 +215,7 @@
     color: #111827;
   }
 
-  /* Product details */
+  
   .product-details {
     width: 100%;
     min-width: 0;
@@ -272,7 +272,7 @@
     margin-right: 6px;
   }
 
-  /* Order summary section */
+  
   .summary-section {
     margin-top: 24px;
     max-width: 896px;
@@ -352,7 +352,7 @@
     color: #111827;
   }
 
-  /* Buttons */
+  
   .button {
     display: inline-flex;
     align-items: center;
@@ -381,7 +381,7 @@
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25);
   }
 
-  /* Continue shopping section */
+
   .continue-shopping-section {
     display: flex;
     align-items: center;
@@ -409,7 +409,7 @@
     text-decoration: none;
   }
 
-  /* Voucher section */
+
   .voucher-section {
     border: 1px solid #e5e7eb;
     border-radius: 0.5rem;
@@ -454,7 +454,7 @@
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
   }
 
-  /* Related products section */
+  
   .related-products {
     margin-top: 32px;
   }
@@ -596,20 +596,20 @@
        <div class="cart-container">
          <div class="cart-items">
            <div class="cart-items-list" id="cart-items-list">
-             <!-- Cart items will be dynamically updated here -->
+           
            </div>
  
            <div class="related-products">
              <h3 class="related-title">People also bought</h3>
              <div class="related-grid" id="related-products-grid">
-               <!-- Related products will be dynamically updated here -->
+               
              </div>
            </div>
          </div>
  
          <div class="summary-section">
            <div class="order-summary" id="order-summary">
-             <!-- Summary will be dynamically updated here -->
+             
            </div>
          </div>
        </div>
@@ -752,14 +752,14 @@
        }
      }
  
-     // Initial load
+    
      $.getJSON('/cart', (data) => {
        renderCartItems(data.cart);
        renderOrderSummary(data.summary);
        renderRelatedProducts(data.relatedProduct);
      });
  
-     // Event listeners for quantity buttons
+     
      $(document).on('click', '[data-input-counter-increment]', function() {
        const inputId = $(this).attr('data-input-counter-increment');
        const input = $(`#${inputId}`);
@@ -778,7 +778,7 @@
        updateCart(inputId.replace('counter-input-', ''), newValue, input);
      });
  
-// Event listeners for quantity buttons
+
 $(document).on('click', '[data-input-counter-increment]', function() {
   const inputId = $(this).attr('data-input-counter-increment');
   const input = $(`#${inputId}`);
@@ -806,7 +806,7 @@ $(document).on('click', '[data-input-counter-decrement]', function() {
   }
 });
 
-// Function to update cart
+
 function updateCart(itemId, newQuantity, input) {
   $.ajax({
     url: '/cart/update-cart',
@@ -824,7 +824,7 @@ function updateCart(itemId, newQuantity, input) {
   });
 }
  
-     // Remove item
+
      $(document).on('click', '.remove', function() {
        const itemId = $(this).data('id');
        $.ajax({
@@ -852,7 +852,7 @@ function updateCart(itemId, newQuantity, input) {
        });
      });
  
-     // Add to cart from related products
+  
      $(document).on('click', '.button-primary[data-product-id]', function() {
        const productId = $(this).data('product-id');
        $.ajax({

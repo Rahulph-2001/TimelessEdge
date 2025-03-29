@@ -335,8 +335,8 @@ const signup = async (req, res) => {
         let otpTimestamp = req.session.otpTimestamp;
 
         if (!otp || !otpTimestamp || (Date.now() - otpTimestamp > 60000)) { 
-            otp = generateOtp();
-            const emailSent = await sendVerificationEmail(email, otp);
+            otp = generateOtp(); 
+            const emailSent = await sendVerificationEmail(email, otp); 
             if (!emailSent) {
                 return res.render('signup', { message: "Failed to send verification email" });
             }
@@ -385,6 +385,7 @@ const verifyOtp = async (req, res) => {
             phone: userData.phone || undefined,
             password: passwordHash,
             wallet: 0,
+            referralCode: `REF${Date.now().toString().slice(-6)}`, 
         });
 
         await newUser.save();
@@ -394,12 +395,11 @@ const verifyOtp = async (req, res) => {
             if (referrer) {
                 newUser.referredBy = referrer._id;
                 await newUser.save();
-                
-               
+
                 referrer.referralCount = (referrer.referralCount || 0) + 1;
                 await referrer.save();
 
-               
+                
                 const referralTransaction = new ReferralTransaction({
                     referrer: referrer._id,
                     referred: newUser._id,  
@@ -407,14 +407,14 @@ const verifyOtp = async (req, res) => {
                     status: 'pending'
                 });
                 await referralTransaction.save();
-                
 
+               
                 const couponCode = `REF${referrer.referralCode}${Date.now().toString().slice(-4)}`;
                 const newCoupon = new Coupon({
                     name: couponCode,
-                    userId: [referrer._id],
+                    userId: [referrer._id], 
                     referrer: referrer._id,
-                    referred: newUser._id, 
+                    referred: newUser._id,
                     createdOn: new Date(),
                     expireOn: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 
                     offerPrice: 100,
@@ -422,7 +422,6 @@ const verifyOtp = async (req, res) => {
                     isList: false
                 });
                 await newCoupon.save();
-                
             } else {
                 console.log('Invalid referral code:', userData.referralCode);
             }

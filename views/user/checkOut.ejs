@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -129,6 +128,16 @@
     .apply-button:hover {
       background-color: #218838;
     }
+    .coupon-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    #applyCoupon {
+      flex: 1;
+    }
+    #removeCoupon {
+      display: none;
+    }
     .payment-methods {
       margin: 20px 0;
     }
@@ -238,12 +247,14 @@
                 <% }); %>
               <% } %>
             </select>
-            <button id="applyCoupon" class="apply-button" type="button">
-              <i class="fas fa-tag me-2"></i> Apply
-            </button>
-            <button id="removeCoupon" class="apply-button" type="button">
-              <i class="fas fa-times me-2"></i> Remove
-            </button>
+            <div class="coupon-buttons">
+              <button id="applyCoupon" class="apply-button" type="button">
+                <i class="fas fa-tag me-2"></i> Apply
+              </button>
+              <button id="removeCoupon" class="apply-button" type="button">
+                <i class="fas fa-times me-2"></i> Remove
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -262,9 +273,6 @@
             <span><i class="fas fa-credit-card me-2"></i> Razorpay</span>
           </label>
         </div>
-        <div class="payment-option">
-          
-        </div>
       </div>
 
       <button onclick="placeOrder()" id="placeOrderBtn" class="btn btn-primary btn-block">
@@ -276,11 +284,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script>
   $(document).ready(function() {
     let appliedCoupon = null;
     let originalTotal = parseFloat("<%= summary.originalPrice %>");
     let discount = 0;
+    
+    // Initially hide remove button
+    $("#removeCoupon").hide();
     
     $("#applyCoupon").click(function() {
       const couponCode = $("#coupon-select").val();
@@ -324,6 +336,13 @@
             const grandTotal = calculateGrandTotal(originalTotal, discount);
             $("#grand-total").text(`Grand Total: ₹${grandTotal.toFixed(2)}`);
             
+            // Hide apply button and show remove button
+            $("#applyCoupon").hide();
+            $("#removeCoupon").show();
+            
+            // Disable coupon select
+            $("#coupon-select").prop('disabled', true);
+            
             Swal.fire({
               icon: 'success',
               title: 'Coupon Applied',
@@ -366,7 +385,12 @@
       const grandTotal = calculateGrandTotal(originalTotal, 0);
       $("#grand-total").text(`Grand Total: ₹${grandTotal.toFixed(2)}`);
       
-      $("#coupon-select").val("");
+      // Reset coupon select
+      $("#coupon-select").val("").prop('disabled', false);
+      
+      // Show apply button and hide remove button
+      $("#applyCoupon").show();
+      $("#removeCoupon").hide();
       
       Swal.fire({
         icon: 'success',
@@ -417,7 +441,7 @@
         Swal.fire({
           icon: 'warning',
           title: 'Payment Method Restricted',
-          text: 'Cash on Delivery is not available for orders above ₹1000. Please choose an online payment method like Razorpay .',
+          text: 'Cash on Delivery is not available for orders above ₹1000. Please choose an online payment method like Razorpay.',
           confirmButtonText: 'Select Another Payment Method'
         });
         return;

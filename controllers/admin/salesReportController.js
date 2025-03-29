@@ -214,7 +214,8 @@ const getSalesReport = async (req, res) => {
           quantity: item.quantity
         })),
         totalAmount: order.finalAmount,
-        status: order.status
+        status: order.status,
+        paymentMethod: order.paymentMethod 
       };
     });
 
@@ -234,7 +235,6 @@ const getSalesReport = async (req, res) => {
     res.redirect('/admin/dashboard');
   }
 };
-
 const exportSalesExcel = async (req, res) => {
   try {
       const { start, end } = getDateRange(

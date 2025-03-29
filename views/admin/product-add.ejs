@@ -351,11 +351,10 @@
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-
 let croppers = [];
 let croppedImageBlobs = [];
-
 
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
@@ -363,14 +362,12 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeImageHandlers();
 });
 
-
 function initializeFormValidation(form) {
     form.onsubmit = function(e) {
         e.preventDefault();
         handleFormSubmission(form);
     };
 }
-
 
 function viewImage(event, index) {
     const input = event.target;
@@ -403,7 +400,6 @@ function viewImage(event, index) {
     }
 }
 
-
 function initializeImageHandlers() {
     for (let i = 1; i <= 4; i++) {
         const saveButton = document.getElementById(`saveButton${i}`);
@@ -414,7 +410,6 @@ function initializeImageHandlers() {
         }
     }
 }
-
 
 function handleImageCrop(index) {
     if (croppers[index]) {
@@ -431,11 +426,9 @@ function handleImageCrop(index) {
     }
 }
 
-
 function validateFormInputs() {
     let isValid = true;
     clearAllErrors();
-
 
     const productName = document.getElementById("product_name").value.trim();
     if (!productName) {
@@ -443,13 +436,11 @@ function validateFormInputs() {
         isValid = false;
     }
 
-
     const brand = document.querySelector('select[name="brand"]').value;
     if (!brand) {
         showError("brand-error", "Please select a brand");
         isValid = false;
     }
-
 
     const description = document.getElementById("descriptionid").value.trim();
     if (!description) {
@@ -457,13 +448,11 @@ function validateFormInputs() {
         isValid = false;
     }
 
-
     const regularPrice = document.querySelector('input[name="regularPrice"]').value.trim();
     if (!regularPrice || isNaN(regularPrice) || parseFloat(regularPrice) <= 0) {
         showError("regularPrice-error", "Please enter a valid regular price");
         isValid = false;
     }
-
 
     const quantity = document.querySelector('input[name="quantity"]').value.trim();
     if (!quantity || isNaN(quantity) || parseInt(quantity) < 0) {
@@ -471,13 +460,11 @@ function validateFormInputs() {
         isValid = false;
     }
 
-
     const category = document.querySelector('select[name="category"]').value;
     if (!category) {
         showError("category-error", "Please select a category");
         isValid = false;
     }
-
 
     if (!croppedImageBlobs.some(blob => blob)) {
         showError("images-error", "At least one product image is required");
@@ -487,17 +474,17 @@ function validateFormInputs() {
     return isValid;
 }
 
-
 function handleFormSubmission(form) {
     if (!validateFormInputs()) {
         return false;
     }
 
-
+    const submitButton = document.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    showLoadingState(submitButton);
 
     const formData = new FormData(form);
     formData.delete('images'); 
-
 
     croppedImageBlobs.forEach((blob, index) => {
         if (blob) {
@@ -505,7 +492,6 @@ function handleFormSubmission(form) {
         }
     });
 
-   
     fetch(form.action, {
         method: 'POST',
         body: formData
@@ -513,17 +499,29 @@ function handleFormSubmission(form) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            window.location.href = '/admin/addproducts?success=product added successfully';
+            Swal.fire({
+                icon: 'success',
+                title: 'Product Added!',
+                text: 'Your product has been added successfully.',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = '/admin/addproducts';
+            });
         } else {
             throw new Error(data.message || 'Product submission failed');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showError("form-error", error.message || "Error submitting product. Please try again.");
-        submitButton.disabled = false;
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.message || 'Error submitting product. Please try again.',
+            confirmButtonText: 'Try Again'
+        });
     })
     .finally(() => {
+        submitButton.disabled = false;
         hideLoadingState(submitButton);
     });
 

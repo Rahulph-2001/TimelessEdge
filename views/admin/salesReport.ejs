@@ -631,6 +631,7 @@
                     <th>Product Details</th>
                     <th>Amount</th>
                     <th>Status</th>
+                    <th>Payment Type</th> 
                 </tr>
             </thead>
             <tbody>
@@ -655,11 +656,12 @@
                                     <%= order.status %>
                                 </span>
                             </td>
+                            <td><%= order.paymentMethod %></td>  <!-- New column -->
                         </tr>
                     <% }) %>
                 <% } else { %>
                     <tr>
-                        <td colspan="6" class="text-center">No orders found for the selected period.</td>
+                        <td colspan="7" class="text-center">No orders found for the selected period.</td>
                     </tr>
                 <% } %>
             </tbody>

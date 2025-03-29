@@ -222,6 +222,7 @@ const updateStatus = async (req, res) => {
                     { new: true }
                 );
                 
+                console.log(`Order ${orderId} returned, wallet credited with ${refundAmount}`);
             } catch (updateError) {
                 console.error("Error processing return:", updateError);
                 return res.status(500).json({
@@ -247,6 +248,7 @@ const updateStatus = async (req, res) => {
         });
     }
 };
+
 
 const viewOrderDetails = async (req, res) => {
     try {
@@ -310,6 +312,7 @@ const viewOrderDetails = async (req, res) => {
         });
     }
 }
+
 
 const approveReturn=async(req,res)=>{
     try {
@@ -595,6 +598,7 @@ const updateItemStatus = async (req, res) => {
                     { new: true }
                 );
                 
+                console.log(`Item in Order ${orderId} returned, user wallet credited with ${refundAmount}, admin wallet debited with ${refundAmount}`);
             } catch (updateError) {
                 console.error("Error processing item return:", updateError);
                 return res.status(500).json({
@@ -625,11 +629,63 @@ const updateItemStatus = async (req, res) => {
             overallStatus = 'Pending';
         }
         
-        await Order.findOneAndUpdate(
+        const finalUpdatedOrder = await Order.findOneAndUpdate(
             { orderId: orderId },
             { $set: { status: overallStatus } },
             { new: true }
         );
+
+     
+        if (finalUpdatedOrder.status === 'Delivered' && finalUpdatedOrder.paymentMethod === 'COD') {
+           
+            const deliveredItemsTotal = finalUpdatedOrder.orderedItems
+                .filter(item => item.status === 'Delivered')
+                .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            const tax = deliveredItemsTotal * 0.1;
+            const shipping = 99;
+            const finalDeliveredAmount = deliveredItemsTotal + tax + shipping - (finalUpdatedOrder.discount || 0);
+
+            
+            const userWallet = await Wallet.findOne({ userId: finalUpdatedOrder.userId });
+            if (userWallet) {
+                const userTransaction = userWallet.transactions.find(
+                    t => t.orderId.toString() === finalUpdatedOrder._id.toString() && 
+                         t.transactionType === 'debit' && 
+                         t.transactionStatus === 'pending'
+                );
+                if (userTransaction) {
+                    userTransaction.transactionAmount = finalDeliveredAmount;
+                    userTransaction.transactionStatus = 'completed';
+                    await userWallet.save();
+                }
+            }
+
+            
+            const admin = await User.findOne({ isAdmin: true });
+            if (admin) {
+                const adminWallet = await Wallet.findOne({ userId: admin._id });
+                if (adminWallet) {
+                    const adminTransaction = adminWallet.transactions.find(
+                        t => t.orderId.toString() === finalUpdatedOrder._id.toString() && 
+                             t.transactionType === 'credit' && 
+                             t.transactionStatus === 'pending'
+                    );
+                    if (adminTransaction) {
+                        adminTransaction.transactionAmount = finalDeliveredAmount;
+                        adminTransaction.transactionStatus = 'completed';
+                        adminWallet.walletBalance += finalDeliveredAmount;
+                        await adminWallet.save();
+
+                        await User.findByIdAndUpdate(
+                            admin._id,
+                            { $set: { wallet: adminWallet.walletBalance } },
+                            { new: true }
+                        );
+                    }
+                }
+            }
+        }
         
         res.json({
             success: true,
@@ -645,8 +701,7 @@ const updateItemStatus = async (req, res) => {
             error: error.message
         });
     }
-}
-
+};
 
 
 module.exports = { getAllOrders,viewOrderDetails,updateStatus,approveReturn,rejectReturn,updateItemStatus};

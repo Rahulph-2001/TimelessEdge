@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>
+    <%= title %>
+  </title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Arial', sans-serif;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .order-details {
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .order-details p {
+      font-size: 18px;
+      color: #333;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1 class="mb-4">Thank You For Your Order!</h1>
+    <p>Your order has been placed successfully.</p>
+
+    <!-- Display Order ID -->
+    <h3 class="mt-4">Order ID: <%= order.orderId %></h3>
+
+    <!-- Order Summary -->
+    <div class="order-details mt-4">
+      <h4>Order Summary</h4>
+      <p><strong>Total Price:</strong> Rs:<%= order.totalPrice.toFixed(2) %></p>
+      <p><strong>Discount:</strong> Rs:<%= order.discount.toFixed(2) %></p>
+      <p><strong>Final Amount:</strong> Rs:<%= order.finalAmount.toFixed(2) %></p>
+      <p><strong>Payment Status:</strong> <%= order.status %></p>
+      <p><strong>Invoice Date:</strong> <%= order.invoiceDate ? order.invoiceDate.toLocaleDateString() : 'N/A' %></p>
+
+      <!-- Display shipping address details -->
+      <p><strong>Shipping Address:</strong></p>
+      <p>
+        <% if (address) { %>
+          <%= address[0].address[0].name %> <br>
+          <%= address[0].address[0].adressType %> <br>
+          <%= address[0].address[0].city %>, <%= address[0].address[0].state %> - <%= address[0].address[0].pincode %> <br>
+          Phone: <%= address[0].address[0].phone %> <br>
+          Alt Phone: <%= address[0].address[0].altPhone %>
+        <% } else { %>
+          <strong>Shipping Address:</strong> Not available.
+        <% } %>
+      </p>
+    </div>
+
+    <!-- Add this near the top of your EJS template for debugging -->
+    <div style="display: none">
+      <p>Debug: Order Address: <%= JSON.stringify(order.address) %></p>
+      <p>Debug: Address Variable: <%= JSON.stringify(address) %></p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="mt-4">
+      <!-- <a href="/invoice/<%= order.orderId %>" class="btn btn-info me-2">
+        <i class="fas fa-file-invoice me-2"></i>Download Invoice
+      </a> -->
+      <a href="/userProfile#orders" class="btn btn-primary me-2">
+        <i class="fas fa-truck me-2"></i>Track Order
+      </a>
+      <a href="/shop" class="btn btn-secondary">
+        <i class="fas fa-home me-2"></i>Continue Shopping
+      </a>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

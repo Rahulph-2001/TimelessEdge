@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= user.name %>'s TimelessEdge - Edit Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .sticky-sidebar {
+            position: sticky;
+            top: 20px;
+        }
+        .section-card {
+            transition: all 0.3s ease;
+        }
+        .section-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+        .nav-link.active {
+            background-color: #4F46E5;
+            color: white;
+        }
+        .profile-image-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+        }
+        .profile-image-overlay {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background-color: #4F46E5;
+            color: white;
+            border-radius: 50%;
+            padding: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        #image-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #4F46E5;
+        }
+        #profile-image-upload {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <main class="container mx-auto px-4 py-8 pt-20">
+        <div class="flex items-center mb-6">
+            <a href="/userProfile" class="flex items-center text-indigo-600 hover:text-indigo-800">
+                <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                <span>Back to Profile</span>
+            </a>
+        </div>
+        
+        <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center md:text-left">Edit Profile</h1>
+        
+        <div class="w-full max-w-3xl mx-auto">
+            <div class="bg-white shadow-md rounded-xl p-8 section-card">
+                <form id="edit-profile-form" action="/profile/update" method="POST" enctype="multipart/form-data">
+                    <!-- Profile Image Section -->
+                    <div class="mb-8 text-center">
+                        <div class="profile-image-container mb-4">
+                            <img id="image-preview" src="<%= user.profile_image || '/ui/dprofile.jpg' %>" alt="User Profile Picture">
+                            <label for="profile-image-upload" class="profile-image-overlay">
+                                <i data-lucide="camera" class="w-5 h-5"></i>
+                            </label>
+                            <input type="file" id="profile-image-upload" name="profile_image" accept="image/*">
+                        </div>
+                        <p class="text-sm text-gray-500">Click the camera icon to upload a new profile picture</p>
+                    </div>
+                    
+                    <!-- Profile Information -->
+                    <div class="space-y-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                            <input type="text" id="name" name="name" value="<%= user.name %>" 
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" 
+                                required>
+                        </div>
+                        
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+                            <input type="tel" id="phone" name="phone" value="<%= user.phone || '' %>" 
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                            <input type="email" id="email" value="<%= user.email %>" 
+                                class="w-full p-3 border border-gray-200 bg-gray-50 rounded-lg" 
+                                disabled>
+                            <p class="mt-1 text-xs text-gray-500">Email cannot be changed here. Use the "Change Email" page.</p>
+                        </div>
+                        
+                        <div class="pt-6 border-t border-gray-200">
+                            <div class="flex justify-end space-x-4">
+                                <a href="/userProfile" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                    Cancel
+                                </a>
+                                <button type="submit" class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+
+    <script>
+        lucide.createIcons();
+
+        // Handle profile image preview
+        const profileImageUpload = document.getElementById('profile-image-upload');
+        const imagePreview = document.getElementById('image-preview');
+
+        profileImageUpload.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form validation
+        const editProfileForm = document.getElementById('edit-profile-form');
+        editProfileForm.addEventListener('submit', function(event) {
+            const nameField = document.getElementById('name');
+            const phoneField = document.getElementById('phone');
+            
+            // Basic form validation
+            if (!nameField.value.trim()) {
+                event.preventDefault();
+                alert('Please enter your name');
+                nameField.focus();
+                return;
+            }
+            
+            // Phone validation (optional field, but validate format if provided)
+            if (phoneField.value.trim()) {
+                const phonePattern = /^\d{10}$/;  // Simple 10-digit validation
+                if (!phonePattern.test(phoneField.value.trim())) {
+                    event.preventDefault();
+                    alert('Please enter a valid 10-digit mobile number');
+                    phoneField.focus();
+                    return;
+                }
+            }
+        });
+        // Function to handle address unblocking with SweetAlert2
+async function unblockAddress(docId, addressId) {
+    Swal.fire({
+        title: 'Unblock Address',
+        text: 'Are you sure you want to unblock this address?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4F46E5',
+        cancelButtonColor: '#EF4444',
+        confirmButtonText: 'Yes, unblock it!',
+        cancelButtonText: 'No, keep it blocked'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/address/unblock/${docId}/${addressId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    Swal.fire({
+                        title: 'Unblocked!',
+                        text: 'Your address has been unblocked successfully.',
+                        icon: 'success',
+                        confirmButtonColor: '#4F46E5'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Failed to unblock address. Please try again.',
+                        icon: 'error',
+                        confirmButtonColor: '#4F46E5'
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'An error occurred while unblocking the address.',
+                    icon: 'error',
+                    confirmButtonColor: '#4F46E5'
+                });
+            }
+        }
+    });
+}
+    </script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Men Fashion Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-bg: #f8f9fa;
+            --sidebar-bg: #343a40;
+            --text-dark: #212529;
+            --text-light: #f8f9fa;
+            --hover-bg: #495057;
+            --accent-color: #007bff;
+            --border-color: #dee2e6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .navbar-aside {
+            background-color: var(--sidebar-bg);
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        .aside-top {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            max-height: 73px;
+        }
+
+        .menu-aside {
+            list-style: none;
+            padding: 0.5rem 0;
+        }
+
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .menu-item a:hover,
+        .menu-item a.active {
+            background-color: var(--hover-bg);
+        }
+
+        .menu-item i {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .main-wrap {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+
+        .navbar {
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-item {
+            margin-left: 1rem;
+        }
+
+        .content-main {
+            background-color: #ffffff;
+            border-radius: 0.25rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        .row {
+    display: flex
+;
+    flex-wrap: wrap;
+    margin: -0.5rem;
+    color: #050506;
+}
+
+        .content-header {
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .content-title {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: #080808;
+    margin: 0;
+}
+.logoutadmin{
+    background-color: rgb(126, 126, 249);
+    color:black ;
+}
+        
+        @media (max-width: 768px) {
+            .navbar-aside {
+                width: 100%;
+                transform: translateX(-100%);
+            }
+
+            .main-wrap {
+                margin-left: 0;
+            }
+
+            .navbar-aside.show {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="navbar-aside" id="offcanvas_aside">
+        <div class="aside-top">
+            <a href="#" class="brand-wrap">
+                <img src="/img/Timeless_Edge__3_-removebg-preview.png" class="logo" alt="Timeless Edge">
+            </a>
+        </div>
+        <nav>
+            <ul class="menu-aside">
+                <li class="menu-item">
+                    <a class="active" href="/admin/dashboard"><i class="fas fa-home"></i>Dashboard</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/admin/users"><i class="fas fa-users"></i>Customers</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/admin/category"><i class="fas fa-list"></i>Categories</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/admin/brands"><i class="fas fa-tags"></i>Brands</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/admin/addProducts"><i class="fas fa-plus-square"></i>Add Product</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/admin/products"><i class="fas fa-shopping-bag"></i>Products</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/admin/coupon"><i class="fas fa-ticket-alt"></i>Coupons</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/admin/Wallet"><i class="fa-solid fa-wallet"></i></i>Wallet</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/admin/AdminOrder"><i class="fas fa-shopping-cart"></i>Orders</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/admin/sales-report"><i class="fas fa-shopping-cart"></i>Sales Reports</a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-wrap">
+        <header class="navbar">
+            <button class="btn-menu" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="navbar-nav">
+                <div class="nav-item">
+                    <a href="/admin/logout"><button class="logoutadmin">Logout</button></a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="btn-user"><i class="fas fa-user"></i></a>
+                </div>
+            </div>
+        </header>
+       

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Change Password</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #dc3545;
+      --primary-hover: #c82333;
+      --secondary-color: #f8f9fc;
+      --text-color: #5a5c69;
+      --error-color: #e74a3b;
+      --success-color: #28a745;
+      --border-color: #e3e6f0;
+      --shadow-color: rgba(0, 0, 0, 0.15);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f8f9fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 450px;
+      width: 100%;
+      background-color: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px var(--shadow-color);
+    }
+    
+    .header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 25px 20px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .header h2 {
+      font-weight: 600;
+      margin: 0;
+      font-size: 24px;
+    }
+    
+    .header .lock-icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    
+    .form-content {
+      padding: 30px;
+    }
+    
+    .form-group {
+      margin-bottom: 25px;
+      position: relative;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-color);
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    input[type="password"] {
+      width: 100%;
+      padding: 12px 40px 12px 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      font-size: 14px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    
+    input[type="password"]:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+    }
+    
+    .password-toggle-icon {
+      position: absolute;
+      right: 15px;
+      top: 38px;
+      color: #aaa;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    
+    .password-toggle-icon:hover {
+      color: var(--text-color);
+    }
+    
+    .btn-submit {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.1s;
+      text-align: center;
+    }
+    
+    .btn-submit:hover {
+      background-color: var(--primary-hover);
+    }
+    
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+    
+    .password-requirements {
+      margin-top: 25px;
+      padding: 15px;
+      background-color: #f8f9fc;
+      border-radius: 5px;
+      border-left: 4px solid var(--primary-color);
+    }
+    
+    .password-requirements h3 {
+      font-size: 15px;
+      color: var(--text-color);
+      margin-bottom: 10px;
+    }
+    
+    .requirements-list {
+      list-style-type: none;
+      padding-left: 5px;
+    }
+    
+    .requirements-list li {
+      margin-bottom: 5px;
+      font-size: 13px;
+      color: #858796;
+      display: flex;
+      align-items: center;
+    }
+    
+    .requirements-list i {
+      margin-right: 8px;
+      font-size: 12px;
+    }
+    
+    .requirement-met {
+      color: var(--success-color);
+    }
+    
+    .error-message {
+      color: var(--error-color);
+      font-size: 13px;
+      margin-top: 5px;
+      display: none;
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        max-width: 100%;
+      }
+      
+      .form-content {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <i class="fas fa-lock lock-icon"></i>
+      <h2>Change Your Password</h2>
+    </div>
+    <div class="form-content">
+      <form id="changePasswordForm" action="/change-password" method="POST">
+        <div class="form-group">
+          <label for="currentPassword">Current Password</label>
+          <input type="password" id="currentPassword" name="currentPassword" required>
+          <span class="password-toggle-icon" data-target="currentPassword"><i class="fas fa-eye"></i></span>
+          <div class="error-message" id="currentPasswordError"></div>
+        </div>
+        
+        <div class="form-group">
+          <label for="newPassword">New Password</label>
+          <input type="password" id="newPassword" name="newPassword" required>
+          <span class="password-toggle-icon" data-target="newPassword"><i class="fas fa-eye"></i></span>
+          <div class="error-message" id="newPasswordError"></div>
+        </div>
+        
+        <div class="form-group">
+          <label for="confirmNewPassword">Confirm New Password</label>
+          <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+          <span class="password-toggle-icon" data-target="confirmNewPassword"><i class="fas fa-eye"></i></span>
+          <div class="error-message" id="confirmNewPasswordError"></div>
+        </div>
+        
+        <button type="submit" class="btn-submit">Update Password</button>
+      </form>
+      
+      <div class="password-requirements">
+        <h3>Password Requirements:</h3>
+        <ul class="requirements-list">
+          <li><i class="far fa-circle" id="req-length"></i> At least 8 characters long</li>
+          <li><i class="far fa-circle" id="req-uppercase"></i> Contains at least one uppercase letter</li>
+          <li><i class="far fa-circle" id="req-lowercase"></i> Contains at least one lowercase letter</li>
+          <li><i class="far fa-circle" id="req-number"></i> Contains at least one number</li>
+          <li><i class="far fa-circle" id="req-special"></i> Contains at least one special character</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery and SweetAlert2 libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.3/sweetalert2.all.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // Toggle password visibility
+      $('.password-toggle-icon').click(function() {
+        const targetId = $(this).data('target');
+        const inputField = $('#' + targetId);
+        const icon = $(this).find('i');
+        
+        if (inputField.attr('type') === 'password') {
+          inputField.attr('type', 'text');
+          icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+          inputField.attr('type', 'password');
+          icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+      });
+      
+      // Password validation function
+      function checkPasswordRequirements(password) {
+        const requirements = {
+          length: password.length >= 8,
+          uppercase: /[A-Z]/.test(password),
+          lowercase: /[a-z]/.test(password),
+          number: /[0-9]/.test(password),
+          special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+        
+        // Update requirement indicators
+        $('#req-length').toggleClass('fa-check-circle requirement-met', requirements.length)
+                        .toggleClass('fa-circle', !requirements.length);
+        $('#req-uppercase').toggleClass('fa-check-circle requirement-met', requirements.uppercase)
+                          .toggleClass('fa-circle', !requirements.uppercase);
+        $('#req-lowercase').toggleClass('fa-check-circle requirement-met', requirements.lowercase)
+                          .toggleClass('fa-circle', !requirements.lowercase);
+        $('#req-number').toggleClass('fa-check-circle requirement-met', requirements.number)
+                        .toggleClass('fa-circle', !requirements.number);
+        $('#req-special').toggleClass('fa-check-circle requirement-met', requirements.special)
+                         .toggleClass('fa-circle', !requirements.special);
+        
+        return Object.values(requirements).every(Boolean);
+      }
+      
+      // Check password requirements on input
+      $('#newPassword').on('input', function() {
+        checkPasswordRequirements($(this).val());
+      });
+      
+      // Form submission using AJAX and SweetAlert2
+      $('#changePasswordForm').submit(function(e) {
+        e.preventDefault();
+        
+        // Get form values
+        const currentPassword = $('#currentPassword').val();
+        const newPassword = $('#newPassword').val();
+        const confirmNewPassword = $('#confirmNewPassword').val();
+        
+        // Client-side validations
+        if (!currentPassword) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Please enter your current password'
+          });
+          return;
+        }
+        
+        if (!checkPasswordRequirements(newPassword)) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'New password does not meet all requirements'
+          });
+          return;
+        }
+        
+        if (newPassword !== confirmNewPassword) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'New passwords do not match'
+          });
+          return;
+        }
+        
+        // Submit the form data via AJAX
+        $.ajax({
+          url: '/change-password',
+          method: 'POST',
+          data: {
+            currentPassword: currentPassword,
+            newPassword: newPassword,
+            confirmNewPassword: confirmNewPassword
+          },
+          success: function(response) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: response.message
+            }).then(() => {
+              // Optionally, you can redirect or simply reload the page
+              window.location.reload();
+            });
+          },
+          error: function(xhr) {
+            const res = xhr.responseJSON;
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: res && res.error ? res.error : 'Something went wrong. Please try again.'
+            });
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

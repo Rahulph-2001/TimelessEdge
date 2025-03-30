@@ -1,0 +1,789 @@
+<%- include("../../views/partials/admin/header") %>
+
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-bg: #f5f6fa;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .page-title {
+            color: var(--secondary-color);
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-title {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            color: var(--secondary-color);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .trend-up {
+            color: var(--success-color);
+        }
+
+        .trend-down {
+            color: var(--danger-color);
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+        }
+
+        .card-header {
+            padding: 18px 25px;
+            border-bottom: 1px solid #edf2f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .transactions-table th {
+            background-color: #f8fafc;
+            color: #64748b;
+            font-weight: 600;
+            padding: 14px 20px;
+            text-align: left;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .transactions-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #edf2f7;
+            vertical-align: middle;
+            color: #334155;
+        }
+
+        .transactions-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .transactions-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-credit {
+            background-color: rgba(46, 204, 113, 0.15);
+            color: var(--success-color);
+        }
+
+        .badge-debit {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: var(--danger-color);
+        }
+
+        .badge-pending {
+            background-color: rgba(243, 156, 18, 0.15);
+            color: var(--warning-color);
+        }
+
+        .badge-completed {
+            background-color: rgba(46, 204, 113, 0.15);
+            color: var(--success-color);
+        }
+
+        .badge-failed {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: var(--danger-color);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+        }
+
+        .btn-outline:hover {
+            background-color: #f8fafc;
+        }
+
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 0.85rem;
+        }
+
+        .btn-icon {
+            margin-right: 6px;
+            font-size: 0.9rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-input {
+            width: 250px;
+            padding: 10px 15px 10px 40px;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+        }
+
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            gap: 5px;
+            margin-top: 20px;
+        }
+
+        .pagination-button {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            background: white;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-button.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination-button:hover:not(.active) {
+            background-color: #f8fafc;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 50px auto;
+            padding: 0;
+            width: 90%;
+            max-width: 700px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            animation: modalFadeIn 0.3s;
+        }
+
+        .modal-header {
+            padding: 18px 25px;
+            border-bottom: 1px solid #edf2f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-footer {
+            padding: 18px 25px;
+            border-top: 1px solid #edf2f7;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 15px;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .detail-label {
+            width: 40%;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            width: 60%;
+            color: #334155;
+            font-weight: 400;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .search-input {
+                width: 100%;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .filter-options {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+    </style>
+
+
+    <div class="dashboard-container">
+        <div class="page-header">
+            <h1 class="page-title">Wallet Management</h1>
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" id="searchTransactions" placeholder="Search transactions...">
+            </div>
+        </div>
+
+        <div class="stats-cards">
+            <div class="stat-card">
+                <p class="stat-title">Total Transactions</p>
+                <h2 class="stat-value" id="totalTransactions">0</h2>
+                <p class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> 12% from last month</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-title">Total Credits</p>
+                <h2 class="stat-value" id="totalCredits">$0.00</h2>
+                <p class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> 8% from last month</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-title">Total Debits</p>
+                <h2 class="stat-value" id="totalDebits">$0.00</h2>
+                <p class="stat-trend trend-down"><i class="fas fa-arrow-down"></i> 3% from last month</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-title">Active Users</p>
+                <h2 class="stat-value" id="activeUsers">0</h2>
+                <p class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> 5% from last month</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Transactions List</h2>
+                <div class="filter-options">
+                    <button class="btn btn-outline btn-sm active" id="filterAll">All</button>
+                    <button class="btn btn-outline btn-sm" id="filterCredit">Credits</button>
+                    <button class="btn btn-outline btn-sm" id="filterDebit">Debits</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="transactions-table" id="transactionsTable">
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% let transactionCount=0; let creditTotal=0; let debitTotal=0; let uniqueUsers=new Set();
+                                %>
+                                <% wallets.forEach(wallet=> { %>
+                                    <% uniqueUsers.add(wallet.userId.toString()); %>
+                                        <% wallet.transactions.forEach(transaction=> { %>
+                                            <% transactionCount++; %>
+                                                <% if(transaction.transactionType==='credit' ) { creditTotal
+                                                    +=transaction.transactionAmount; } %>
+                                                    <% if(transaction.transactionType==='debit' ) { debitTotal
+                                                        +=transaction.transactionAmount; } %>
+                                                        <tr class="transaction-row"
+                                                            data-type="<%= transaction.transactionType %>"
+                                                            data-id="<%= transaction.transactionId %>">
+                                                            <td title="Click for details" class="transaction-id"
+                                                                style="cursor:pointer;">
+                                                                <%= transaction.transactionId.substring(0, 8) %>...
+                                                            </td>
+                                                            <td>
+                                                                <%= new
+                                                                    Date(transaction.transactionDate).toLocaleString()
+                                                                    %>
+                                                            </td>
+                                                            <td>
+                                                                <% if(typeof wallet.userId==='object' &&
+                                                                    wallet.userId.username) { %>
+                                                                    <%= wallet.userId.username %>
+                                                                        <% } else { %>
+                                                                            User #<%=
+                                                                                wallet.userId.toString().substring(0, 6)
+                                                                                %>
+                                                                                <% } %>
+                                                            </td>
+                                                            <td>
+                                                                <!-- Fixed the nested spans issue -->
+                                                                <span
+                                                                    class="badge badge-<%= transaction.transactionType %>">
+                                                                    <%= transaction.transactionType.charAt(0).toUpperCase()
+                                                                        + transaction.transactionType.slice(1) %>
+                                                                </span>
+                                                            </td>
+                                                            <td
+                                                                class="<%= transaction.transactionType === 'credit' ? 'text-success' : 'text-danger' %>">
+                                                                $<%= transaction.transactionAmount.toFixed(2) %>
+                                                            </td>
+                                                            <td>
+                                                                <span
+                                                                    class="badge badge-<%= transaction.transactionStatus %>">
+                                                                    <%= transaction.transactionStatus.charAt(0).toUpperCase()
+                                                                        + transaction.transactionStatus.slice(1) %>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <div class="action-buttons">
+                                                                    <button class="btn btn-outline btn-sm view-details"
+                                                                        data-id="<%= transaction.transactionId %>">
+                                                                        <i class="fas fa-eye btn-icon"></i> View
+                                                                    </button>
+                                                                    <% if(transaction.orderId) { %>
+                                                                        <a href="/admin/orders/<%= transaction.orderId %>"
+                                                                            class="btn btn-primary btn-sm">
+                                                                            <i
+                                                                                class="fas fa-shopping-cart btn-icon"></i>
+                                                                            Order
+                                                                        </a>
+                                                                        <% } %>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+
+                                                        <!-- Hidden data for modal -->
+                                                        <div id="transaction-data-<%= transaction.transactionId %>"
+                                                            style="display:none;">
+                                                            <div class="transaction-detail-data">
+                                                                <div class="detail-row">
+                                                                    <div class="detail-label">Transaction ID:</div>
+                                                                    <div class="detail-value">
+                                                                        <%= transaction.transactionId %>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="detail-row">
+                                                                    <div class="detail-label">Date:</div>
+                                                                    <div class="detail-value">
+                                                                        <%= new
+                                                                            Date(transaction.transactionDate).toLocaleString()
+                                                                            %>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="detail-row">
+                                                                    <div class="detail-label">User ID:</div>
+                                                                    <div class="detail-value">
+                                                                        <%= wallet.userId %>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="detail-row">
+                                                                    <div class="detail-label">User Details:</div>
+                                                                    <div class="detail-value">
+                                                                        <% if(typeof wallet.userId==='object' &&
+                                                                            wallet.userId.username) { %>
+                                                                            Username: <%= wallet.userId.username %><br>
+                                                                                Email: <%= wallet.userId.email || 'N/A'
+                                                                                    %><br>
+                                                                                    User since: <%= new
+                                                                                        Date(wallet.userId.createdAt).toLocaleDateString()
+                                                                                        || 'N/A' %>
+                                                                                        <% } else { %>
+                                                                                            User #<%=
+                                                                                                wallet.userId.toString()
+                                                                                                %>
+                                                                                                <% } %>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="detail-row">
+                                                                    <div class="detail-label">Transaction Type:</div>
+                                                                    <div class="detail-value">
+                                                                        <span
+                                                                            class="badge badge-<%= transaction.transactionType %>">
+                                                                            <%= transaction.transactionType.charAt(0).toUpperCase()
+                                                                                + transaction.transactionType.slice(1)
+                                                                                %>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="detail-row">
+                                                                    <div class="detail-label">Amount:</div>
+                                                                    <div class="detail-value">$<%=
+                                                                            transaction.transactionAmount.toFixed(2) %>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="detail-row">
+                                                                    <div class="detail-label">Status:</div>
+                                                                    <div class="detail-value">
+                                                                        <span
+                                                                            class="badge badge-<%= transaction.transactionStatus %>">
+                                                                            <%= transaction.transactionStatus.charAt(0).toUpperCase()
+                                                                                + transaction.transactionStatus.slice(1)
+                                                                                %>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="detail-row">
+                                                                    <div class="detail-label">Description:</div>
+                                                                    <div class="detail-value">
+                                                                        <%= transaction.transactionDescription
+                                                                            || 'No description provided' %>
+                                                                    </div>
+                                                                </div>
+                                                                <% if(transaction.orderId) { %>
+                                                                    <div class="detail-row">
+                                                                        <div class="detail-label">Order ID:</div>
+                                                                        <div class="detail-value">
+                                                                            <%= transaction.orderId %>
+                                                                                <a href="/admin/orders/<%= transaction.orderId %>"
+                                                                                    class="btn btn-primary btn-sm">
+                                                                                    <i
+                                                                                        class="fas fa-shopping-cart btn-icon"></i>
+                                                                                    View Order
+                                                                                </a>
+                                                                        </div>
+                                                                    </div>
+                                                                    <% } %>
+                                                            </div>
+                                                        </div>
+                                                        <% }); %>
+                                                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    <button class="pagination-button" id="prevPage"><i class="fas fa-chevron-left"></i></button>
+                    <button class="pagination-button active">1</button>
+                    <button class="pagination-button">2</button>
+                    <button class="pagination-button">3</button>
+                    <button class="pagination-button">...</button>
+                    <button class="pagination-button" id="nextPage"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Details Modal -->
+    <div id="transactionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Transaction Details</h3>
+                <button class="close-button">&times;</button>
+            </div>
+            <div class="modal-body" id="transactionModalBody">
+                <!-- Content will be loaded dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="closeModal">Close</button>
+                <a class="btn btn-primary" id="viewOrderBtn" style="display:none;">View Order</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('totalTransactions').textContent = '<%= stats.transactionCount %>';
+            document.getElementById('totalCredits').textContent = '$<%= stats.creditTotal.toFixed(2) %>';
+            document.getElementById('totalDebits').textContent = '$<%= stats.debitTotal.toFixed(2) %>';
+            document.getElementById('activeUsers').textContent = '<%= stats.uniqueUsers %>';
+
+            const filterAll = document.getElementById('filterAll');
+            const filterCredit = document.getElementById('filterCredit');
+            const filterDebit = document.getElementById('filterDebit');
+            const rows = document.querySelectorAll('.transaction-row');
+
+            filterAll.classList.add('btn-primary');
+            filterAll.classList.remove('btn-outline');
+
+            filterAll.addEventListener('click', function () {
+                rows.forEach(row => row.style.display = '');
+                setActiveFilter(this);
+            });
+
+            filterCredit.addEventListener('click', function () {
+                rows.forEach(row => {
+                    if (row.dataset.type === 'credit') {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                setActiveFilter(this);
+            });
+
+            filterDebit.addEventListener('click', function () {
+                rows.forEach(row => {
+                    if (row.dataset.type === 'debit') {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                setActiveFilter(this);
+            });
+
+            function setActiveFilter(button) {
+                [filterAll, filterCredit, filterDebit].forEach(btn => {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-outline');
+                });
+                button.classList.remove('btn-outline');
+                button.classList.add('btn-primary');
+            }
+
+            const searchInput = document.getElementById('searchTransactions');
+            searchInput.addEventListener('keyup', function () {
+                const searchTerm = this.value.toLowerCase();
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+
+            const modal = document.getElementById('transactionModal');
+            const modalBody = document.getElementById('transactionModalBody');
+            const closeModal = document.getElementById('closeModal');
+            const closeButton = document.querySelector('.close-button');
+            const viewOrderBtn = document.getElementById('viewOrderBtn');
+
+            document.querySelectorAll('.view-details, .transaction-id').forEach(element => {
+                element.addEventListener('click', function () {
+                    const transactionId = this.classList.contains('transaction-id') ?
+                        this.closest('tr').dataset.id : this.dataset.id;
+
+                    const detailData = document.getElementById(`transaction-data-${transactionId}`);
+                    if (detailData) {
+                        modalBody.innerHTML = detailData.querySelector('.transaction-detail-data').innerHTML;
+
+                        const orderLink = modalBody.querySelector('a[href^="/admin/orders/"]');
+                        if (orderLink) {
+                            viewOrderBtn.style.display = 'inline-flex';
+                            viewOrderBtn.href = orderLink.href;
+                        } else {
+                            viewOrderBtn.style.display = 'none';
+                        }
+
+                        modal.style.display = 'block';
+                    }
+                });
+            });
+
+            closeModal.addEventListener('click', function () {
+                modal.style.display = 'none';
+            });
+
+            closeButton.addEventListener('click', function () {
+                modal.style.display = 'none';
+            });
+
+            window.addEventListener('click', function (event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            const prevPage = document.getElementById('prevPage');
+            const nextPage = document.getElementById('nextPage');
+            const paginationButtons = document.querySelectorAll('.pagination-button:not(#prevPage):not(#nextPage)');
+
+            paginationButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    paginationButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+
+    <%- include("../../views/partials/admin/footer") %>

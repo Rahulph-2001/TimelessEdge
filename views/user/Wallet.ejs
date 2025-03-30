@@ -1,0 +1,768 @@
+<%- include("../../views/partials/user/header") %>
+
+<style>
+   :root {
+       --primary-color: #3b82f6;
+       --primary-hover: #2563eb;
+       --success-color: #10b981;
+       --danger-color: #ef4444;
+       --warning-color: #f59e0b;
+       --dark-color: #1e293b;
+       --light-color: #f8fafc;
+       --border-color: #e2e8f0;
+       --text-primary: #334155;
+       --text-secondary: #64748b;
+       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+       --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+       --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+       --radius: 0.5rem;
+   }
+
+   /* Main Layout */
+   .wallet-container {
+       max-width: 1200px;
+       margin: 0 auto;
+       padding: 2rem;
+       font-family: 'Inter', system-ui, -apple-system, sans-serif;
+   }
+
+   /* Header Styling */
+   .page-header {
+       background-position: center;
+       background-size: cover;
+       padding: 4rem 0;
+       position: relative;
+   }
+   
+   .page-header::before {
+       content: '';
+       position: absolute;
+       top: 0;
+       left: 0;
+       right: 0;
+       bottom: 0;
+       background: linear-gradient(to right, rgba(30, 41, 59, 0.8), rgba(30, 41, 59, 0.6));
+   }
+   
+   .page-header .container {
+       position: relative;
+       z-index: 1;
+   }
+   
+   .page-title {
+       color: white;
+       font-size: 2.5rem;
+       font-weight: 700;
+       margin: 0;
+       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+   }
+
+   /* Wallet Header Card */
+   .wallet-header {
+       background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+       border-radius: var(--radius);
+       padding: 2.5rem;
+       margin-bottom: 2rem;
+       box-shadow: var(--shadow-md);
+       position: relative;
+       overflow: hidden;
+   }
+   
+   .wallet-header::after {
+       content: '';
+       position: absolute;
+       top: 0;
+       right: 0;
+       width: 150px;
+       height: 150px;
+       background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0) 70%);
+       border-radius: 50%;
+   }
+   
+   .wallet-title {
+       font-size: 1.25rem;
+       font-weight: 600;
+       color: var(--text-secondary);
+       margin-bottom: 0.5rem;
+       text-transform: uppercase;
+       letter-spacing: 0.05em;
+   }
+   
+   .wallet-balance {
+       font-size: 3rem;
+       font-weight: 800;
+       color: var(--primary-color);
+       margin-top: 0.5rem;
+       display: flex;
+       align-items: baseline;
+   }
+   
+   .wallet-balance::before {
+       content: '₹';
+       font-size: 2rem;
+       margin-right: 0.25rem;
+   }
+
+   /* Wallet Actions */
+   .wallet-actions {
+       display: flex;
+       gap: 1rem;
+       margin-bottom: 2rem;
+   }
+   
+   .btn {
+       display: inline-flex;
+       align-items: center;
+       justify-content: center;
+       font-weight: 600;
+       border-radius: var(--radius);
+       transition: all 0.2s ease;
+       padding: 0.75rem 1.5rem;
+       cursor: pointer;
+       border: none;
+       font-size: 0.95rem;
+   }
+   
+   .btn-primary {
+       background-color: var(--primary-color);
+       color: white;
+       box-shadow: var(--shadow-sm);
+   }
+   
+   .btn-primary:hover {
+       background-color: var(--primary-hover);
+       box-shadow: var(--shadow);
+       transform: translateY(-1px);
+   }
+   
+   .btn-outline {
+       background-color: transparent;
+       color: var(--primary-color);
+       border: 2px solid var(--primary-color);
+   }
+   
+   .btn-outline:hover {
+       background-color: var(--primary-color);
+       color: white;
+   }
+
+   /* Transaction Section */
+   .transactions-section {
+       background-color: white;
+       border-radius: var(--radius);
+       box-shadow: var(--shadow);
+       padding: 2rem;
+       margin-top: 1.5rem;
+   }
+   
+   h4 {
+       font-size: 1.5rem;
+       font-weight: 700;
+       color: var(--dark-color);
+       margin-bottom: 1rem;
+       position: relative;
+       padding-bottom: 0.75rem;
+   }
+   
+   h4::after {
+       content: '';
+       position: absolute;
+       bottom: 0;
+       left: 0;
+       width: 50px;
+       height: 4px;
+       background-color: var(--primary-color);
+       border-radius: 2px;
+   }
+
+   /* Transaction Table */
+   .transaction-table {
+       width: 100%;
+       border-collapse: separate;
+       border-spacing: 0;
+       margin-bottom: 1.5rem;
+   }
+   
+   .transaction-table th {
+       background-color: #f8fafc;
+       font-weight: 600;
+       color: var(--text-secondary);
+       text-align: left;
+       padding: 1.25rem 1rem;
+       border-bottom: 2px solid var(--border-color);
+       text-transform: uppercase;
+       font-size: 0.85rem;
+       letter-spacing: 0.05em;
+   }
+   
+   .transaction-table td {
+       padding: 1.25rem 1rem;
+       border-bottom: 1px solid var(--border-color);
+       color: var(--text-primary);
+       vertical-align: middle;
+   }
+   
+   .transaction-table tbody tr {
+       transition: all 0.2s ease;
+   }
+   
+   .transaction-table tbody tr:hover {
+       background-color: #f1f5f9;
+   }
+   
+   .transaction-id {
+       font-family: 'JetBrains Mono', monospace;
+       color: var(--text-secondary);
+       font-size: 0.875rem;
+       letter-spacing: -0.025em;
+   }
+   
+   .transaction-date {
+       color: var(--text-secondary);
+       font-size: 0.95rem;
+   }
+   
+   .transaction-type {
+       text-transform: capitalize;
+       font-weight: 500;
+   }
+   
+   .transaction-type.credit {
+       color: var(--success-color);
+   }
+   
+   .transaction-type.debit {
+       color: var(--danger-color);
+   }
+   
+   .transaction-amount {
+       font-weight: 700;
+       font-size: 1.05rem;
+   }
+   
+   .transaction-amount.credit {
+       color: var(--success-color);
+   }
+   
+   .transaction-amount.debit {
+       color: var(--danger-color);
+   }
+   
+   .order-link {
+       color: var(--primary-color);
+       text-decoration: none;
+       font-weight: 500;
+       display: inline-flex;
+       align-items: center;
+       transition: all 0.2s ease;
+   }
+   
+   .order-link:hover {
+       color: var(--primary-hover);
+       text-decoration: underline;
+   }
+   
+   .order-link::after {
+       content: '→';
+       margin-left: 0.25rem;
+       transition: transform 0.2s ease;
+   }
+   
+   .order-link:hover::after {
+       transform: translateX(3px);
+   }
+   
+   .status-badge {
+       display: inline-flex;
+       align-items: center;
+       justify-content: center;
+       padding: 0.35rem 0.75rem;
+       border-radius: 9999px;
+       font-size: 0.8rem;
+       font-weight: 600;
+       text-transform: capitalize;
+   }
+   
+   .status-badge.completed {
+       background-color: rgba(16, 185, 129, 0.1);
+       color: var(--success-color);
+   }
+   
+   .status-badge.pending {
+       background-color: rgba(245, 158, 11, 0.1);
+       color: var(--warning-color);
+   }
+   
+   .status-badge.failed {
+       background-color: rgba(239, 68, 68, 0.1);
+       color: var(--danger-color);
+   }
+
+   /* Pagination */
+   .pagination {
+       display: flex;
+       justify-content: center;
+       gap: 0.5rem;
+       margin-top: 2rem;
+   }
+   
+   .pagination-button {
+       padding: 0.75rem 1.25rem;
+       border-radius: var(--radius);
+       background-color: white;
+       color: var(--text-primary);
+       border: 1px solid var(--border-color);
+       cursor: pointer;
+       transition: all 0.2s ease;
+       font-weight: 500;
+       text-decoration: none;
+       display: inline-flex;
+       align-items: center;
+   }
+   
+   .pagination-button:hover {
+       background-color: #f1f5f9;
+       border-color: #cbd5e1;
+       color: var(--primary-color);
+   }
+   
+   .pagination-button.active {
+       background-color: var(--primary-color);
+       color: white;
+       border-color: var(--primary-color);
+   }
+
+   /* Empty State */
+   .no-transactions {
+       text-align: center;
+       padding: 4rem 2rem;
+       color: var(--text-secondary);
+       font-size: 1.125rem;
+   }
+   
+   .no-transactions i {
+       display: block;
+       font-size: 2.5rem;
+       margin-bottom: 1rem;
+       opacity: 0.5;
+   }
+
+   /* Back Button */
+   .back-button {
+       display: inline-flex;
+       align-items: center;
+       gap: 0.5rem;
+       padding: 0.75rem 1.25rem;
+       margin-bottom: 1.5rem;
+       background-color: white;
+       border: 1px solid var(--border-color);
+       border-radius: var(--radius);
+       color: var(--text-primary);
+       font-weight: 500;
+       text-decoration: none;
+       transition: all 0.2s ease;
+       box-shadow: var(--shadow-sm);
+   }
+   
+   .back-button:hover {
+       background-color: #f8fafc;
+       color: var(--primary-color);
+       border-color: var(--primary-color);
+       text-decoration: none;
+       box-shadow: var(--shadow);
+   }
+
+   /* Breadcrumbs */
+   .breadcrumb-nav {
+       background-color: transparent;
+       padding: 1.5rem 0;
+       margin-bottom: 1rem;
+   }
+   
+   .breadcrumb {
+       display: flex;
+       flex-wrap: wrap;
+       padding: 0;
+       margin: 0;
+       list-style: none;
+       align-items: center;
+   }
+   
+   .breadcrumb-item {
+       display: flex;
+       align-items: center;
+       color: var(--text-secondary);
+       font-size: 0.95rem;
+   }
+   
+   .breadcrumb-item a {
+       color: var(--text-secondary);
+       text-decoration: none;
+       transition: color 0.2s ease;
+   }
+   
+   .breadcrumb-item a:hover {
+       color: var(--primary-color);
+   }
+   
+   .breadcrumb-item + .breadcrumb-item {
+       padding-left: 0.75rem;
+   }
+   
+   .breadcrumb-item + .breadcrumb-item::before {
+       content: "/";
+       padding-right: 0.75rem;
+       color: #94a3b8;
+   }
+   
+   .breadcrumb-item.active {
+       color: var(--dark-color);
+       font-weight: 500;
+   }
+
+   /* Modal Styling */
+   .modal-content {
+       border: none;
+       border-radius: var(--radius);
+       box-shadow: var(--shadow-lg);
+       overflow: hidden;
+   }
+   
+   .modal-header {
+       background-color: #f8fafc;
+       border-bottom: 1px solid var(--border-color);
+       padding: 1.5rem;
+   }
+   
+   .modal-title {
+       font-weight: 700;
+       color: var(--dark-color);
+       font-size: 1.25rem;
+   }
+   
+   .modal-body {
+       padding: 2rem;
+   }
+   
+   .form-group {
+       margin-bottom: 1.5rem;
+   }
+   
+   .form-group label {
+       display: block;
+       margin-bottom: 0.5rem;
+       font-weight: 500;
+       color: var(--dark-color);
+   }
+   
+   .form-control {
+       width: 100%;
+       padding: 0.75rem 1rem;
+       border: 1px solid var(--border-color);
+       border-radius: var(--radius);
+       font-size: 1rem;
+       transition: all 0.2s ease;
+   }
+   
+   .form-control:focus {
+       outline: none;
+       border-color: var(--primary-color);
+       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+   }
+   
+   .btn-block {
+       display: block;
+       width: 100%;
+   }
+
+   /* Responsive Design */
+   @media (max-width: 768px) {
+       .wallet-container {
+           padding: 1rem;
+       }
+       
+       .page-title {
+           font-size: 2rem;
+       }
+       
+       .wallet-header {
+           padding: 1.5rem;
+       }
+       
+       .wallet-balance {
+           font-size: 2.5rem;
+       }
+       
+       .transaction-table {
+           display: block;
+           overflow-x: auto;
+           -webkit-overflow-scrolling: touch;
+       }
+       
+       .transaction-table th,
+       .transaction-table td {
+           padding: 1rem 0.75rem;
+           white-space: nowrap;
+       }
+       
+       .transaction-id {
+           max-width: 120px;
+           overflow: hidden;
+           text-overflow: ellipsis;
+       }
+       
+       .breadcrumb {
+           font-size: 0.875rem;
+       }
+       
+       .back-button {
+           padding: 0.625rem 1rem;
+       }
+       
+       .wallet-actions {
+           flex-direction: column;
+       }
+       
+       .btn {
+           width: 100%;
+       }
+   }
+   
+   @media (max-width: 576px) {
+       .page-header {
+           padding: 3rem 0;
+       }
+       
+       .page-title {
+           font-size: 1.75rem;
+       }
+       
+       .wallet-balance {
+           font-size: 2rem;
+       }
+       
+       .transactions-section {
+           padding: 1.5rem 1rem;
+       }
+       
+       h4 {
+           font-size: 1.25rem;
+       }
+       
+       .pagination-button {
+           padding: 0.5rem 0.75rem;
+           font-size: 0.875rem;
+       }
+   }
+</style>
+
+<main class="main">
+    <div class="page-header text-center" style="background-image: url('assets/images/page-header-bg.jpg')">
+        <div class="container">
+            <h1 class="page-title">My Wallet</h1>
+        </div>
+    </div>
+    
+    <nav aria-label="breadcrumb" class="breadcrumb-nav">
+        <div class="container">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/userProfile">My account</a></li>
+                <li class="breadcrumb-item active" aria-current="page">My Wallet</li>
+            </ol>
+        </div>
+    </nav>
+
+    <div class="page-content">
+        <div class="dashboard">
+            <div class="container wallet-container">
+                <a href="/userProfile" class="back-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                    </svg>
+                    Back to Account
+                </a>
+                
+                <div class="wallet-content">
+                    <div class="wallet-header">
+                        <h5 class="wallet-title">Available Balance</h5>
+                        <div class="wallet-balance"><%= walletBalance %></div>
+                    </div>
+                    
+                    <!-- Action buttons section -->
+                    <div class="wallet-actions">
+                        <!-- <button class="btn btn-primary" data-toggle="modal" data-target="#addFundsModal">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
+                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                            </svg>
+                            Add Funds
+                        </button> -->
+                    </div>
+                    
+                    <h4>Transaction History</h4>
+                    <div class="transactions-section">
+                        <table class="transaction-table">
+                            <thead>
+                                <tr>
+                                    <th>Transaction ID</th>
+                                    <th>Date</th>
+                                    <th>Order</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (transactions.length === 0) { %>
+                                    <tr>
+                                        <td colspan="6" class="no-transactions">
+                                            <i class="icon-info-circle"></i>
+                                            No transactions available yet.
+                                            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Add funds to your wallet to get started.</p>
+                                        </td>
+                                    </tr>
+                                <% } else { %>
+                                    <% transactions.forEach(transaction => { %>
+                                        <tr>
+                                            <% 
+                                            // Format date
+                                            var date = new Date(transaction.transactionDate);
+                                            var formattedDate = date.toLocaleDateString('en-US', { 
+                                                year: 'numeric', 
+                                                month: 'short', 
+                                                day: 'numeric' 
+                                            });
+                                            var transactionSymbol = transaction.transactionType === 'credit' ? '+' : '-';
+                                            var transactionClass = transaction.transactionType === 'credit' ? 'credit' : 'debit';
+                                            %>
+                                            <td class="transaction-id"><%= transaction.transactionId || 'N/A' %></td>
+                                            <td class="transaction-date"><%= formattedDate %></td>
+                                            <td>
+                                                <% if (transaction.orderId) { %>
+                                                    <a href="/orders/<%= transaction.orderId %>" class="order-link">
+                                                        View Order
+                                                    </a>
+                                                <% } else { %>
+                                                    N/A
+                                                <% } %>
+                                            </td>
+                                            <td class="transaction-type <%= transaction.transactionType %>">
+                                                <%= transaction.transactionType %>
+                                            </td>
+                                            <td>
+                                                <span class="status-badge <%= transaction.transactionStatus || 'completed' %>">
+                                                    <%= transaction.transactionStatus || 'completed' %>
+                                                </span>
+                                            </td>
+                                            <td class="transaction-amount <%= transactionClass %>">
+                                                <%= transactionSymbol %>₹<%= transaction.transactionAmount %>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                <% } %>
+                            </tbody>
+                        </table>
+                        
+                        <!-- Pagination -->
+                        <% if (totalPages > 1) { %>
+                            <div class="pagination">
+                                <% if (currentPage > 1) { %>
+                                    <a href="?page=<%= currentPage - 1 %>" class="pagination-button">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 4px;">
+                                            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                                        </svg>
+                                        Previous
+                                    </a>
+                                <% } %>
+                                
+                                <% 
+                                // Show limited page numbers with ellipsis for better UX
+                                let startPage = Math.max(1, currentPage - 2);
+                                let endPage = Math.min(totalPages, startPage + 4);
+                                
+                                if (startPage > 1) { %>
+                                    <a href="?page=1" class="pagination-button">1</a>
+                                    <% if (startPage > 2) { %>
+                                        <span style="margin: 0 0.5rem; color: var(--text-secondary);">...</span>
+                                    <% } %>
+                                <% } %>
+                                
+                                <% for (let i = startPage; i <= endPage; i++) { %>
+                                    <a href="?page=<%= i %>" class="pagination-button <%= currentPage === i ? 'active' : '' %>">
+                                        <%= i %>
+                                    </a>
+                                <% } %>
+                                
+                                <% if (endPage < totalPages) { %>
+                                    <% if (endPage < totalPages - 1) { %>
+                                        <span style="margin: 0 0.5rem; color: var(--text-secondary);">...</span>
+                                    <% } %>
+                                    <a href="?page=<%= totalPages %>" class="pagination-button"><%= totalPages %></a>
+                                <% } %>
+                                
+                                <% if (currentPage < totalPages) { %>
+                                    <a href="?page=<%= currentPage + 1 %>" class="pagination-button">
+                                        Next
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-left: 4px;">
+                                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                        </svg>
+                                    </a>
+                                <% } %>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Add Funds Modal -->
+<div class="modal fade" id="addFundsModal" tabindex="-1" role="dialog" aria-labelledby="addFundsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addFundsModalLabel">Add Funds to Wallet</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addFundsForm" action="/user/wallet/add-funds" method="POST">
+                    <div class="form-group">
+                        <label for="amount">Amount (₹)</label>
+                        <input type="number" class="form-control" id="amount" name="amount" min="1" placeholder="Enter amount" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Proceed to Payment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('addFundsForm').addEventListener('submit', function(e) {
+        const amount = document.getElementById('amount').value;
+        if (amount <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid amount greater than 0');
+        }
+    });
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('.transaction-table tbody tr');
+        rows.forEach((row, index) => {
+            row.style.opacity = '0';
+            row.style.transform = 'translateY(10px)';
+            row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            
+            setTimeout(() => {
+                row.style.opacity = '1';
+                row.style.transform = 'translateY(0)';
+            }, 100 + (index * 50));
+        });
+    });
+</script>
+
+<%- include("../../views/partials/user/footer") %>

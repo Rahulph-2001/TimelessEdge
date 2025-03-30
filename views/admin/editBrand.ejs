@@ -1,0 +1,164 @@
+<%- include("../../views/partials/admin/header") %>
+
+<style>
+  .content-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 2rem;
+  }
+
+  .content-header {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .card-body {
+    padding: 2rem;
+  }
+
+  .alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+  }
+
+  .alert-danger {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+  }
+
+  .alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+  }
+
+  .preview-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin: 1rem 0;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  .btn-primary {
+    background-color: #0d6efd;
+    color: white;
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    text-decoration: none;
+    margin-left: 1rem;
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 2rem;
+  }
+</style>
+
+<section class="content-main">
+  <div class="content-header">
+    <h2 class="content-title">Edit Brand</h2>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <% if (locals.error) { %>
+        <div class="alert alert-danger">
+          <%= error %>
+        </div>
+      <% } %>
+
+      <% if (locals.success) { %>
+        <div class="alert alert-success">
+          <%= success %>
+        </div>
+      <% } %>
+
+      <form action="/admin/updateBrand/<%= brand._id %>" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label class="form-label">Brand Name</label>
+          <input 
+            type="text" 
+            name="name" 
+            class="form-control" 
+            value="<%= brand.name %>" 
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Current Brand Image</label>
+          <div>
+            <img 
+            src="<%= brand.brandImage && brand.brandImage.length > 0 ? brand.brandImage[0] : 'https://via.placeholder.com/120' %>" 
+            alt="<%= brand.name %>" 
+            class="preview-image"
+          >
+          
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Update Brand Image</label>
+          <input 
+            type="file" 
+            name="image" 
+            class="form-control"
+            accept="image/*"
+          >
+          <small class="text-muted">Leave empty to keep current image</small>
+        </div>
+
+        <div class="button-group">
+          <button type="submit" class="btn btn-primary">Update Brand</button>
+          <a href="/admin/brands" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<%- include("../../views/partials/admin/footer") %>

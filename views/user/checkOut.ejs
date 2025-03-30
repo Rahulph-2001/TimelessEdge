@@ -1,0 +1,653 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Arial', sans-serif;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .shipping-address, .order-summary {
+      margin-bottom: 30px;
+    }
+    .shipping-address h2, .order-summary h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .address-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .address-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .address-card:hover {
+      border-color: #007bff;
+      box-shadow: 0 0 10px rgba(0, 123, 255, 0.1);
+    }
+    .address-card.selected {
+      border-color: #007bff;
+      background-color: #f0f8ff;
+    }
+    .address-content {
+      margin-left: 10px;
+    }
+    .address-name {
+      font-weight: bold;
+      color: #333;
+    }
+    .address-details, .address-phone {
+      color: #666;
+      margin-top: 5px;
+    }
+    .add-address-btn {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+    .add-address-btn:hover {
+      background-color: #0056b3;
+    }
+    .product-details {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .product-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      margin-right: 15px;
+    }
+    .product-info h3 {
+      font-size: 18px;
+      margin-bottom: 5px;
+      color: #333;
+    }
+    .product-info p {
+      margin: 0;
+      color: #666;
+    }
+    .total, .discount, .grand-total {
+      font-size: 18px;
+      margin: 10px 0;
+      color: #333;
+    }
+    .grand-total {
+      font-weight: bold;
+      color: #007bff;
+    }
+    .cart-discount {
+      margin: 20px 0;
+    }
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .coupon-input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .apply-button {
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .apply-button:hover {
+      background-color: #218838;
+    }
+    .payment-methods {
+      margin: 20px 0;
+    }
+    .payment-option {
+      margin: 10px 0;
+    }
+    .payment-option label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .payment-option input {
+      margin-right: 10px;
+    }
+    .btn-block {
+      width: 100%;
+      padding: 15px;
+      font-size: 18px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    .btn-block:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="shipping-address">
+      <h2>Select Shipping Address</h2>
+      <div class="address-list">
+        <% if (addresses && addresses.length > 0) { %>
+          <% addresses.forEach(function(address) { %>
+            <div class="address-card">
+              <label>
+                <input 
+                  type="radio" 
+                  name="selectedAddress" 
+                  value="<%= address._id %>" 
+                  <%= address.default ? 'checked' : '' %>
+                >
+                <div class="address-content">
+                  <div class="address-name"><%= address.name %></div>
+                  <div class="address-details">
+                    <%= address.adressType %> - <%= address.landMark %>, <%= address.city %>, <%= address.state %>, <%= address.pincode %>
+                  </div>
+                  <div class="address-phone">
+                    <i class="fas fa-phone-alt me-2"></i> <%= address.phone %>
+                    <% if (address.altPhone) { %>
+                      <span class="ms-3"><i class="fas fa-phone-alt me-2"></i> <%= address.altPhone %></span>
+                    <% } %>
+                  </div>
+                </div>
+              </label>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <p>No address available. Please add an address.</p>
+        <% } %>
+      </div>
+      <a href="/profile/address/add" class="add-address-btn">
+        <i class="fas fa-plus me-2"></i> Add New Address
+      </a>
+    </div>
+
+    <!-- Order Summary Section -->
+    <div class="order-summary">
+      <h2>Order Summary <span class="badge badge-primary"><%= cart.items.length %> Items</span></h2>
+      <% cart.items.forEach(function(item) { %>
+        <div class="product-details">
+          <img 
+            src="<%= item.productId.productImages && item.productId.productImages.length > 0 ? item.productId.productImages[0] : '/api/placeholder/100/100' %>" 
+            alt="<%= item.productId.productName %>" 
+            class="product-image"
+          >
+          <div class="product-info">
+            <h3><%= item.productId.productName %></h3>
+            <p>Quantity: <%= item.quantity %></p>
+            <p>Price: ₹<%= item.price %></p>
+          </div>
+        </div>
+      <% }); %>
+      <p class="total" id="total">Total Amount: ₹<%= summary.originalPrice.toFixed(2) %></p>
+      <p class="discount" id="discount">Discount: ₹0.00</p>
+      <p class="grand-total" id="grand-total">Grand Total: ₹<%= summary.total.toFixed(2) %></p>
+
+      <div class="cart-discount">
+        <form id="couponForm">
+          <div class="input-group">
+            <select id="coupon-select" class="form-select">
+              <option value="">Select a coupon</option>
+              <% if (coupons && coupons.length > 0) { %>
+                <% coupons.forEach(function(coupon) { %>
+                  <option value="<%= coupon.name %>" data-offer="<%= coupon.offerPrice %>" data-minimum-price="<%= coupon.minimumPrice %>">
+                    <%= coupon.name %> - ₹<%= coupon.offerPrice %> off (Min ₹<%= coupon.minimumPrice %>)
+                  </option>
+                <% }); %>
+              <% } %>
+              <!-- Add referral coupons -->
+              <% if (referralCoupons && referralCoupons.length > 0) { %>
+                <% referralCoupons.forEach(function(coupon) { %>
+                  <option value="<%= coupon.name %>" data-offer="<%= coupon.offerPrice %>" data-minimum-price="<%= coupon.minimumPrice %>">
+                    <%= coupon.name %> - ₹<%= coupon.offerPrice %> off (Min ₹<%= coupon.minimumPrice %>) [Referral]
+                  </option>
+                <% }); %>
+              <% } %>
+            </select>
+            <button id="applyCoupon" class="apply-button" type="button">
+              <i class="fas fa-tag me-2"></i> Apply
+            </button>
+            <button id="removeCoupon" class="apply-button" type="button">
+              <i class="fas fa-times me-2"></i> Remove
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="payment-methods">
+        <h3><i class="fas fa-credit-card me-2"></i> Select Payment Method</h3>
+        <div class="payment-option">
+          <label>
+            <input type="radio" id="cod" name="paymentMethod" value="COD" checked>
+            <span><i class="fas fa-money-bill-wave me-2"></i> Cash on Delivery</span>
+          </label>
+        </div>
+        <div class="payment-option">
+          <label>
+            <input type="radio" id="razorpay" name="paymentMethod" value="Razorpay">
+            <span><i class="fas fa-credit-card me-2"></i> Razorpay</span>
+          </label>
+        </div>
+        <div class="payment-option">
+          <label>
+            <input type="radio" id="wallet" name="paymentMethod" value="Wallet">
+            <span><i class="fas fa-wallet me-2"></i> Wallet (Available: ₹<%= walletBalance.toFixed(2) %>)</span>
+          </label>
+        </div>
+      </div>
+
+      <button onclick="placeOrder()" id="placeOrderBtn" class="btn btn-primary btn-block">
+        <i class="fas fa-shopping-bag me-2"></i> Place Order
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+// Add this JavaScript to your checkout page
+$(document).ready(function() {
+  let appliedCoupon = null;
+  let originalTotal = parseFloat("<%= summary.originalPrice %>");
+  let discount = 0;
+  
+  // Apply coupon button click handler
+  $("#applyCoupon").click(function() {
+    const couponCode = $("#coupon-select").val();
+    if (!couponCode) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No Coupon Selected',
+        text: 'Please select a coupon to apply'
+      });
+      return;
+    }
+    
+    const selectedOption = $("#coupon-select option:selected");
+    const minimumPrice = parseFloat(selectedOption.data("minimum-price"));
+    
+    if (originalTotal < minimumPrice) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Cannot Apply Coupon',
+        text: `This coupon requires a minimum purchase of ₹${minimumPrice.toFixed(2)}`
+      });
+      return;
+    }
+    
+    $.ajax({
+      url: '/validate-coupon',
+      method: 'POST',
+      data: JSON.stringify({
+        couponCode: couponCode,
+        cartTotal: originalTotal
+      }),
+      contentType: 'application/json',
+      dataType: 'json',
+      success: function(response) {
+        if (response.success) {
+          appliedCoupon = response.coupon;
+          discount = parseFloat(appliedCoupon.discount);
+          
+          $("#discount").text(`Discount: ₹${discount.toFixed(2)}`);
+          
+          const grandTotal = calculateGrandTotal(originalTotal, discount);
+          $("#grand-total").text(`Grand Total: ₹${grandTotal.toFixed(2)}`);
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Coupon Applied',
+            text: `Coupon "${appliedCoupon.name}" applied successfully! You saved ₹${discount.toFixed(2)}`
+          });
+        }
+      },
+      error: function(xhr) {
+        let errorMessage = "Failed to apply coupon";
+        try {
+          const response = JSON.parse(xhr.responseText);
+          if (response.message) {
+            errorMessage = response.message;
+          }
+        } catch (e) {}
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Coupon Error',
+          text: errorMessage
+        });
+      }
+    });
+  });
+  
+  $("#removeCoupon").click(function() {
+    if (!appliedCoupon) {
+      Swal.fire({
+        icon: 'info',
+        title: 'No Coupon Applied',
+        text: 'There is no coupon currently applied to remove'
+      });
+      return;
+    }
+    
+    appliedCoupon = null;
+    discount = 0;
+    
+    $("#discount").text("Discount: ₹0.00");
+    const grandTotal = calculateGrandTotal(originalTotal, 0);
+    $("#grand-total").text(`Grand Total: ₹${grandTotal.toFixed(2)}`);
+    
+    $("#coupon-select").val("");
+    
+    Swal.fire({
+      icon: 'success',
+      title: 'Coupon Removed',
+      text: 'Coupon has been removed successfully'
+    });
+  });
+  
+  function calculateGrandTotal(total, discount) {
+    const subtotal = total - discount;
+    const tax = subtotal * 0.1;  
+    const shipping = 99;        
+    return subtotal + tax + shipping;
+  }
+  
+  window.placeOrder = function() {
+    let selectedAddress = $('input[name="selectedAddress"]:checked').val();
+    if (!selectedAddress) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please select a shipping address'
+      });
+      return;
+    }
+    
+    let paymentMethod = $('input[name="paymentMethod"]:checked').val();
+    let couponCode = appliedCoupon ? appliedCoupon.name : "";
+    
+    const finalAmount = calculateGrandTotal(originalTotal, discount);
+    
+    let orderData = {
+      addressId: selectedAddress,
+      paymentMethod: paymentMethod,
+      coupon: couponCode,
+      totalPrice: originalTotal,
+      discount: discount,
+      finalAmount: finalAmount,
+      status: paymentMethod === "COD" ? "Pending" : "Processing",
+      couponApplied: discount > 0
+    };
+    
+    $("#placeOrderBtn").prop("disabled", true).html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...');
+    
+if (paymentMethod === "Razorpay") {
+    $.ajax({
+        url: '/order/create-razorpay-order',
+        method: 'POST',
+        data: JSON.stringify(orderData),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                const options = {
+                    key: response.key_id,
+                    amount: response.amount,
+                    currency: "INR",
+                    name: "Your Store Name",
+                    description: "Purchase Payment",
+                    order_id: response.order_id,
+                    handler: function(response) {
+                        verifyRazorpayPayment(response, orderData);
+                    },
+                    prefill: {
+                        name: "<%= user.name %>",
+                        email: "<%= user.email %>",
+                        contact: "<%= user.phone %>"
+                    },
+                    theme: {
+                        color: "#007bff"
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+                            
+                            sessionStorage.setItem('failedOrderData', JSON.stringify(orderData));
+                            
+                            window.location.href = `/order/payment-failed/${response.order_id}`;
+                        }
+                    }
+                };
+                
+                options.on = {
+                    payment: {
+                        failed: function(response) {
+                            console.log("Payment failed response:", response);
+                            sessionStorage.setItem('failedOrderData', JSON.stringify(orderData));
+                            
+                            const failOrderId = 
+                                (response.error && response.error.metadata && response.error.metadata.order_id) || 
+                                response.razorpay_order_id || 
+                                response.order_id;
+                            
+                            window.location.href = `/order/payment-failed/${failOrderId}`;
+                        }
+                    }
+                };
+                
+                const rzp = new Razorpay(options);
+                rzp.open();
+                
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Order Failed',
+                    text: response.message || "Failed to create Razorpay order. Please try again."
+                });
+                $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+            }
+        },
+        error: function(xhr) {
+            console.error("AJAX Error:", xhr.responseText);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: "Failed to initialize payment. Please try again."
+            });
+            $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+        }
+    });
+} else {
+      $.ajax({
+        url: '/order/place',
+        method: 'POST',
+        data: JSON.stringify(orderData),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+          console.log("Order response:", response); 
+          
+          if (response.success) {
+            console.log('order object', response.order);
+            const orderId = response.order && response.order._id;
+            
+            if (!orderId) {
+              console.error("No order ID returned from server");
+              Swal.fire({
+                icon: 'warning',
+                title: 'Order Placed',
+                text: "Order placed but confirmation page couldn't be loaded. Please check your orders history."
+              });
+              window.location.href = "/profile/orders";
+              return;
+            }
+            
+            window.location.href = `/order/confirmation/${orderId}`;
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Order Failed',
+              text: response.message || "Failed to place order. Please try again."
+            });
+            $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error("AJAX Error:", xhr.responseText);
+          let errorMessage = "An error occurred while placing your order. Please try again.";
+          
+          try {
+            const response = JSON.parse(xhr.responseText);
+            if (response.error) {
+              errorMessage = response.error;
+            }
+          } catch (e) {}
+          
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: errorMessage
+          });
+          $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+        }
+      });
+    }
+  };
+
+
+$("#wallet").on("change", function() {
+  if ($(this).is(":checked")) {
+    const walletBalance = 1200; 
+    const finalAmount = calculateGrandTotal(originalTotal, discount);
+    
+
+    if (walletBalance < finalAmount) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Insufficient Wallet Balance',
+        text: `Your wallet balance (₹${walletBalance.toFixed(2)}) is less than the order amount (₹${finalAmount.toFixed(2)})`
+      });
+      
+   
+      $("#cod").prop("checked", true);
+    }
+  }
+});
+
+if (paymentMethod === "Wallet") {
+  orderData.paymentMethod = "Wallet";
+  orderData.status = "Paid"; 
+  
+  $.ajax({
+    url: '/order/wallet-payment',
+    method: 'POST',
+    data: JSON.stringify(orderData),
+    contentType: 'application/json',
+    dataType: 'json',
+    success: function(response) {
+      if (response.success) {
+        const orderId = response.order && response.order._id;
+        window.location.href = `/order/confirmation/${orderId}`;
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Payment Failed',
+          text: response.message || "Wallet payment failed. Please try another payment method."
+        });
+        $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+      }
+    },
+    error: function(xhr) {
+      console.error("AJAX Error:", xhr.responseText);
+      let errorMessage = "An error occurred during wallet payment.";
+      
+      try {
+        const response = JSON.parse(xhr.responseText);
+        if (response.error) {
+          errorMessage = response.error;
+        }
+      } catch (e) {}
+      
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: errorMessage
+      });
+      $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-shopping-bag me-2"></i> Place Order');
+    }
+  });
+}
+  
+  
+function verifyRazorpayPayment(paymentData, orderData) {
+    const verificationData = {
+        ...orderData,
+        razorpay_payment_id: paymentData.razorpay_payment_id,
+        razorpay_order_id: paymentData.razorpay_order_id,
+        razorpay_signature: paymentData.razorpay_signature
+    };
+    
+    $.ajax({
+        url: '/order/verify-payment',
+        method: 'POST',
+        data: JSON.stringify(verificationData),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                window.location.href = `/order/confirmation/${response.order._id}`;
+            } else {
+                const failOrderId = response.orderId || paymentData.razorpay_order_id;
+                window.location.href = `/order/payment-failed/${failOrderId}`;
+            }
+        },
+        error: function(xhr) {
+            console.error("AJAX Error:", xhr.responseText);
+            
+            const failOrderId = paymentData.razorpay_order_id || orderData.addressId + "_" + Date.now();
+            
+            sessionStorage.setItem('failedOrderData', JSON.stringify(orderData));
+            
+            window.location.href = `/order/payment-failed/${failOrderId}`;
+        }
+    });
+}
+});
+  </script>
+</body>
+</html>

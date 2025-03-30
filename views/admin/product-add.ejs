@@ -211,14 +211,14 @@
                                 <div class="col-lg-4">
                                     <div class="mb-4">
                                         <label class="form-label">Regular price</label>
-                                        <input placeholder="RS :" name="regularPrice" type="text" class="form-control">
+                                        <input placeholder="RS :" name="regularPrice" type="number" step="0.01" min="0.01" class="form-control">
                                         <div id="regularPrice-error" class="error-message"></div>
                                     </div>
                                 </div>
                                 <div class="col-lg-4">
                                     <div class="mb-4">
                                         <label class="form-label">Sale price</label>
-                                        <input placeholder="RS :" name="salePrice" type="text" class="form-control">
+                                        <input placeholder="RS :" name="salePrice" type="number" step="0.01" min="0" class="form-control">
                                         <div id="salePrice-error" class="error-message"></div>
                                     </div>
                                 </div>
@@ -448,10 +448,26 @@ function validateFormInputs() {
         isValid = false;
     }
 
+    // Enhanced regular price validation
     const regularPrice = document.querySelector('input[name="regularPrice"]').value.trim();
-    if (!regularPrice || isNaN(regularPrice) || parseFloat(regularPrice) <= 0) {
-        showError("regularPrice-error", "Please enter a valid regular price");
+    if (!regularPrice) {
+        showError("regularPrice-error", "Regular price is required");
         isValid = false;
+    } else if (isNaN(regularPrice) || parseFloat(regularPrice) <= 0) {
+        showError("regularPrice-error", "Regular price must be a positive number");
+        isValid = false;
+    }
+
+    // Enhanced sale price validation
+    const salePrice = document.querySelector('input[name="salePrice"]').value.trim();
+    if (salePrice) {
+        if (isNaN(salePrice) || parseFloat(salePrice) < 0) {
+            showError("salePrice-error", "Sale price must be a valid number");
+            isValid = false;
+        } else if (parseFloat(salePrice) >= parseFloat(regularPrice)) {
+            showError("salePrice-error", "Sale price must be less than regular price");
+            isValid = false;
+        }
     }
 
     const quantity = document.querySelector('input[name="quantity"]').value.trim();

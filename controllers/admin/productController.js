@@ -32,74 +32,98 @@ const addProduct = async (req, res) => {
     try {
         const { productName, brand, description, regularPrice, salePrice, quantity, color, category } = req.body;
         
+       
         if (!productName || !brand || !description || !regularPrice || !quantity || !category) {
             return res.status(400).json({
                 success: false,
                 message: "All required fields must be provided"
             });
         }
+        
+     
+        const regPrice = parseFloat(regularPrice);
+        if (isNaN(regPrice) || regPrice <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Regular price must be a positive number"
+            });
+        }
+        
+        
+        if (salePrice) {
+            const saleP = parseFloat(salePrice);
+            if (isNaN(saleP) || saleP < 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Sale price must be a valid number"
+                });
+            }
+            
+            if (saleP >= regPrice) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Sale price must be less than regular price"
+                });
+            }
+        }
 
-        const existingProduct = await Product.findOne({ 
+        const existingProduct = await Product.findOne({
             productName: { $regex: new RegExp(`^${productName}$`, 'i') }
         });
-        
+                
         if (existingProduct) {
             return res.status(400).json({
                 success: false,
                 message: "A product with this name already exists"
             });
         }
-
-  
+        
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({
                 success: false,
                 message: "At least one product image is required"
             });
         }
-
+        
         const uploadPromises = req.files.map(file => 
-            cloudinary.uploader.upload(file.path, { 
+            cloudinary.uploader.upload(file.path, {
                 folder: "products",
                 resource_type: "auto"
             })
         );
-
+        
         const uploadResults = await Promise.all(uploadPromises);
         const images = uploadResults.map(result => result.secure_url);
-
-
+         
         const newProduct = new Product({
             productName,
             brand,
             description,
-            regularPrice,
-            salePrice,
+            regularPrice: regPrice,
+            salePrice: salePrice ? parseFloat(salePrice) : undefined,
             quantity,
             color,
             category,
             productImages: images
         });
-
+        
         await newProduct.save();
-
-   
+            
         req.files.forEach(file => {
             fs.unlink(file.path, (err) => {
                 if (err) console.error('Error deleting temporary file:', err);
             });
         });
-
+        
         return res.status(201).json({
             success: true,
             message: "Product added successfully",
             product: newProduct
         });
-
+        
     } catch (error) {
         console.error("Error adding product:", error);
-        
-      
+                
         if (req.files) {
             req.files.forEach(file => {
                 fs.unlink(file.path, (err) => {
@@ -107,7 +131,7 @@ const addProduct = async (req, res) => {
                 });
             });
         }
-
+        
         return res.status(500).json({
             success: false,
             message: "Error adding product",
@@ -115,7 +139,6 @@ const addProduct = async (req, res) => {
         });
     }
 };
-
 
 const getAllproduct = async (req, res) => {
     try {

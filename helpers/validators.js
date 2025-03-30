@@ -4,7 +4,7 @@ const validateAddress = [
     body("addressType").isIn(["Home", "Work", "Other"]).withMessage("Invalid address type"),
     body("name").trim().notEmpty().withMessage("Full Name is required"),
     body("city").trim().notEmpty().withMessage("City is required"),
-    body("landMark").optional().trim(), // Optional field
+    body("landMark").optional().trim(), 
     body("state").trim().notEmpty().withMessage("State is required"),
     body("pincode")
         .trim()

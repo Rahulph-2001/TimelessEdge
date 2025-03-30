@@ -1,6 +1,6 @@
 <%- include("../../views/partials/admin/header") %>
   <style>
-    /* Main Layout */
+    
     .content-main {
       padding: 2rem;
       background-color: #f8f9fa;
@@ -29,7 +29,7 @@
       padding: 1.5rem;
     }
 
-    /* Form Styling */
+   
     .col-md-3 {
       padding: 1.5rem;
       background-color: #fff;
@@ -74,7 +74,7 @@
       margin-bottom: 0.5rem;
     }
 
-    /* Button Styling */
+    
     .d-grid {
       margin-top: 1.5rem;
     }
@@ -132,7 +132,7 @@
       border-color: #1e7e34;
     }
 
-    /* Table Styling */
+    
     .col-md-7 {
       padding: 0.5rem;
     }
@@ -185,7 +185,7 @@
       text-align: center;
     }
 
-    /* Pagination Styling */
+    
     .pagination {
       display: flex;
       justify-content: center;
@@ -225,7 +225,7 @@
       background-color: #fff;
       border-color: #dee2e6;
     }
-     /* Additional styles for SweetAlert customization */
+     
      .swal2-popup {
       font-size: 0.9rem;
       border-radius: 0.5rem;
@@ -243,7 +243,7 @@
       padding: 0.5rem 1.5rem;
     }
 
-    /* Badge styling */
+    
     .badge {
       display: inline-block;
       padding: 0.35em 0.65em;
@@ -265,7 +265,7 @@
       background-color: #dc3545;
     }
 
-    /* Responsive adjustments */
+    
     @media (max-width: 768px) {
       .content-main {
         padding: 1rem;
@@ -400,7 +400,7 @@
                 </tbody>
               </table>
             </div>
-            <!-- Pagination -->
+            
             <% if (totalPages> 1) { %>
               <nav class="pagination">
                 <ul class="pagination">
@@ -638,16 +638,6 @@
       return false;
     }
 
-    // function setDefaultStartdate() {
-    //     const today = new Date();
-    //     const year = today.getFullYear();
-    //     const month = (today.getMonth() + 1).toString().padStart(2, "0");
-    //     const day = today.getDate().toString().padStart(2, "0");
-    //     document.getElementById("startingDate").value = `${year}-${month}-${day}`;
-    // }
-
-    // document.addEventListener("DOMContentLoaded", function() {
-    //     setDefaultStartdate();
-    // });
+    
   </script>
   <%- include("../../views/partials/admin/footer") %>

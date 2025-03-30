@@ -215,13 +215,7 @@
                                                     : 'Unknown' %>
                                             </span>
                                         </p>
-                                        <p class="flex items-center">
-                                            <span class="font-semibold text-gray-700 w-32">Last Updated:</span>
-                                            <span class="text-gray-800">
-                                                <%= user.updatedAt ? new Date(user.updatedAt).toLocaleDateString()
-                                                    : 'Unknown' %>
-                                            </span>
-                                        </p>
+                                       
                                     </div>
                                 </div>
                             </div>
@@ -236,16 +230,7 @@
                                     <i data-lucide="package" class="w-6 h-6 mr-2 text-indigo-600"></i>
                                     My Orders
                                 </h2>
-                                <div class="flex items-center">
-                                    <select id="orderFilter"
-                                        class="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                        <option value="all">All Orders</option>
-                                        <option value="processing">Processing</option>
-                                        <option value="shipped">Shipped</option>
-                                        <option value="delivered">Delivered</option>
-                                        <option value="cancelled">Cancelled</option>
-                                    </select>
-                                </div>
+                              
                             </div>
                             <% if (orders && orders.length> 0) { %>
                                 <div class="overflow-x-auto rounded-lg border border-gray-200">

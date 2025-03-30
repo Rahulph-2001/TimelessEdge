@@ -414,376 +414,336 @@
     </style>
 
 
-    <div class="dashboard-container">
-        <div class="page-header">
-            <h1 class="page-title">Wallet Management</h1>
-            <div class="search-box">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" class="search-input" id="searchTransactions" placeholder="Search transactions...">
+<div class="dashboard-container">
+    <div class="page-header">
+        <h1 class="page-title">Wallet Management</h1>
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" id="searchTransactions" placeholder="Search transactions...">
+        </div>
+    </div>
+
+    <div class="stats-cards">
+        <div class="stat-card">
+            <p class="stat-title">Total Transactions</p>
+            <h2 class="stat-value" id="totalTransactions">0</h2>
+            <p class="stat-trend <%= stats.transactionChangePercent >= 0 ? 'trend-up' : 'trend-down' %>">
+                <i class="fas fa-arrow-<%= stats.transactionChangePercent >= 0 ? 'up' : 'down' %>"></i> 
+                <%= Math.abs(stats.transactionChangePercent) %>% from last month
+            </p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-title">Total Credits</p>
+            <h2 class="stat-value" id="totalCredits">Rs:0.00</h2>
+            <p class="stat-trend <%= stats.creditChangePercent >= 0 ? 'trend-up' : 'trend-down' %>">
+                <i class="fas fa-arrow-<%= stats.creditChangePercent >= 0 ? 'up' : 'down' %>"></i> 
+                <%= Math.abs(stats.creditChangePercent) %>% from last month
+            </p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-title">Total Debits</p>
+            <h2 class="stat-value" id="totalDebits">Rs:0.00</h2>
+            <p class="stat-trend <%= stats.debitChangePercent >= 0 ? 'trend-up' : 'trend-down' %>">
+                <i class="fas fa-arrow-<%= stats.debitChangePercent >= 0 ? 'up' : 'down' %>"></i> 
+                <%= Math.abs(stats.debitChangePercent) %>% from last month
+            </p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-title">Active Users</p>
+            <h2 class="stat-value" id="activeUsers">0</h2>
+            <p class="stat-trend <%= stats.userChangePercent >= 0 ? 'trend-up' : 'trend-down' %>">
+                <i class="fas fa-arrow-<%= stats.userChangePercent >= 0 ? 'up' : 'down' %>"></i> 
+                <%= Math.abs(stats.userChangePercent) %>% from last month
+            </p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Transactions List</h2>
+            <div class="filter-options">
+                <button class="btn btn-outline btn-sm active" id="filterAll">All</button>
+                <button class="btn btn-outline btn-sm" id="filterCredit">Credits</button>
+                <button class="btn btn-outline btn-sm" id="filterDebit">Debits</button>
             </div>
         </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="transactions-table" id="transactionsTable">
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Date</th>
+                            
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% wallets.forEach(wallet => { %>
+                            <% wallet.transactions.forEach(transaction => { %>
+                                <tr class="transaction-row" 
+                                    data-type="<%= transaction.transactionType %>" 
+                                    data-id="<%= transaction.transactionId %>">
+                                    <td title="Click for details" class="transaction-id" style="cursor:pointer;">
+                                        <%= transaction.transactionId.substring(0, 8) %>...
+                                    </td>
+                                    <td>
+                                        <%= new Date(transaction.transactionDate).toLocaleString() %>
+                                    </td>
+                                    
+                                    <td>
+                                        <span class="badge badge-<%= transaction.transactionType %>">
+                                            <%= transaction.transactionType.charAt(0).toUpperCase() + transaction.transactionType.slice(1) %>
+                                        </span>
+                                    </td>
+                                    <td class="<%= transaction.transactionType === 'credit' ? 'text-success' : 'text-danger' %>">
+                                        Rs:<%= transaction.transactionAmount.toFixed(2) %>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-<%= transaction.transactionStatus %>">
+                                            <%= transaction.transactionStatus.charAt(0).toUpperCase() + transaction.transactionStatus.slice(1) %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-outline btn-sm view-details" data-id="<%= transaction.transactionId %>">
+                                                <i class="fas fa-eye btn-icon"></i> View
+                                            </button>
+                                            <% if(transaction.orderId) { %>
+                                                <a href="/admin/orders/view/<%= transaction.orderId %>" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-shopping-cart btn-icon"></i> Order
+                                                </a>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                </tr>
 
-        <div class="stats-cards">
-            <div class="stat-card">
-                <p class="stat-title">Total Transactions</p>
-                <h2 class="stat-value" id="totalTransactions">0</h2>
-                <p class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> 12% from last month</p>
+                                
+                                <div id="transaction-data-<%= transaction.transactionId %>" style="display:none;">
+                                    <div class="transaction-detail-data">
+                                        <div class="detail-row">
+                                            <div class="detail-label">Transaction ID:</div>
+                                            <div class="detail-value"><%= transaction.transactionId %></div>
+                                        </div>
+                                        <div class="detail-row">
+                                            <div class="detail-label">Date:</div>
+                                            <div class="detail-value"><%= new Date(transaction.transactionDate).toLocaleString() %></div>
+                                        </div>
+                                        <div class="detail-row">
+                                            <div class="detail-label">User ID:</div>
+                                            <div class="detail-value"><%= wallet.userId ? wallet.userId._id || wallet.userId : 'Unknown' %></div>
+                                        </div>
+                                        
+                                        <div class="detail-row">
+                                            <div class="detail-label">Transaction Type:</div>
+                                            <div class="detail-value">
+                                                <span class="badge badge-<%= transaction.transactionType %>">
+                                                    <%= transaction.transactionType.charAt(0).toUpperCase() + transaction.transactionType.slice(1) %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="detail-row">
+                                            <div class="detail-label">Amount:</div>
+                                            <div class="detail-value">Rs:<%= transaction.transactionAmount.toFixed(2) %></div>
+                                        </div>
+                                        <div class="detail-row">
+                                            <div class="detail-label">Status:</div>
+                                            <div class="detail-value">
+                                                <span class="badge badge-<%= transaction.transactionStatus %>">
+                                                    <%= transaction.transactionStatus.charAt(0).toUpperCase() + transaction.transactionStatus.slice(1) %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="detail-row">
+                                            <div class="detail-label">Description:</div>
+                                            <div class="detail-value"><%= transaction.transactionDescription || 'No description provided' %></div>
+                                        </div>
+                                        <% if(transaction.orderId) { %>
+                                            <div class="detail-row">
+                                                <div class="detail-label">Order ID:</div>
+                                                <div class="detail-value">
+                                                    <%= transaction.orderId %>
+                                                    <a href="/admin/orders/view/<%= transaction.orderId %>" class="btn btn-primary btn-sm">
+                                                        <i class="fas fa-shopping-cart btn-icon"></i> View Order
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        <% }); %>
+                    </tbody>
+                </table>
             </div>
-            <div class="stat-card">
-                <p class="stat-title">Total Credits</p>
-                <h2 class="stat-value" id="totalCredits">$0.00</h2>
-                <p class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> 8% from last month</p>
-            </div>
-            <div class="stat-card">
-                <p class="stat-title">Total Debits</p>
-                <h2 class="stat-value" id="totalDebits">$0.00</h2>
-                <p class="stat-trend trend-down"><i class="fas fa-arrow-down"></i> 3% from last month</p>
-            </div>
-            <div class="stat-card">
-                <p class="stat-title">Active Users</p>
-                <h2 class="stat-value" id="activeUsers">0</h2>
-                <p class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> 5% from last month</p>
-            </div>
-        </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Transactions List</h2>
-                <div class="filter-options">
-                    <button class="btn btn-outline btn-sm active" id="filterAll">All</button>
-                    <button class="btn btn-outline btn-sm" id="filterCredit">Credits</button>
-                    <button class="btn btn-outline btn-sm" id="filterDebit">Debits</button>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="transactions-table" id="transactionsTable">
-                        <thead>
-                            <tr>
-                                <th>Transaction ID</th>
-                                <th>Date</th>
-                                <th>User</th>
-                                <th>Type</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% let transactionCount=0; let creditTotal=0; let debitTotal=0; let uniqueUsers=new Set();
-                                %>
-                                <% wallets.forEach(wallet=> { %>
-                                    <% uniqueUsers.add(wallet.userId.toString()); %>
-                                        <% wallet.transactions.forEach(transaction=> { %>
-                                            <% transactionCount++; %>
-                                                <% if(transaction.transactionType==='credit' ) { creditTotal
-                                                    +=transaction.transactionAmount; } %>
-                                                    <% if(transaction.transactionType==='debit' ) { debitTotal
-                                                        +=transaction.transactionAmount; } %>
-                                                        <tr class="transaction-row"
-                                                            data-type="<%= transaction.transactionType %>"
-                                                            data-id="<%= transaction.transactionId %>">
-                                                            <td title="Click for details" class="transaction-id"
-                                                                style="cursor:pointer;">
-                                                                <%= transaction.transactionId.substring(0, 8) %>...
-                                                            </td>
-                                                            <td>
-                                                                <%= new
-                                                                    Date(transaction.transactionDate).toLocaleString()
-                                                                    %>
-                                                            </td>
-                                                            <td>
-                                                                <% if(typeof wallet.userId==='object' &&
-                                                                    wallet.userId.username) { %>
-                                                                    <%= wallet.userId.username %>
-                                                                        <% } else { %>
-                                                                            User #<%=
-                                                                                wallet.userId.toString().substring(0, 6)
-                                                                                %>
-                                                                                <% } %>
-                                                            </td>
-                                                            <td>
-                                                                <!-- Fixed the nested spans issue -->
-                                                                <span
-                                                                    class="badge badge-<%= transaction.transactionType %>">
-                                                                    <%= transaction.transactionType.charAt(0).toUpperCase()
-                                                                        + transaction.transactionType.slice(1) %>
-                                                                </span>
-                                                            </td>
-                                                            <td
-                                                                class="<%= transaction.transactionType === 'credit' ? 'text-success' : 'text-danger' %>">
-                                                                $<%= transaction.transactionAmount.toFixed(2) %>
-                                                            </td>
-                                                            <td>
-                                                                <span
-                                                                    class="badge badge-<%= transaction.transactionStatus %>">
-                                                                    <%= transaction.transactionStatus.charAt(0).toUpperCase()
-                                                                        + transaction.transactionStatus.slice(1) %>
-                                                                </span>
-                                                            </td>
-                                                            <td>
-                                                                <div class="action-buttons">
-                                                                    <button class="btn btn-outline btn-sm view-details"
-                                                                        data-id="<%= transaction.transactionId %>">
-                                                                        <i class="fas fa-eye btn-icon"></i> View
-                                                                    </button>
-                                                                    <% if(transaction.orderId) { %>
-                                                                        <a href="/admin/orders/<%= transaction.orderId %>"
-                                                                            class="btn btn-primary btn-sm">
-                                                                            <i
-                                                                                class="fas fa-shopping-cart btn-icon"></i>
-                                                                            Order
-                                                                        </a>
-                                                                        <% } %>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-
-                                                        <!-- Hidden data for modal -->
-                                                        <div id="transaction-data-<%= transaction.transactionId %>"
-                                                            style="display:none;">
-                                                            <div class="transaction-detail-data">
-                                                                <div class="detail-row">
-                                                                    <div class="detail-label">Transaction ID:</div>
-                                                                    <div class="detail-value">
-                                                                        <%= transaction.transactionId %>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="detail-row">
-                                                                    <div class="detail-label">Date:</div>
-                                                                    <div class="detail-value">
-                                                                        <%= new
-                                                                            Date(transaction.transactionDate).toLocaleString()
-                                                                            %>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="detail-row">
-                                                                    <div class="detail-label">User ID:</div>
-                                                                    <div class="detail-value">
-                                                                        <%= wallet.userId %>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="detail-row">
-                                                                    <div class="detail-label">User Details:</div>
-                                                                    <div class="detail-value">
-                                                                        <% if(typeof wallet.userId==='object' &&
-                                                                            wallet.userId.username) { %>
-                                                                            Username: <%= wallet.userId.username %><br>
-                                                                                Email: <%= wallet.userId.email || 'N/A'
-                                                                                    %><br>
-                                                                                    User since: <%= new
-                                                                                        Date(wallet.userId.createdAt).toLocaleDateString()
-                                                                                        || 'N/A' %>
-                                                                                        <% } else { %>
-                                                                                            User #<%=
-                                                                                                wallet.userId.toString()
-                                                                                                %>
-                                                                                                <% } %>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="detail-row">
-                                                                    <div class="detail-label">Transaction Type:</div>
-                                                                    <div class="detail-value">
-                                                                        <span
-                                                                            class="badge badge-<%= transaction.transactionType %>">
-                                                                            <%= transaction.transactionType.charAt(0).toUpperCase()
-                                                                                + transaction.transactionType.slice(1)
-                                                                                %>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="detail-row">
-                                                                    <div class="detail-label">Amount:</div>
-                                                                    <div class="detail-value">$<%=
-                                                                            transaction.transactionAmount.toFixed(2) %>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="detail-row">
-                                                                    <div class="detail-label">Status:</div>
-                                                                    <div class="detail-value">
-                                                                        <span
-                                                                            class="badge badge-<%= transaction.transactionStatus %>">
-                                                                            <%= transaction.transactionStatus.charAt(0).toUpperCase()
-                                                                                + transaction.transactionStatus.slice(1)
-                                                                                %>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="detail-row">
-                                                                    <div class="detail-label">Description:</div>
-                                                                    <div class="detail-value">
-                                                                        <%= transaction.transactionDescription
-                                                                            || 'No description provided' %>
-                                                                    </div>
-                                                                </div>
-                                                                <% if(transaction.orderId) { %>
-                                                                    <div class="detail-row">
-                                                                        <div class="detail-label">Order ID:</div>
-                                                                        <div class="detail-value">
-                                                                            <%= transaction.orderId %>
-                                                                                <a href="/admin/orders/<%= transaction.orderId %>"
-                                                                                    class="btn btn-primary btn-sm">
-                                                                                    <i
-                                                                                        class="fas fa-shopping-cart btn-icon"></i>
-                                                                                    View Order
-                                                                                </a>
-                                                                        </div>
-                                                                    </div>
-                                                                    <% } %>
-                                                            </div>
-                                                        </div>
-                                                        <% }); %>
-                                                            <% }); %>
-                        </tbody>
-                    </table>
-                </div>
-
+            <% if (totalPages > 1) { %>
                 <div class="pagination">
-                    <button class="pagination-button" id="prevPage"><i class="fas fa-chevron-left"></i></button>
-                    <button class="pagination-button active">1</button>
-                    <button class="pagination-button">2</button>
-                    <button class="pagination-button">3</button>
-                    <button class="pagination-button">...</button>
-                    <button class="pagination-button" id="nextPage"><i class="fas fa-chevron-right"></i></button>
+                    <button class="pagination-button" id="prevPage" <%= currentPage === 1 ? 'disabled' : '' %>>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                        <% if (i === currentPage) { %>
+                            <button class="pagination-button active"><%= i %></button>
+                        <% } else if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) { %>
+                            <a href="?page=<%= i %>" class="pagination-button"><%= i %></a>
+                        <% } else if (i === currentPage - 2 || i === currentPage + 2) { %>
+                            <button class="pagination-button">...</button>
+                        <% } %>
+                    <% } %>
+                    
+                    <button class="pagination-button" id="nextPage" <%= currentPage === totalPages ? 'disabled' : '' %>>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
-            </div>
+            <% } %>
         </div>
     </div>
+</div>
 
-    <!-- Transaction Details Modal -->
-    <div id="transactionModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Transaction Details</h3>
-                <button class="close-button">&times;</button>
-            </div>
-            <div class="modal-body" id="transactionModalBody">
-                <!-- Content will be loaded dynamically -->
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="closeModal">Close</button>
-                <a class="btn btn-primary" id="viewOrderBtn" style="display:none;">View Order</a>
-            </div>
+
+<div id="transactionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Transaction Details</h3>
+            <button class="close-button">&times;</button>
+        </div>
+        <div class="modal-body" id="transactionModalBody">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="closeModal">Close</button>
+            <a class="btn btn-primary" id="viewOrderBtn" style="display:none;">View Order</a>
         </div>
     </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('totalTransactions').textContent = '<%= stats.transactionCount %>';
-            document.getElementById('totalCredits').textContent = '$<%= stats.creditTotal.toFixed(2) %>';
-            document.getElementById('totalDebits').textContent = '$<%= stats.debitTotal.toFixed(2) %>';
-            document.getElementById('activeUsers').textContent = '<%= stats.uniqueUsers %>';
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('totalTransactions').textContent = '<%= stats.transactionCount %>';
+        document.getElementById('totalCredits').textContent = 'Rs:<%= stats.creditTotal.toFixed(2) %>';
+        document.getElementById('totalDebits').textContent = 'Rs:<%= stats.debitTotal.toFixed(2) %>';
+        document.getElementById('activeUsers').textContent = '<%= stats.uniqueUsers %>';
 
-            const filterAll = document.getElementById('filterAll');
-            const filterCredit = document.getElementById('filterCredit');
-            const filterDebit = document.getElementById('filterDebit');
-            const rows = document.querySelectorAll('.transaction-row');
+        const filterAll = document.getElementById('filterAll');
+        const filterCredit = document.getElementById('filterCredit');
+        const filterDebit = document.getElementById('filterDebit');
+        const rows = document.querySelectorAll('.transaction-row');
 
-            filterAll.classList.add('btn-primary');
-            filterAll.classList.remove('btn-outline');
+        filterAll.classList.add('btn-primary');
+        filterAll.classList.remove('btn-outline');
 
-            filterAll.addEventListener('click', function () {
-                rows.forEach(row => row.style.display = '');
-                setActiveFilter(this);
-            });
+        filterAll.addEventListener('click', function () {
+            rows.forEach(row => row.style.display = '');
+            setActiveFilter(this);
+        });
 
-            filterCredit.addEventListener('click', function () {
-                rows.forEach(row => {
-                    if (row.dataset.type === 'credit') {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-                setActiveFilter(this);
-            });
-
-            filterDebit.addEventListener('click', function () {
-                rows.forEach(row => {
-                    if (row.dataset.type === 'debit') {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-                setActiveFilter(this);
-            });
-
-            function setActiveFilter(button) {
-                [filterAll, filterCredit, filterDebit].forEach(btn => {
-                    btn.classList.remove('btn-primary');
-                    btn.classList.add('btn-outline');
-                });
-                button.classList.remove('btn-outline');
-                button.classList.add('btn-primary');
-            }
-
-            const searchInput = document.getElementById('searchTransactions');
-            searchInput.addEventListener('keyup', function () {
-                const searchTerm = this.value.toLowerCase();
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    if (text.includes(searchTerm)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-            });
-
-            const modal = document.getElementById('transactionModal');
-            const modalBody = document.getElementById('transactionModalBody');
-            const closeModal = document.getElementById('closeModal');
-            const closeButton = document.querySelector('.close-button');
-            const viewOrderBtn = document.getElementById('viewOrderBtn');
-
-            document.querySelectorAll('.view-details, .transaction-id').forEach(element => {
-                element.addEventListener('click', function () {
-                    const transactionId = this.classList.contains('transaction-id') ?
-                        this.closest('tr').dataset.id : this.dataset.id;
-
-                    const detailData = document.getElementById(`transaction-data-${transactionId}`);
-                    if (detailData) {
-                        modalBody.innerHTML = detailData.querySelector('.transaction-detail-data').innerHTML;
-
-                        const orderLink = modalBody.querySelector('a[href^="/admin/orders/"]');
-                        if (orderLink) {
-                            viewOrderBtn.style.display = 'inline-flex';
-                            viewOrderBtn.href = orderLink.href;
-                        } else {
-                            viewOrderBtn.style.display = 'none';
-                        }
-
-                        modal.style.display = 'block';
-                    }
-                });
-            });
-
-            closeModal.addEventListener('click', function () {
-                modal.style.display = 'none';
-            });
-
-            closeButton.addEventListener('click', function () {
-                modal.style.display = 'none';
-            });
-
-            window.addEventListener('click', function (event) {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
+        filterCredit.addEventListener('click', function () {
+            rows.forEach(row => {
+                if (row.dataset.type === 'credit') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
                 }
             });
+            setActiveFilter(this);
+        });
 
-            const prevPage = document.getElementById('prevPage');
-            const nextPage = document.getElementById('nextPage');
-            const paginationButtons = document.querySelectorAll('.pagination-button:not(#prevPage):not(#nextPage)');
+        filterDebit.addEventListener('click', function () {
+            rows.forEach(row => {
+                if (row.dataset.type === 'debit') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            setActiveFilter(this);
+        });
 
-            paginationButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    paginationButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                });
+        function setActiveFilter(button) {
+            [filterAll, filterCredit, filterDebit].forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline');
+            });
+            button.classList.remove('btn-outline');
+            button.classList.add('btn-primary');
+        }
+
+        const searchInput = document.getElementById('searchTransactions');
+        searchInput.addEventListener('keyup', function () {
+            const searchTerm = this.value.toLowerCase();
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
             });
         });
-    </script>
 
-    <%- include("../../views/partials/admin/footer") %>
+        const modal = document.getElementById('transactionModal');
+        const modalBody = document.getElementById('transactionModalBody');
+        const closeModal = document.getElementById('closeModal');
+        const closeButton = document.querySelector('.close-button');
+        const viewOrderBtn = document.getElementById('viewOrderBtn');
+
+        document.querySelectorAll('.view-details, .transaction-id').forEach(element => {
+            element.addEventListener('click', function () {
+                const transactionId = this.classList.contains('transaction-id') ?
+                    this.closest('tr').dataset.id : this.dataset.id;
+
+                const detailData = document.getElementById(`transaction-data-${transactionId}`);
+                if (detailData) {
+                    modalBody.innerHTML = detailData.querySelector('.transaction-detail-data').innerHTML;
+
+                    const orderLink = modalBody.querySelector('a[href^="/admin/orders/"]');
+                    if (orderLink) {
+                        viewOrderBtn.style.display = 'inline-flex';
+                        viewOrderBtn.href = orderLink.href;
+                    } else {
+                        viewOrderBtn.style.display = 'none';
+                    }
+
+                    modal.style.display = 'block';
+                }
+            });
+        });
+
+        closeModal.addEventListener('click', function () {
+            modal.style.display = 'none';
+        });
+
+        closeButton.addEventListener('click', function () {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        const prevPage = document.getElementById('prevPage');
+        const nextPage = document.getElementById('nextPage');
+        
+        if (prevPage) {
+            prevPage.addEventListener('click', function() {
+                if (!this.hasAttribute('disabled')) {
+                    window.location.href = '?page=<%= currentPage - 1 %>';
+                }
+            });
+        }
+        
+        if (nextPage) {
+            nextPage.addEventListener('click', function() {
+                if (!this.hasAttribute('disabled')) {
+                    window.location.href = '?page=<%= currentPage + 1 %>';
+                }
+            });
+        }
+    });
+</script>

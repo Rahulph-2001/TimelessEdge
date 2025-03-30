@@ -2,7 +2,7 @@
 <head>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css"/>
   <style>
-    /* Reset and Base Styles */
+    
     * {
       margin: 0;
       padding: 0;
@@ -16,7 +16,7 @@
       line-height: 1.6;
     }
 
-    /* Main Layout */
+   
     .content-main {
       padding: 2rem;
       max-width: 1400px;
@@ -51,7 +51,7 @@
       border-radius: 3px;
     }
 
-    /* Card Styles */
+   
     .card {
       background: white;
       border-radius: 16px;
@@ -76,7 +76,7 @@
       padding: 2rem;
     }
 
-    /* Search Bar */
+    
     .search-container {
       max-width: 500px;
       margin: 0 auto;
@@ -108,7 +108,7 @@
       color: #64748b;
     }
 
-    /* Grid Layout */
+    
     .row {
       display: flex;
       gap: 2.5rem;
@@ -125,7 +125,7 @@
       max-width: 70%;
     }
 
-    /* Form Elements */
+    
     .form-group {
       margin-bottom: 1.75rem;
     }
@@ -160,7 +160,7 @@
       resize: vertical;
     }
 
-    /* Buttons */
+    
     .btn {
       display: inline-flex;
       align-items: center;
@@ -232,7 +232,7 @@
       box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
     }
 
-    /* Table Styles */
+ 
     .table-responsive {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -266,7 +266,7 @@
 
     .table td {
       border-bottom: 1px solid #e2e8f0;
-      /* Fix for content display */
+      
       max-width: 250px;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -285,7 +285,7 @@
       border-bottom: none;
     }
 
-    /* Status Badges */
+    
     .badge {
       display: inline-flex;
       align-items: center;
@@ -311,30 +311,30 @@
       color: #92400e;
     }
 
-    /* Action Buttons Container */
+   
     .action-buttons {
       display: flex;
       gap: 0.5rem;
       justify-content: center;
       align-items: center;
-      flex-wrap: wrap; /* Allow buttons to wrap if needed */
+      flex-wrap: wrap; 
     }
 
     .action-buttons .btn {
       padding: 0.5rem 0.75rem;
       font-size: 0.85rem;
-      min-width: 80px; /* Ensure minimum width for buttons */
-      margin: 0.25rem 0; /* Add some vertical spacing */
+      min-width: 80px; 
+      margin: 0.25rem 0; 
     }
 
-    /* Fix for edit button */
+   
     .action-buttons .btn-info {
       display: inline-flex;
       align-items: center;
       justify-content: center;
     }
 
-    /* Error Messages */
+    
     .error-message {
       color: #ef4444;
       font-size: 0.85rem;
@@ -343,7 +343,7 @@
       font-weight: 500;
     }
 
-    /* Pagination */
+   
     .pagination {
       display: flex;
       justify-content: center;
@@ -383,7 +383,7 @@
       box-shadow: 0 3px 10px rgba(59, 130, 246, 0.25);
     }
 
-    /* Modal Styles */
+   
     .modal {
       display: none;
       position: fixed;
@@ -449,7 +449,7 @@
       color: #0f172a;
     }
 
-    /* Offer Styles */
+   
     .offer-badge {
       background-color: #fef3c7;
       color: #92400e;
@@ -471,7 +471,7 @@
       margin-right: 8px;
     }
 
-    /* Form Add Category Card */
+    
     .form-card {
       background-color: white;
       border-radius: 16px;
@@ -489,7 +489,7 @@
       border-bottom: 2px solid #e2e8f0;
     }
 
-    /* Responsive Design */
+    
     @media (max-width: 1024px) {
       .row {
         flex-direction: column;
@@ -515,7 +515,7 @@
         padding: 1.5rem;
       }
       
-      /* Fix table display on smaller screens */
+      
       .table td {
         max-width: 150px;
       }
@@ -548,7 +548,7 @@
         font-size: 0.85rem;
       }
       
-      /* Ensure table content is visible on mobile */
+      
       .table td {
         max-width: 100px;
         white-space: normal;
@@ -577,7 +577,6 @@
 
       <div class="card-body">
         <div class="row">
-          <!-- Add Category Form -->
           <div class="col-md-3">
             <div class="form-card">
               <h3 class="form-card-title">Add New Category</h3>
@@ -601,7 +600,6 @@
             </div>
           </div>
 
-          <!-- Categories Table -->
           <div class="col-md-9">
             <div class="table-responsive">
               <table class="table">
@@ -656,7 +654,7 @@
               </table>
             </div>
           
-            <!-- Pagination -->
+            
             <div class="pagination">
               <% if (currentPage > 1) { %>
                 <a href="?page=<%= currentPage - 1 %>" class="pagination-link">&laquo;</a>
@@ -680,7 +678,7 @@
     </div>
   </section>
 
-  <!-- Add Offer Modal -->
+  
   <div id="addOfferModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -751,14 +749,14 @@
       });
     }
 
-    // Validate form function
+    
     function validateForm() {
       clearErrorMessages();
       const name = document.getElementsByName("name")[0].value.trim();
       const description = document.getElementById("descriptionId").value.trim();
       let isValid = true;
 
-      // Name validation
+    
       if (!name) {
         displayErrorMessage("name-error", "Please enter a category name");
         isValid = false;
@@ -770,7 +768,7 @@
         isValid = false;
       }
 
-      // Description validation
+      
       if (!description) {
         displayErrorMessage("description-error", "Please enter a category description");
         isValid = false;
@@ -796,7 +794,7 @@
       });
     }
 
-    // Real-time search functionality
+    
     document.querySelector('.search-input').addEventListener('input', function(e) {
       const searchTerm = e.target.value.toLowerCase();
       const tableRows = document.querySelectorAll('tbody tr');
@@ -813,7 +811,7 @@
       });
     });
 
-    // Modal functions
+    
     function showAddOfferModal(categoryId, categoryName) {
       document.getElementById('categoryId').value = categoryId;
       document.getElementById('categoryName').textContent = categoryName;
@@ -826,7 +824,7 @@
       clearErrorMessages();
     }
 
-    // Close modal when clicking outside of it
+    
     window.onclick = function(event) {
       const modal = document.getElementById('addOfferModal');
       if (event.target == modal) {
@@ -834,14 +832,14 @@
       }
     }
 
-    // Handle add offer form submission
+    
     function handleAddOfferSubmit(event) {
       event.preventDefault();
       
       const categoryId = document.getElementById('categoryId').value;
       const offerPercentage = document.getElementById('offerPercentage').value;
       
-      // Validate offer percentage
+     
       if (!offerPercentage || offerPercentage < 1 || offerPercentage > 90) {
         displayErrorMessage("offer-error", "Please enter a valid offer percentage between 1 and 90");
         return false;
@@ -882,7 +880,6 @@
       return false;
     }
 
-    // Remove offer function
     function removeOffer(categoryId) {
       Swal.fire({
         title: 'Are you sure?',

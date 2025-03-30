@@ -38,8 +38,7 @@ const getBrandPage = async (req, res) => {
 };
 const addBrand = async (req, res) => {
     try {
-        // console.log("Received form data:", req.body);
-        // console.log("Received file data:", req.file);
+        
 
         const brand = req.body.name ? req.body.name.trim() : null;
         if (!brand) {

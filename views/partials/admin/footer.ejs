@@ -1,5 +1,82 @@
+<footer class="main-footer">
+    <div class="container">
+        <p class="text-center">&copy; 2025 Timeless Edge Fashion. All rights reserved.</p>
+    </div>
+</footer>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Toggle sidebar functionality
+function toggleSidebar() {
+    const sidebar = document.getElementById('offcanvas_aside');
+    const mainWrap = document.querySelector('.main-wrap');
+    
+    sidebar.classList.toggle('show');
+    
+    // Add event listener to close sidebar when clicking outside on mobile
+    if (sidebar.classList.contains('show')) {
+        document.addEventListener('click', closeSidebarOnClickOutside);
+    } else {
+        document.removeEventListener('click', closeSidebarOnClickOutside);
+    }
+}
+
+function closeSidebarOnClickOutside(event) {
+    const sidebar = document.getElementById('offcanvas_aside');
+    const btnMenu = document.querySelector('.btn-menu');
+    
+    // Check if the click was outside the sidebar and not on the menu button
+    if (!sidebar.contains(event.target) && !btnMenu.contains(event.target)) {
+        sidebar.classList.remove('show');
+        document.removeEventListener('click', closeSidebarOnClickOutside);
+    }
+}
+
+// Add active class to current menu item
+document.addEventListener('DOMContentLoaded', function() {
+    const currentPath = window.location.pathname;
+    const menuItems = document.querySelectorAll('.menu-item a');
+    
+    menuItems.forEach(item => {
+        if (currentPath === item.getAttribute('href')) {
+            // Remove active class from all menu items
+            menuItems.forEach(menuItem => menuItem.classList.remove('active'));
+            // Add active class to current menu item
+            item.classList.add('active');
+        }
+    });
+    
+    // Responsive adjustments
+    function handleResize() {
+        const windowWidth = window.innerWidth;
+        const sidebar = document.getElementById('offcanvas_aside');
+        
+        if (windowWidth > 768) {
+            sidebar.classList.remove('show');
+            document.removeEventListener('click', closeSidebarOnClickOutside);
+        }
+    }
+    
+    window.addEventListener('resize', handleResize);
+    handleResize();
+});
+</script>
+
+<style>
+.main-footer {
+    margin-top: 2rem;
+    padding: 1rem 0;
+    text-align: center;
+    border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .main-footer {
+        margin-top: 1.5rem;
+        padding: 0.75rem 0;
+    }
+}
+</style>
 </body>
 </html>

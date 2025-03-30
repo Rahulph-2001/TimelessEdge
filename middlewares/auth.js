@@ -48,12 +48,10 @@ const redirectIfUserLoggedIn = async (req, res, next) => {
     try {
       const { user } = req.session;
       
-      // If no user exists in session, redirect to login
       if (!user) {
         return next();
       }
   
-      // Validate the user's existence in the database
       const activeUser = await User.findById(user._id);
       if (!activeUser) {
         return next();

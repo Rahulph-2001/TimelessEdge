@@ -9,6 +9,7 @@ const app = express();
 const session = require('express-session');
 const Wallet = require('../../models/walletSchema');
 require('dotenv').config();
+const { v4: uuidv4 } = require('uuid'); 
 
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -248,6 +249,7 @@ const updateStatus = async (req, res) => {
     }
 };
 
+
 const viewOrderDetails = async (req, res) => {
     try {
         const orderId = req.params.id;
@@ -257,7 +259,6 @@ const viewOrderDetails = async (req, res) => {
                 message: 'Invalid order ID format'
             });
         }
-        console.log("Order ID being queried:", orderId);
 
         const order = await Order.findById(orderId)
             .populate({
@@ -290,14 +291,12 @@ const viewOrderDetails = async (req, res) => {
             }
         }
         
-        console.log("Address details:", addressDetails); 
         
         let userData = null;
         if (addressDoc) {
             userData = await User.findById(addressDoc.userId, 'name email phone');
         }
         
-        console.log("User data:", userData); 
         
         res.render('viewOrderDetail', {
             order, 
@@ -313,6 +312,7 @@ const viewOrderDetails = async (req, res) => {
         });
     }
 }
+
 
 const approveReturn=async(req,res)=>{
     try {
@@ -527,21 +527,41 @@ const updateItemStatus = async (req, res) => {
                 
                 const userId = addressDoc.userId;
                 
-                let wallet = await Wallet.findOne({ userId: userId });
-                
-                if (!wallet) {
-                    wallet = new Wallet({
+                let userWallet = await Wallet.findOne({ userId: userId });
+                if (!userWallet) {
+                    userWallet = new Wallet({
                         userId: userId,
                         walletBalance: 0,
                         transactions: []
                     });
                 }
                 
-                const refundAmount = returnedItem.price * returnedItem.quantity;
+                const admin = await User.findOne({ isAdmin: true });
+                if (!admin) {
+                    console.error("Admin user not found");
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Error processing refund: Admin account not found'
+                    });
+                }
                 
-                wallet.transactions.push({
+                let adminWallet = await Wallet.findOne({ userId: admin._id });
+                if (!adminWallet) {
+                    adminWallet = new Wallet({
+                        userId: admin._id,
+                        walletBalance: 0,
+                        transactions: []
+                    });
+                }
+                
+                const refundAmount = returnedItem.price * returnedItem.quantity;
+                const userTransactionId = uuidv4(); 
+                const adminTransactionId = uuidv4(); 
+
+                userWallet.transactions.push({
                     orderId: order._id,
                     itemId: returnedItem._id,
+                    transactionId: userTransactionId,
                     transactionType: 'credit',
                     transactionAmount: refundAmount,
                     transactionDate: new Date(),
@@ -549,15 +569,36 @@ const updateItemStatus = async (req, res) => {
                     transactionDescription: `Refund for returned item in order #${order.orderId}`
                 });
                 
-                await wallet.save();
+                userWallet.walletBalance += refundAmount;
+                await userWallet.save();
+                
+                adminWallet.transactions.push({
+                    orderId: order._id,
+                    itemId: returnedItem._id,
+                    transactionId: adminTransactionId,
+                    transactionType: 'debit',
+                    transactionAmount: refundAmount,
+                    transactionDate: new Date(),
+                    transactionStatus: 'completed',
+                    transactionDescription: `Refund issued for returned item in order #${order.orderId}`
+                });
+                
+                adminWallet.walletBalance -= refundAmount;
+                await adminWallet.save();
                 
                 await User.findByIdAndUpdate(
                     userId,
-                    { $inc: { wallet: refundAmount } },
+                    { $set: { wallet: userWallet.walletBalance } },
                     { new: true }
                 );
                 
-                console.log(`Item in Order ${orderId} returned, wallet credited with ${refundAmount}`);
+                await User.findByIdAndUpdate(
+                    admin._id,
+                    { $set: { wallet: adminWallet.walletBalance } },
+                    { new: true }
+                );
+                
+                console.log(`Item in Order ${orderId} returned, user wallet credited with ${refundAmount}, admin wallet debited with ${refundAmount}`);
             } catch (updateError) {
                 console.error("Error processing item return:", updateError);
                 return res.status(500).json({
@@ -588,11 +629,63 @@ const updateItemStatus = async (req, res) => {
             overallStatus = 'Pending';
         }
         
-        await Order.findOneAndUpdate(
+        const finalUpdatedOrder = await Order.findOneAndUpdate(
             { orderId: orderId },
             { $set: { status: overallStatus } },
             { new: true }
         );
+
+     
+        if (finalUpdatedOrder.status === 'Delivered' && finalUpdatedOrder.paymentMethod === 'COD') {
+           
+            const deliveredItemsTotal = finalUpdatedOrder.orderedItems
+                .filter(item => item.status === 'Delivered')
+                .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            const tax = deliveredItemsTotal * 0.1;
+            const shipping = 99;
+            const finalDeliveredAmount = deliveredItemsTotal + tax + shipping - (finalUpdatedOrder.discount || 0);
+
+            
+            const userWallet = await Wallet.findOne({ userId: finalUpdatedOrder.userId });
+            if (userWallet) {
+                const userTransaction = userWallet.transactions.find(
+                    t => t.orderId.toString() === finalUpdatedOrder._id.toString() && 
+                         t.transactionType === 'debit' && 
+                         t.transactionStatus === 'pending'
+                );
+                if (userTransaction) {
+                    userTransaction.transactionAmount = finalDeliveredAmount;
+                    userTransaction.transactionStatus = 'completed';
+                    await userWallet.save();
+                }
+            }
+
+            
+            const admin = await User.findOne({ isAdmin: true });
+            if (admin) {
+                const adminWallet = await Wallet.findOne({ userId: admin._id });
+                if (adminWallet) {
+                    const adminTransaction = adminWallet.transactions.find(
+                        t => t.orderId.toString() === finalUpdatedOrder._id.toString() && 
+                             t.transactionType === 'credit' && 
+                             t.transactionStatus === 'pending'
+                    );
+                    if (adminTransaction) {
+                        adminTransaction.transactionAmount = finalDeliveredAmount;
+                        adminTransaction.transactionStatus = 'completed';
+                        adminWallet.walletBalance += finalDeliveredAmount;
+                        await adminWallet.save();
+
+                        await User.findByIdAndUpdate(
+                            admin._id,
+                            { $set: { wallet: adminWallet.walletBalance } },
+                            { new: true }
+                        );
+                    }
+                }
+            }
+        }
         
         res.json({
             success: true,
@@ -608,8 +701,7 @@ const updateItemStatus = async (req, res) => {
             error: error.message
         });
     }
-}
-
+};
 
 
 module.exports = { getAllOrders,viewOrderDetails,updateStatus,approveReturn,rejectReturn,updateItemStatus};

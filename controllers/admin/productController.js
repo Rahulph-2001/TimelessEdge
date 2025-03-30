@@ -138,7 +138,6 @@ const getAllproduct = async (req, res) => {
             .skip(skip)
             .exec();
 
-        // Calculate the effective offer (max of product and category offer)
         const productsWithEffectiveOffer = allProducts.map(product => {
             const productOffer = product.productOffer || 0;
             const categoryOffer = product.category ? product.category.categoryOffer || 0 : 0;
@@ -199,7 +198,6 @@ const getEditProduct=async(req,res)=>{
         if(!product){
             return res.status(400).send("product not found")
         }
-        console.log("Brands",brands)
          res.render('product-edit',{product,brands,categories})
     }catch(error){
         console.error(error)

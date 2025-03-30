@@ -706,7 +706,6 @@
                           <h4><%= product.productName %></h4>
                           <p><%= product.description ? (product.description.length > 60 ? product.description.substring(0, 60) + '...' : product.description) : '' %></p>
                           
-                          <!-- Price display with offer if available -->
                           <p class="price-section">
                               <% if (product.offerPrice) { %>
                                   <span class="sale-price">₹<%= product.offerPrice %></span>

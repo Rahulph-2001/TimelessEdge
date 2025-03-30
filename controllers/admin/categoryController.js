@@ -87,7 +87,6 @@ const editCategory = async(req,res) => {
     const {categoryName, description} = req.body;
     const existingCategory = await Category.findOne({name: categoryName})
     
-    // This could throw an error if existingCategory is null
     if(existingCategory && existingCategory._id.toString() !== id) {
       return res.status(httpStatus.BAD_REQUEST).json({
         error: "Category exists, please choose another name"
@@ -130,7 +129,6 @@ const removeOfferCat=async(req,res)=>{
   try {
     const { categoryId } = req.body;
     
-    // Find the category and set offer to 0
     const updatedCategory = await Category.findByIdAndUpdate(
       categoryId,
       { categoryOffer: 0 },

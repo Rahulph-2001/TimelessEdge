@@ -256,7 +256,7 @@
         box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
     }
 
-    /* Loading overlay */
+   
     .loading-overlay {
         position: absolute;
         top: 0;
@@ -272,7 +272,7 @@
         backdrop-filter: blur(3px);
     }
 
-    /* Custom scrollbar */
+    
     ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -292,7 +292,7 @@
         background: #a8a8a8;
     }
 
-    /* Print styles for report */
+    
     @media print {
         body {
             background-color: white;
@@ -322,7 +322,7 @@
         }
     }
 
-    /* Responsive adjustments */
+   
     @media (max-width: 1200px) {
         .content-main {
             padding: 1.5rem;
@@ -365,7 +365,7 @@
         }
     }
 
-    /* Animation for chart cards */
+    
     @keyframes fadeInUp {
         from {
             opacity: 0;
@@ -393,21 +393,15 @@
         animation-delay: 0.3s;
     }
 </style>
-
 <section class="content-main">
     <div class="content-header">
         <div class="content-title">
             <h2>Admin Order Dashboard</h2>
             <p>Order analytics and sales performance</p>
         </div>
-        <div class="content-actions">
-            <button onclick="exportToPDF()" class="btn-primary">
-                <i class="fas fa-file-pdf"></i> Export Report
-            </button>
-        </div>
     </div>
     
-    <!-- Dashboard Stats -->
+   
     <div class="dashboard-stats">
         <div class="stat-card">
             <div class="stat-card-title">Total Orders</div>
@@ -423,13 +417,13 @@
         </div>
     </div>
 
-    <!-- Hidden Input Fields for Initial Data -->
+    
     <input type="hidden" id="ordersData" value='<%- JSON.stringify(ordersData) %>'>
     <input type="hidden" id="productsData" value='<%- JSON.stringify(topProducts) %>'>
     <input type="hidden" id="categoriesData" value='<%- JSON.stringify(topCategories) %>'>
     <input type="hidden" id="brandsData" value='<%- JSON.stringify(topBrands) %>'>
     
-    <!-- Main Sales Chart -->
+    
     <div class="chart-container">
         <div class="chart-card">
             <div class="chart-header">
@@ -449,7 +443,7 @@
         </div>
     </div>
 
-    <!-- Top Products Chart -->
+    
     <div class="chart-container">
         <div class="chart-card">
             <div class="chart-header">
@@ -461,7 +455,7 @@
         </div>
     </div>
 
-    <!-- Categories and Brands Charts -->
+    
     <div class="chart-grid">
         <div class="chart-card">
             <div class="chart-header">
@@ -481,7 +475,7 @@
         </div>
     </div>
 
-    <!-- Ledger Book -->
+    
     <div class="chart-container">
         <div class="chart-card">
             <div class="chart-header">
@@ -503,7 +497,7 @@
     </div>
 </section>
 
-<!-- Dependencies -->
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -512,7 +506,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Show welcome message
+        
         Swal.fire({
             title: '<span style="font-weight: 700; color: #2b2d42;">Welcome to Admin Dashboard</span>',
             html: '<p style="color: #6c757d;">Loading your analytics data...</p>',
@@ -527,216 +521,211 @@
             }
         });
 
-        // Parse initial data from hidden fields
-        const ordersData = JSON.parse(document.getElementById('ordersData').value || '{}');
-        const topProducts = JSON.parse(document.getElementById('productsData').value || '[]');
-        const topCategories = JSON.parse(document.getElementById('categoriesData').value || '[]');
-        const topBrands = JSON.parse(document.getElementById('brandsData').value || '[]');
+        try {
+            
+            const ordersData = JSON.parse(document.getElementById('ordersData').value || '{"labels":[],"values":[]}');
+            const topProducts = JSON.parse(document.getElementById('productsData').value || '[]');
+            const topCategories = JSON.parse(document.getElementById('categoriesData').value || '[]');
+            const topBrands = JSON.parse(document.getElementById('brandsData').value || '[]');
 
-        // Chart.js global defaults
-        Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
-        Chart.defaults.font.size = 12;
-        Chart.defaults.color = '#6c757d';
+            
+            Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
+            Chart.defaults.font.size = 12;
+            Chart.defaults.color = '#6c757d';
 
-        // Colors
-        const colors = {
-            primary: '#4361ee',
-            background: [
-                'rgba(67, 97, 238, 0.7)', 'rgba(72, 149, 239, 0.7)', 'rgba(76, 201, 240, 0.7)',
-                'rgba(247, 37, 133, 0.7)', 'rgba(255, 209, 102, 0.7)', 'rgba(6, 214, 160, 0.7)',
-                'rgba(239, 71, 111, 0.7)', 'rgba(17, 138, 178, 0.7)', 'rgba(6, 147, 227, 0.7)',
-                'rgba(153, 102, 255, 0.7)'
-            ]
-        };
+            
+            const colors = {
+                primary: '#4361ee',
+                background: [
+                    'rgba(67, 97, 238, 0.7)', 'rgba(72, 149, 239, 0.7)', 'rgba(76, 201, 240, 0.7)',
+                    'rgba(247, 37, 133, 0.7)', 'rgba(255, 209, 102, 0.7)', 'rgba(6, 214, 160, 0.7)',
+                    'rgba(239, 71, 111, 0.7)', 'rgba(17, 138, 178, 0.7)', 'rgba(6, 147, 227, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ]
+            };
 
-        // Orders Chart
-        const ordersChartCtx = document.getElementById('ordersChart').getContext('2d');
-        const gradient = ordersChartCtx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(67, 97, 238, 0.3)');
-        gradient.addColorStop(1, 'rgba(67, 97, 238, 0.0)');
+            
+            const ordersChartCtx = document.getElementById('ordersChart').getContext('2d');
+            const gradient = ordersChartCtx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(67, 97, 238, 0.3)');
+            gradient.addColorStop(1, 'rgba(67, 97, 238, 0.0)');
 
-        const ordersChart = new Chart(ordersChartCtx, {
-            type: 'line',
-            data: {
-                labels: ordersData.labels?.length ? ordersData.labels : ['No Data'],
-                datasets: [{
-                    label: 'Orders',
-                    data: ordersData.values?.length ? ordersData.values : [0],
-                    borderColor: colors.primary,
-                    backgroundColor: gradient,
-                    tension: 0.3,
-                    fill: true,
-                    borderWidth: 3,
-                    pointBackgroundColor: colors.primary,
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true },
-                    x: { grid: { display: false } }
+            const ordersChart = new Chart(ordersChartCtx, {
+                type: 'line',
+                data: {
+                    labels: ordersData.labels && ordersData.labels.length ? ordersData.labels : ['No Data'],
+                    datasets: [{
+                        label: 'Orders',
+                        data: ordersData.values && ordersData.values.length ? ordersData.values : [0],
+                        borderColor: colors.primary,
+                        backgroundColor: gradient,
+                        tension: 0.3,
+                        fill: true,
+                        borderWidth: 3,
+                        pointBackgroundColor: colors.primary,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
                 },
-                plugins: { legend: { display: false } }
-            }
-        });
-
-        // Products Chart
-        const productsChart = new Chart(document.getElementById('productsChart').getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: topProducts.length ? topProducts.map(p => p.name || 'Unknown') : ['No Data'],
-                datasets: [{
-                    label: 'Units Sold',
-                    data: topProducts.length ? topProducts.map(p => p.count || 0) : [0],
-                    backgroundColor: colors.background,
-                    borderWidth: 1,
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true }, x: { grid: { display: false } } },
-                plugins: { legend: { display: false } }
-            }
-        });
-
-        // Categories Chart
-        const categoriesChart = new Chart(document.getElementById('categoriesChart').getContext('2d'), {
-            type: 'pie',
-            data: {
-                labels: topCategories.length ? topCategories.map(c => c.name || 'Unknown') : ['No Data'],
-                datasets: [{
-                    data: topCategories.length ? topCategories.map(c => c.count || 0) : [0],
-                    backgroundColor: colors.background,
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'right' } }
-            }
-        });
-
-        // Brands Chart
-        const brandsChart = new Chart(document.getElementById('brandsChart').getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: topBrands.length ? topBrands.map(b => b.name || 'Unknown') : ['No Data'],
-                datasets: [{
-                    data: topBrands.length ? topBrands.map(b => b.count || 0) : [0],
-                    backgroundColor: colors.background,
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'right' } },
-                cutout: '60%'
-            }
-        });
-
-        // Ledger Chart
-        const ledgerChart = new Chart(document.getElementById('ledgerChart').getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: ['Revenue', 'Expenses', 'Profit'],
-                datasets: [{
-                    label: 'Amount (₹)',
-                    data: [0, 0, 0], // Initial placeholder
-                    backgroundColor: ['rgba(67, 97, 238, 0.7)', 'rgba(247, 37, 133, 0.7)', 'rgba(76, 201, 240, 0.7)'],
-                    borderWidth: 1,
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { callback: value => '₹' + value.toLocaleString('en-IN') }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true },
+                        x: { grid: { display: false } }
                     },
-                    x: { grid: { display: false } }
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            
+            const productsChart = new Chart(document.getElementById('productsChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: topProducts.length ? topProducts.map(p => p.name || 'Unknown') : ['No Data'],
+                    datasets: [{
+                        label: 'Units Sold',
+                        data: topProducts.length ? topProducts.map(p => p.count || 0) : [0],
+                        backgroundColor: colors.background,
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true }, x: { grid: { display: false } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            
+            const categoriesChart = new Chart(document.getElementById('categoriesChart').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: topCategories.length ? topCategories.map(c => c.name || 'Unknown') : ['No Data'],
+                    datasets: [{
+                        data: topCategories.length ? topCategories.map(c => c.count || 0) : [0],
+                        backgroundColor: colors.background,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right' } }
+                }
+            });
+
+            
+            const brandsChart = new Chart(document.getElementById('brandsChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: topBrands.length ? topBrands.map(b => b.name || 'Unknown') : ['No Data'],
+                    datasets: [{
+                        data: topBrands.length ? topBrands.map(b => b.count || 0) : [0],
+                        backgroundColor: colors.background,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right' } },
+                    cutout: '60%'
+                }
+            });
+
+           
+            const ledgerChart = new Chart(document.getElementById('ledgerChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Revenue', 'Expenses', 'Profit'],
+                    datasets: [{
+                        label: 'Amount (₹)',
+                        data: [0, 0, 0], 
+                        backgroundColor: ['rgba(67, 97, 238, 0.7)', 'rgba(247, 37, 133, 0.7)', 'rgba(76, 201, 240, 0.7)'],
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: function(value) { return '₹' + value.toLocaleString('en-IN'); } }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            
+            document.getElementById('timeFilter').addEventListener('change', async function() {
+                const timeFilter = this.value;
+                try {
+                    Swal.fire({ title: 'Loading...', showConfirmButton: false, didOpen: () => Swal.showLoading() });
+                    const response = await fetch(`/admin/api/orders-data?timeFilter=${timeFilter}`);
+                    if (!response.ok) throw new Error('Failed to fetch orders data');
+                    const data = await response.json();
+                    
+                    ordersChart.data.labels = data.labels && data.labels.length ? data.labels : ['No Data'];
+                    ordersChart.data.datasets[0].data = data.values && data.values.length ? data.values : [0];
+                    ordersChart.update();
+                    Swal.fire({ title: 'Updated', icon: 'success', timer: 1500, showConfirmButton: false });
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire({ title: 'Error', text: 'Failed to load data', icon: 'error' });
+                }
+            });
+
+            
+            document.getElementById('ledgerDateRange').addEventListener('change', async function() {
+                const dateRange = this.value;
+                try {
+                    Swal.fire({ title: 'Loading...', showConfirmButton: false, didOpen: () => Swal.showLoading() });
+                    const response = await fetch(`/admin/api/ledger-data?dateRange=${dateRange}`);
+                    if (!response.ok) throw new Error('Failed to fetch ledger data');
+                    const data = await response.json();
+                    
+                    ledgerChart.data.datasets[0].data = [data.revenue || 0, data.expenses || 0, data.profit || 0];
+                    ledgerChart.update();
+                    Swal.fire({ title: 'Updated', icon: 'success', timer: 1500, showConfirmButton: false });
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire({ title: 'Error', text: 'Failed to load ledger data', icon: 'error' });
+                }
+            });
+
+            fetchLedgerData('30');
+            
+            async function fetchLedgerData(dateRange) {
+                try {
+                    const response = await fetch(`/admin/api/ledger-data?dateRange=${dateRange}`);
+                    if (!response.ok) throw new Error('Failed to fetch ledger data');
+                    const data = await response.json();
+                    
+                    ledgerChart.data.datasets[0].data = [data.revenue || 0, data.expenses || 0, data.profit || 0];
+                    ledgerChart.update();
+                } catch (error) {
+                    console.error('Error fetching ledger data:', error);
+                    Swal.fire({ title: 'Error', text: 'Failed to load ledger data', icon: 'error' });
                 }
             }
-        });
-
-        // Time Filter Event Listener
-        document.getElementById('timeFilter').addEventListener('change', async function() {
-            const timeFilter = this.value;
-            Swal.fire({ title: 'Loading...', showConfirmButton: false, didOpen: () => Swal.showLoading() });
-            try {
-                const data = await fetchOrdersData(timeFilter);
-                ordersChart.data.labels = data.labels;
-                ordersChart.data.datasets[0].data = data.values;
-                ordersChart.update();
-                Swal.fire({ title: 'Updated', icon: 'success', timer: 1500, showConfirmButton: false });
-            } catch (error) {
-                Swal.fire({ title: 'Error', text: 'Failed to load data', icon: 'error' });
-            }
-        });
-
-        // Ledger Date Range Event Listener
-        document.getElementById('ledgerDateRange').addEventListener('change', async function() {
-            const dateRange = this.value;
-            Swal.fire({ title: 'Loading...', showConfirmButton: false, didOpen: () => Swal.showLoading() });
-            try {
-                const data = await fetchLedgerData(dateRange);
-                ledgerChart.data.datasets[0].data = [data.revenue, data.expenses, data.profit];
-                ledgerChart.update();
-                Swal.fire({ title: 'Updated', icon: 'success', timer: 1500, showConfirmButton: false });
-            } catch (error) {
-                Swal.fire({ title: 'Error', text: 'Failed to load ledger data', icon: 'error' });
-            }
-        });
-
-        // Fetch Functions
-        async function fetchOrdersData(timeFilter) {
-            const response = await fetch(`/api/orders-data?timeFilter=${timeFilter}`);
-            if (!response.ok) throw new Error('Failed to fetch orders data');
-            return await response.json();
+        } catch (error) {
+            console.error('Dashboard initialization error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Failed to initialize dashboard. Please try refreshing the page.',
+                icon: 'error'
+            });
         }
-
-        async function fetchLedgerData(dateRange) {
-            const response = await fetch(`/api/ledger-data?dateRange=${dateRange}`);
-            if (!response.ok) throw new Error('Failed to fetch ledger data');
-            return await response.json();
-        }
-
-        // Initial Data Load
-        fetchOrdersData('monthly');
-        fetchLedgerData('30');
     });
 
-    // Export to PDF
-    function exportToPDF() {
-        Swal.fire({ title: 'Generating PDF...', showConfirmButton: false, didOpen: () => Swal.showLoading() });
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape', 'pt', 'a4');
-        const content = document.querySelector('.content-main');
-
-        html2canvas(content, { scale: 3, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
-            setTimeout(() => {
-                const imgData = canvas.toDataURL('image/png');
-                const imgWidth = doc.internal.pageSize.getWidth();
-                const imgHeight = canvas.height * imgWidth / canvas.width;
-                doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-                doc.save('admin-order-report.pdf');
-                Swal.fire({ title: 'Success!', text: 'Report downloaded', icon: 'success' });
-            }, 500);
-        }).catch(error => {
-            Swal.fire({ title: 'Error', text: 'Failed to generate PDF', icon: 'error' });
-            console.error('PDF Error:', error);
-        });
-    }
 </script>
 
 <%- include("../../views/partials/admin/footer") %>

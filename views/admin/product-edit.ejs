@@ -130,7 +130,7 @@
             display: none;
         }
 
-        /* Cropper Modal Styles */
+        
         .modal {
             display: none;
             position: fixed;
@@ -187,7 +187,7 @@
             cursor: pointer;
         }
 
-        /* Zoom Modal Styles */
+       
         .zoom-modal {
             display: none;
             position: fixed;
@@ -257,7 +257,7 @@
                 <div class="card">
                     <div class="card-body">
                         <form action="" enctype="multipart/form-data">
-                            <!-- Product Name -->
+                            
                             <div class="form-group">
                                 <label for="product_name" class="form-label">Product Name</label>
                                 <input type="text" name="productName" class="form-control" id="product_name"
@@ -265,7 +265,7 @@
                                 <div id="productName-error" class="error-message"></div>
                             </div>
 
-                            <!-- Brand -->
+                           
                             <div class="form-group">
                                 <label class="form-label">Brand</label>
                                 <select class="form-control" name="brand">
@@ -280,7 +280,7 @@
                                 <div id="brand-error" class="error-message"></div>
                             </div>
 
-                            <!-- Category -->
+                            
                             <div class="form-group">
                                 <label class="form-label">Category</label>
                                 <select class="form-control" name="category">
@@ -295,14 +295,14 @@
                                 <div id="category-error" class="error-message"></div>
                             </div>
 
-                            <!-- Description -->
+                            
                             <div class="form-group">
                                 <label class="form-label">Full Description</label>
                                 <textarea name="descriptionData" class="form-control" rows="4"><%= product.description %></textarea>
                                 <div id="description-error" class="error-message"></div>
                             </div>
 
-                            <!-- Prices & Quantity -->
+                            
                             <div class="price-quantity-grid">
                                 <div class="form-group">
                                     <label class="form-label">Regular Price (RS :)</label>
@@ -321,14 +321,14 @@
                                 </div>
                             </div>
 
-                            <!-- Color -->
+                           
                             <div class="form-group">
                                 <label class="form-label">Color</label>
                                 <input name="color" type="text" class="form-control" value="<%= product.color %>">
                                 <div id="color-error" class="error-message"></div>
                             </div>
 
-                            <!-- Image Upload Section -->
+                            
                             <div class="form-group">
                                 <label class="form-label">Product Images</label>
                                 <div class="image-grid">
@@ -357,7 +357,7 @@
         </div>
     </section>
 
-    <!-- Cropper Modal -->
+    
     <div id="cropperModal" class="modal">
         <div class="modal-content">
             <div class="crop-container">
@@ -370,7 +370,7 @@
         </div>
     </div>
 
-    <!-- Zoom Modal -->
+    
     <div id="zoomModal" class="zoom-modal">
         <span class="close-zoom" onclick="closeZoom()">&times;</span>
         <img class="zoom-content" id="zoomImg">
@@ -384,12 +384,12 @@
         let cropper = null;
         let currentImageId = null;
 
-        // Trigger file input when "Replace" button is clicked
+        
         function triggerReplace(id) {
             document.getElementById(`input${id}`).click();
         }
 
-        // Handle file selection and show Cropper modal
+        
         document.querySelectorAll('input[type="file"]').forEach(input => {
             input.addEventListener('change', function(event) {
                 replaceImage(event, this.id.replace('input', ''));
@@ -400,7 +400,7 @@
             const file = event.target.files[0];
 
             if (file) {
-                // Validate file size (max 5MB)
+                
                 if (file.size > 5 * 1024 * 1024) {
                     alert('Image size should be less than 5MB');
                     return;
@@ -412,12 +412,12 @@
                     const cropperImage = document.getElementById('cropperImage');
                     cropperImage.src = e.target.result;
 
-                    // Destroy existing Cropper instance
+                    
                     if (cropper) {
                         cropper.destroy();
                     }
 
-                    // Initialize Cropper
+                    
                     cropper = new Cropper(cropperImage, {
                         viewMode: 2,
                         dragMode: 'move',
@@ -441,7 +441,7 @@
             }
         }
 
-        // Crop Image and Replace Preview
+        
         function cropImage() {
             if (!cropper) return;
 
@@ -459,24 +459,24 @@
                     lastModified: Date.now()
                 });
 
-                // Update image preview
+               
                 const img = document.getElementById(`imgView${currentImageId}`);
                 img.src = URL.createObjectURL(croppedFile);
 
-                // Update input field with cropped image
+                
                 const input = document.getElementById(`input${currentImageId}`);
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(croppedFile);
                 input.files = dataTransfer.files;
 
-                // Close modal and cleanup
+               
                 document.getElementById('cropperModal').style.display = 'none';
                 cropper.destroy();
                 cropper = null;
             }, 'image/jpeg', 0.95);
         }
 
-        // Close Cropper Modal
+        
         function cancelCrop() {
             document.getElementById('cropperModal').style.display = 'none';
             if (cropper) {
@@ -485,31 +485,26 @@
             }
         }
 
-        // Show zoom modal with larger image
+        
         function showZoom(imageSrc) {
             const zoomImg = document.getElementById('zoomImg');
             zoomImg.src = imageSrc;
             document.getElementById('zoomModal').style.display = 'block';
         }
 
-        // Close zoom modal
+       
         function closeZoom() {
             document.getElementById('zoomModal').style.display = 'none';
         }
 
-        // Update the updateProduct function to handle image upload better
+       
         function updateProduct(event, productId) {
             event.preventDefault();
-
-            // You can uncomment and implement form validation as needed
-            // if (!validateForm()) {
-            //     return;
-            // }
 
             const form = document.querySelector("form");
             const formData = new FormData(form);
 
-            // Add loading state
+            
             const submitButton = event.target;
             submitButton.disabled = true;
             submitButton.textContent = 'Updating...';

@@ -65,7 +65,6 @@ const getDateRange = (dateRange, startDate, endDate) => {
     return { start, end };
 };
 
-// Helper function to get customer name - reusable across all report functions
 const getCustomerNameFromOrder = async (order) => {
     try {
         if (!order.address) {
@@ -215,7 +214,8 @@ const getSalesReport = async (req, res) => {
           quantity: item.quantity
         })),
         totalAmount: order.finalAmount,
-        status: order.status
+        status: order.status,
+        paymentMethod: order.paymentMethod 
       };
     });
 
@@ -235,7 +235,6 @@ const getSalesReport = async (req, res) => {
     res.redirect('/admin/dashboard');
   }
 };
-
 const exportSalesExcel = async (req, res) => {
   try {
       const { start, end } = getDateRange(

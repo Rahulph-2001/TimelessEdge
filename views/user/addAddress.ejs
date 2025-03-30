@@ -17,7 +17,7 @@
           box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       }
 
-      /* Logo Styles */
+      
       .header__logo {
           display: flex;
           align-items: center;
@@ -29,7 +29,7 @@
           width: auto;
       }
 
-      /* Menu Styles */
+      
       .header__menu {
           display: flex;
           justify-content: center;
@@ -56,7 +56,7 @@
           color: #ff7f50;
       }
 
-      /* Navigation Options */
+      
       .header__nav__option {
           display: flex;
           justify-content: flex-end;
@@ -65,7 +65,7 @@
           height: 100%;
       }
 
-      /* Sign-in Link Styles */
+      
       .sign-in-link {
           font-size: 16px;
           color: #333;
@@ -79,7 +79,7 @@
           color: #ff7f50;
       }
 
-      /* Dropdown Styles */
+      
       .dropdown {
           position: relative;
           display: flex;
@@ -114,7 +114,7 @@
           background-color: #f8f9fa;
       }
 
-      /* Cart Link Styles */
+     
       .cartlink {
           display: flex;
           align-items: center;
@@ -134,7 +134,7 @@
           border-radius: 50%;
       }
 
-      /* Icon Links */
+    
       .header__nav__option a img {
           width: 20px;
           height: 20px;
@@ -145,14 +145,14 @@
           opacity: 0.8;
       }
 
-      /* Mobile Menu Button */
+     
       .canvas__open {
           display: none;
           cursor: pointer;
           font-size: 24px;
       }
 
-      /* Responsive Styles */
+     
       @media (max-width: 992px) {
           .header__menu ul {
               gap: 20px;
@@ -335,7 +335,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- SweetAlert2 Library -->
     <style>
-        /* Your existing CSS styles */
+        
         .header {
             position: relative;
             z-index: 500;
@@ -344,13 +344,13 @@
             background: white;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        /* Add all your existing CSS styles here */
+       
     </style>
 </head>
 <body>
     <main class="container">
         <div class="max-w-3xl">
-            <!-- Breadcrumb -->
+           
             <nav class="breadcrumb" aria-label="Breadcrumb">
                 <ol>
                     <li>
@@ -370,7 +370,7 @@
                 </ol>
             </nav>
             
-            <!-- Address Form Card -->
+            
             <div class="card">
                 <h2>Add New Address</h2>
                 <form id="addAddressForm" action="/profile/address/add" method="POST">
@@ -443,7 +443,7 @@
     <script>
         lucide.createIcons();
 
-        // Form validation
+        
         document.getElementById('addAddressForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
@@ -512,7 +512,7 @@
                 return;
             }
 
-            // Submit the form if validation passes
+            
             fetch('/profile/address/add', {
                 method: 'POST',
                 headers: {

@@ -39,6 +39,7 @@
             left: 0;
             overflow-y: auto;
             transition: all 0.3s ease;
+            z-index: 1000;
         }
 
         .aside-top {
@@ -77,6 +78,7 @@
         .main-wrap {
             margin-left: 250px;
             padding: 2rem;
+            transition: margin-left 0.3s ease;
         }
 
         .navbar {
@@ -86,6 +88,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
         }
 
         .navbar-nav {
@@ -104,13 +109,13 @@
             padding: 2rem;
             margin-top: 2rem;
         }
+
         .row {
-    display: flex
-;
-    flex-wrap: wrap;
-    margin: -0.5rem;
-    color: #050506;
-}
+            display: flex;
+            flex-wrap: wrap;
+            margin: -0.5rem;
+            color: #050506;
+        }
 
         .content-header {
             margin-bottom: 1.5rem;
@@ -119,28 +124,85 @@
         }
 
         .content-title {
-    font-size: 1.875rem;
-    font-weight: 600;
-    color: #080808;
-    margin: 0;
-}
-.logoutadmin{
-    background-color: rgb(126, 126, 249);
-    color:black ;
-}
-        
+            font-size: 1.875rem;
+            font-weight: 600;
+            color: #080808;
+            margin: 0;
+        }
+
+        .logoutadmin {
+            background-color: rgb(126, 126, 249);
+            color: black;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logoutadmin:hover {
+            background-color: rgb(106, 106, 255);
+        }
+
+        .btn-menu {
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: none;
+        }
+
+        @media (max-width: 992px) {
+            .navbar-aside {
+                width: 220px;
+            }
+
+            .main-wrap {
+                margin-left: 220px;
+                padding: 1.5rem;
+            }
+        }
+
         @media (max-width: 768px) {
             .navbar-aside {
                 width: 100%;
                 transform: translateX(-100%);
             }
 
-            .main-wrap {
-                margin-left: 0;
-            }
-
             .navbar-aside.show {
                 transform: translateX(0);
+            }
+
+            .main-wrap {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .btn-menu {
+                display: block;
+            }
+
+            .navbar {
+                padding: 0.5rem 1rem;
+            }
+
+            .content-main {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .content-main {
+                padding: 1rem;
+            }
+
+            .content-title {
+                font-size: 1.5rem;
+            }
+
+            .navbar {
+                padding: 0.5rem;
             }
         }
     </style>
@@ -177,7 +239,7 @@
                     <a href="/admin/coupon"><i class="fas fa-ticket-alt"></i>Coupons</a>
                 </li>
                 <li class="menu-item">
-                    <a href="/admin/Wallet"><i class="fa-solid fa-wallet"></i></i>Wallet</a>
+                    <a href="/admin/Wallet"><i class="fa-solid fa-wallet"></i>Wallet</a>
                 </li>
                 <li class="menu-item">
                     <a href="/admin/AdminOrder"><i class="fas fa-shopping-cart"></i>Orders</a>
@@ -203,4 +265,3 @@
                 </div>
             </div>
         </header>
-       

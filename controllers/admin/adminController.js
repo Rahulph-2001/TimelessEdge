@@ -120,8 +120,10 @@ const loadDashboard = async (req, res) => {
             { $match: { createdOn: { $gte: startDate, $lte: endDate }, status: { $nin: ['Cancelled', 'Returned'] } } },
             { $group: { _id: null, totalOrders: { $sum: 1 }, revenue: { $sum: '$finalAmount' } } }
         ]);
+        console.log(ordersStats)
 
         const totalOrders = ordersStats[0]?.totalOrders || 0;
+       
         const revenue = ordersStats[0]?.revenue || 0;
         const avgOrderValue = totalOrders > 0 ? Math.round(revenue / totalOrders) : 0;
 

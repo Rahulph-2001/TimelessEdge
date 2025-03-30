@@ -186,7 +186,7 @@
     margin-top: 1.25rem;
   }
 
-  /* New search styles */
+  
   .search-box {
     display: flex;
     margin-bottom: 1.5rem;
@@ -210,7 +210,7 @@
     cursor: pointer;
   }
 
-  /* Pagination styles */
+  
   .pagination {
     display: flex;
     justify-content: center;
@@ -260,7 +260,7 @@
   <div class="card">
     <div class="card-body">
       <div class="row">
-        <!-- Brand Form -->
+
         <div class="col-md-3">
           <form method="post" action="/admin/addBrand" enctype="multipart/form-data">
             <div class="mb-4">
@@ -280,9 +280,7 @@
           </form>
         </div>
 
-        <!-- Brand Table -->
         <div class="col-md-7">
-          <!-- Search Box -->
           <form action="/admin/brands" method="GET" class="search-box">
             <input 
               type="text" 
@@ -382,7 +380,6 @@
             </table>
           </div>
 
-          <!-- Pagination -->
           <% if (totalPages > 1) { %>
           <ul class="pagination">
             <li class="<%= currentPage === 1 ? 'disabled' : '' %>">

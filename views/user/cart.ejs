@@ -1,18 +1,15 @@
+<%- include("../../views/partials/user/header") %>
 
- <%- include("../../views/partials/user/header") %>
-
- <style>
- 
+<style>
   body {
     margin: 0;
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
-  
   .section {
     background-color: white;
-    padding: 32px 0;
+    padding: 24px 0;
   }
 
   @media (min-width: 768px) {
@@ -37,6 +34,7 @@
     font-size: 1.25rem;
     font-weight: 600;
     color: #111827;
+    margin-bottom: 16px;
   }
 
   @media (min-width: 640px) {
@@ -44,7 +42,6 @@
       font-size: 1.5rem;
     }
   }
-
 
   .cart-container {
     margin-top: 24px;
@@ -59,6 +56,7 @@
   @media (min-width: 1024px) {
     .cart-container {
       display: flex;
+      flex-direction: row;
       align-items: flex-start;
       gap: 24px;
     }
@@ -70,7 +68,6 @@
     }
   }
 
- 
   .cart-items {
     width: 100%;
     margin: 0 auto;
@@ -78,7 +75,7 @@
 
   @media (min-width: 1024px) {
     .cart-items {
-      flex: none;
+      flex: 1;
       max-width: 672px;
     }
   }
@@ -92,15 +89,27 @@
   .cart-items-list {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
+  }
+
+  @media (min-width: 640px) {
+    .cart-items-list {
+      gap: 24px;
+    }
   }
 
   .cart-item {
     border: 1px solid #e5e7eb;
     border-radius: 0.5rem;
     background-color: white;
-    padding: 16px;
+    padding: 12px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  @media (min-width: 640px) {
+    .cart-item {
+      padding: 16px;
+    }
   }
 
   @media (min-width: 768px) {
@@ -112,21 +121,35 @@
   .cart-item-content {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
+  }
+
+  @media (min-width: 640px) {
+    .cart-item-content {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
   }
 
   @media (min-width: 768px) {
     .cart-item-content {
-      flex-direction: row;
-      align-items: center;
+      flex-wrap: nowrap;
       justify-content: space-between;
       gap: 24px;
     }
   }
 
- 
   .product-image-link {
     flex-shrink: 0;
+    align-self: center;
+  }
+
+  @media (min-width: 640px) {
+    .product-image-link {
+      align-self: flex-start;
+    }
   }
 
   @media (min-width: 768px) {
@@ -139,19 +162,28 @@
     height: 80px;
     width: 80px;
     object-fit: cover;
+    border-radius: 4px;
   }
 
- 
   .quantity-section {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
+  }
+
+  @media (min-width: 640px) {
+    .quantity-section {
+      width: auto;
+      flex: 1;
+    }
   }
 
   @media (min-width: 768px) {
     .quantity-section {
       order: 3;
       justify-content: flex-end;
+      flex: 0 0 auto;
     }
   }
 
@@ -197,7 +229,6 @@
     box-shadow: none;
   }
 
-  
   .price-display {
     text-align: end;
   }
@@ -205,7 +236,8 @@
   @media (min-width: 768px) {
     .price-display {
       order: 4;
-      width: 128px;
+      width: 100px;
+      flex-shrink: 0;
     }
   }
 
@@ -213,18 +245,25 @@
     font-size: 1rem;
     font-weight: 700;
     color: #111827;
+    white-space: nowrap;
   }
 
-  
   .product-details {
     width: 100%;
     min-width: 0;
-    flex: 1;
+  }
+
+  @media (min-width: 640px) {
+    .product-details {
+      flex: 1 1 100%;
+      order: 3;
+    }
   }
 
   @media (min-width: 768px) {
     .product-details {
       order: 2;
+      flex: 1;
       max-width: 384px;
     }
   }
@@ -235,6 +274,9 @@
     font-weight: 500;
     color: #111827;
     text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .product-name:hover {
@@ -244,7 +286,13 @@
   .action-buttons {
     display: flex;
     gap: 16px;
-    margin-top: 16px;
+    margin-top: 12px;
+  }
+
+  @media (min-width: 640px) {
+    .action-buttons {
+      margin-top: 16px;
+    }
   }
 
   .action-button {
@@ -272,19 +320,24 @@
     margin-right: 6px;
   }
 
-  
   .summary-section {
     margin-top: 24px;
-    max-width: 896px;
-    margin-left: auto;
-    margin-right: auto;
-    flex: 1;
+    width: 100%;
+  }
+
+  @media (min-width: 640px) {
+    .summary-section {
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
   }
 
   @media (min-width: 1024px) {
     .summary-section {
       margin-top: 0;
-      width: 100%;
+      max-width: 384px;
+      flex-shrink: 0;
     }
   }
 
@@ -352,7 +405,6 @@
     color: #111827;
   }
 
-  
   .button {
     display: inline-flex;
     align-items: center;
@@ -381,13 +433,13 @@
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25);
   }
 
-
   .continue-shopping-section {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     margin-top: 16px;
+    flex-wrap: wrap;
   }
 
   .continue-shopping-text {
@@ -408,7 +460,6 @@
   .continue-shopping-link:hover {
     text-decoration: none;
   }
-
 
   .voucher-section {
     border: 1px solid #e5e7eb;
@@ -454,34 +505,44 @@
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
   }
 
-  
   .related-products {
     margin-top: 32px;
-  }
-
-  @media (min-width: 1280px) {
-    .related-products {
-      margin-top: 32px;
-      display: block;
-    }
   }
 
   .related-title {
     font-size: 1.5rem;
     font-weight: 600;
     color: #111827;
+    margin-bottom: 16px;
   }
 
   .related-grid {
-    margin-top: 24px;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(1, 1fr);
     gap: 16px;
   }
 
-  @media (min-width: 640px) {
+  @media (min-width: 480px) {
     .related-grid {
-      margin-top: 32px;
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .related-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .related-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .related-grid {
+      grid-template-columns: repeat(3, 1fr);
     }
   }
 
@@ -489,25 +550,44 @@
     border: 1px solid #e5e7eb;
     border-radius: 0.5rem;
     background-color: white;
-    padding: 24px;
+    padding: 16px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (min-width: 640px) {
+    .product-card {
+      padding: 24px;
+    }
   }
 
   .product-card-image {
     display: block;
     border-radius: 0.5rem;
     overflow: hidden;
+    text-align: center;
   }
 
   .product-card-image img {
-    height: 176px;
-    width: 176px;
+    height: auto;
+    width: 100%;
+    max-width: 176px;
+    max-height: 176px;
+    object-fit: contain;
     margin: 0 auto;
   }
 
   .product-card-details {
-    margin-top: 24px;
+    margin-top: 16px;
+    flex-grow: 1;
+  }
+
+  @media (min-width: 640px) {
+    .product-card-details {
+      margin-top: 24px;
+    }
   }
 
   .product-card-title {
@@ -515,6 +595,10 @@
     font-weight: 600;
     color: #111827;
     text-decoration: none;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .product-card-title:hover {
@@ -523,32 +607,65 @@
 
   .product-card-description {
     margin-top: 8px;
-    font-size: 1rem;
+    font-size: 0.875rem;
     color: #6b7280;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (min-width: 640px) {
+    .product-card-description {
+      font-size: 1rem;
+    }
   }
 
   .product-card-price {
-    margin-top: 24px;
+    margin-top: 16px;
+  }
+
+  @media (min-width: 640px) {
+    .product-card-price {
+      margin-top: 24px;
+    }
   }
 
   .original-price {
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #111827;
     text-decoration: line-through;
   }
 
+  @media (min-width: 640px) {
+    .original-price {
+      font-size: 1.125rem;
+    }
+  }
+
   .sale-price {
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #dc2626;
   }
 
+  @media (min-width: 640px) {
+    .sale-price {
+      font-size: 1.125rem;
+    }
+  }
+
   .product-card-actions {
-    margin-top: 24px;
+    margin-top: 16px;
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+
+  @media (min-width: 640px) {
+    .product-card-actions {
+      margin-top: 24px;
+    }
   }
 
   .tooltip {
@@ -586,376 +703,398 @@
     white-space: nowrap;
     border: 0;
   }
+
+  /* Additional responsive fixes */
+  @media (max-width: 639px) {
+    .cart-item-content {
+      position: relative;
+    }
+    
+    .product-image-link {
+      float: left;
+      margin-right: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .product-details {
+      overflow: hidden;
+    }
+    
+    .quantity-section {
+      clear: both;
+      margin-top: 8px;
+    }
+  }
 </style>
- 
- <body>
-   <section class="section">
-     <div class="container">
-       <h2 class="title">Shopping Cart</h2>
-       
-       <div class="cart-container">
-         <div class="cart-items">
-           <div class="cart-items-list" id="cart-items-list">
-           
-           </div>
- 
-           <div class="related-products">
-             <h3 class="related-title">People also bought</h3>
-             <div class="related-grid" id="related-products-grid">
-               
-             </div>
-           </div>
-         </div>
- 
-         <div class="summary-section">
-           <div class="order-summary" id="order-summary">
-             
-           </div>
-         </div>
-       </div>
-     </div>
-   </section>
- 
-   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-   <script>
-   const MAX_LIMIT = 10;
-   
-   function renderCartItems(cart) {
-     const cartItemsList = $('#cart-items-list');
-     cartItemsList.empty();
-     
-     if (cart.items && cart.items.length > 0) {
-       cart.items.forEach(item => {
-         const itemHtml = `
-           <div class="cart-item">
-             <div class="cart-item-content">
-               <a href="#" class="product-image-link">
-                 <img class="product-image" src="${item.productId.productImages?.[0] || 'https://via.placeholder.com/80'}" alt="${item.productId.productName} image" />
-               </a>
-               <div class="quantity-section">
-                 <label for="counter-input-${item._id}" class="sr-only">Choose quantity:</label>
-                 <div class="quantity-controls">
-                   <button type="button" id="decrement-button-${item._id}" data-input-counter-decrement="counter-input-${item._id}" class="quantity-button">
-                     <svg class="h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
-                       <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
-                     </svg>
-                   </button>
-                   <input type="text" id="counter-input-${item._id}" data-input-counter class="quantity-input" value="${item.quantity}" required />
-                   <button type="button" id="increment-button-${item._id}" data-input-counter-increment="counter-input-${item._id}" class="quantity-button">
-                     <svg class="h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                       <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                     </svg>
-                   </button>
-                 </div>
-                 <div class="price-display">
-                   <p class="price">RS:${item.price}</p>
-                 </div>
-               </div>
-               <div class="product-details">
-                 <a href="#" class="product-name">${item.productId.productName}</a>
-                 <div class="action-buttons">
-                   <button type="button" class="action-button remove" data-id="${item._id}">
-                     <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                       <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6" />
-                     </svg>
-                     Remove
-                   </button>
-                 </div>
-               </div>
-             </div>
-           </div>
-         `;
-         cartItemsList.append(itemHtml);
-       });
-     } else {
-       cartItemsList.append('<p>Your cart is empty.</p>');
-     }
-   }
-   
-   function renderOrderSummary(summary) {
-     const orderSummary = $('#order-summary');
-     orderSummary.html(`
-       <p class="summary-title">Order summary</p>
-       <div class="summary-list">
-         <div class="summary-item">
-           <dt class="summary-label">Original price</dt>
-           <dd class="summary-value">RS:${summary.originalPrice.toFixed(2)}</dd>
-         </div>
-         <div class="summary-item">
-           <dt class="summary-label">Savings</dt>
-           <dd class="summary-value summary-savings">-RS:${summary.savings.toFixed(2)}</dd>
-         </div>
-         <div class="summary-item">
-           <dt class="summary-label">Store Pickup</dt>
-           <dd class="summary-value">RS:${summary.storePickup.toFixed(2)}</dd>
-         </div>
-         <div class="summary-item">
-           <dt class="summary-label">Tax</dt>
-           <dd class="summary-value">RS:${summary.tax.toFixed(2)}</dd>
-         </div>
-         <div class="summary-total">
-           <dt class="summary-label">Total</dt>
-           <dd class="summary-value">RS:${summary.total.toFixed(2)}</dd>
-         </div>
-       </div>
-       <a href="/checkout" class="button button-primary">Proceed to Checkout</a>
-       <div class="continue-shopping-section">
-         <span class="continue-shopping-text">or</span>
-         <a href="/shop" class="continue-shopping-link">
-           Continue Shopping
-           <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4" />
-           </svg>
-         </a>
-       </div>
-     `);
-   }
-   
-   function renderRelatedProducts(relatedProducts) {
-     const relatedGrid = $('#related-products-grid');
-     relatedGrid.empty();
-     
-     if (relatedProducts && relatedProducts.length > 0) {
-       relatedProducts.forEach(product => {
-         const productHtml = `
-           <div class="product-card">
-             <a href="/productdetails?id=${product._id}" class="product-card-image">
-               <img src="${product.productImages?.[0] || 'https://via.placeholder.com/176'}" alt="${product.productName} image" onerror="this.onerror=null; this.src='https://via.placeholder.com/176'" />
-             </a>
-             <div class="product-card-details">
-               <a href="/productdetails?id=${product._id}" class="product-card-title">${product.productName}</a>
-               <p class="product-card-description">${product.description}</p>
-             </div>
-             <div class="product-card-price">
-               ${product.salePrice && product.salePrice < product.regularPrice ? `
-                 <p class="original-price">RS:${product.regularPrice.toLocaleString()}</p>
-                 <p class="sale-price">RS:${product.salePrice.toLocaleString()}</p>
-               ` : `
-                 <p class="price">RS:${product.regularPrice.toLocaleString()}</p>
-               `}
-             </div>
-             <div class="product-card-actions">
-               <button type="button" class="button button-primary" data-product-id="${product._id}">
-                 <svg class="h-5 w-5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                   <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7h-1M8 7h-.688M13 5v4m-2-2h4" />
-                 </svg>
-                 Add to cart
-               </button>
-             </div>
-           </div>
-         `;
-         relatedGrid.append(productHtml);
-       });
-     } else {
-       relatedGrid.append('<p>No related products found.</p>');
-     }
-   }
-   
-   $.getJSON('/cart', (data) => {
-     renderCartItems(data.cart);
-     renderOrderSummary(data.summary);
-     renderRelatedProducts(data.relatedProduct);
-   });
-   
-   $(document).on('click', '[data-input-counter-increment]', function() {
-     const inputId = $(this).attr('data-input-counter-increment');
-     const input = $(`#${inputId}`);
-     let currentValue = parseInt(input.val(), 10);
-     
-     // Check for maximum limit
-     if (currentValue >= MAX_LIMIT) {
-       Swal.fire({
-         icon: 'warning',
-         title: 'Maximum Quantity Limit',
-         html: `
-           <p>You can only add a maximum of ${MAX_LIMIT} units for this product.</p>
-           <small>This helps us ensure availability for all customers.</small>
-         `,
-         confirmButtonText: 'Understood',
-         confirmButtonColor: '#3085d6',
-         customClass: {
-           popup: 'swal-wide',
-           title: 'swal-title',
-           content: 'swal-text'
-         }
-       });
-       return;
-     }
-     
-     const newValue = currentValue + 1;
-     updateCart(inputId.replace('counter-input-', ''), newValue, input);
-   });
-   
-   $(document).on('click', '[data-input-counter-decrement]', function() {
-     const inputId = $(this).attr('data-input-counter-decrement');
-     const input = $(`#${inputId}`);
-     const newValue = parseInt(input.val(), 10) - 1;
-     if (newValue > 0) {
-       updateCart(inputId.replace('counter-input-', ''), newValue, input);
-     } else {
-       Swal.fire({
-         icon: 'info',
-         title: 'Remove Item',
-         text: 'Would you like to remove this item from your cart?',
-         showCancelButton: true,
-         confirmButtonText: 'Yes, remove it',
-         cancelButtonText: 'Keep in cart',
-         confirmButtonColor: '#d33',
-         cancelButtonColor: '#3085d6'
-       }).then((result) => {
-         if (result.isConfirmed) {
-           const itemId = inputId.replace('counter-input-', '');
-           $.ajax({
-             url: '/cart/remove',
-             type: 'POST',
-             data: { itemId },
-             success: (data) => {
-               renderCartItems(data.cart);
-               renderOrderSummary(data.summary);
-               Swal.fire({
-                 icon: 'success',
-                 title: 'Item Removed',
-                 text: 'The item has been removed from your cart.',
-                 timer: 1500,
-                 showConfirmButton: false
-               });
-             },
-             error: (xhr) => {
-               Swal.fire({
-                 icon: 'error',
-                 title: 'Oops...',
-                 text: xhr.responseJSON?.error || 'Error removing item'
-               });
-             }
-           });
-         }
-       });
-     }
-   });
-   
-   function updateCart(itemId, newQuantity, input) {
-     $.ajax({
-       url: '/cart/update-cart',
-       type: 'POST',
-       contentType: 'application/json',
-       data: JSON.stringify({ itemId, quantity: newQuantity }),
-       success: (data) => {
-         input.val(newQuantity);
-         renderCartItems(data.cart);
-         renderOrderSummary(data.summary);
-         
-         // Add a subtle notification for quantity update
-         Swal.fire({
-           toast: true,
-           position: 'top-end',
-           icon: 'success',
-           title: 'Quantity updated',
-           showConfirmButton: false,
-           timer: 1500,
-           timerProgressBar: true
-         });
-       },
-       error: (xhr) => {
-         const errorMessage = xhr.responseJSON?.error || 'Error updating cart';
-         
-         Swal.fire({
-           icon: 'error',
-           title: 'Update Failed',
-           html: `
-             <p>${errorMessage}</p>
-             <small>Please try again or contact support.</small>
-           `,
-           confirmButtonText: 'OK',
-           confirmButtonColor: '#d33'
-         });
-       }
-     });
-   }
-   
-   $(document).on('click', '.remove', function() {
-     const itemId = $(this).data('id');
-     Swal.fire({
-       title: 'Remove Item',
-       text: 'Are you sure you want to remove this item from your cart?',
-       icon: 'warning',
-       showCancelButton: true,
-       confirmButtonColor: '#d33',
-       cancelButtonColor: '#3085d6',
-       confirmButtonText: 'Yes, remove it',
-       cancelButtonText: 'Cancel'
-     }).then((result) => {
-       if (result.isConfirmed) {
-         $.ajax({
-           url: '/cart/remove',
-           type: 'POST',
-           data: { itemId },
-           success: (data) => {
-             renderCartItems(data.cart);
-             renderOrderSummary(data.summary);
-             Swal.fire({
-               icon: 'success',
-               title: 'Removed',
-               text: data.message,
-               timer: 1500,
-               showConfirmButton: false
-             });
-           },
-           error: (xhr) => {
-             Swal.fire({
-               icon: 'error',
-               title: 'Oops...',
-               text: xhr.responseJSON?.error || 'Error removing item'
-             });
-           }
-         });
-       }
-     });
-   });
-   
-   $(document).on('click', '.button-primary[data-product-id]', function() {
-     const productId = $(this).data('product-id');
-     $.ajax({
-       url: '/cart/add',
-       type: 'POST',
-       contentType: 'application/json',
-       data: JSON.stringify({ productId, quantity: 1 }),
-       success: (data) => {
-         renderCartItems(data.cart);
-         renderOrderSummary(data.summary);
-         Swal.fire({
-           icon: 'success',
-           title: 'Added to Cart',
-           html: `
-             <p>${data.message}</p>
-             <small>Item successfully added to your cart.</small>
-           `,
-           showConfirmButton: false,
-           timer: 1500
-         });
-       },
-       error: (xhr) => {
-         let errorMsg = xhr.responseJSON?.error || 'Failed to add product to cart.';
-         
-         if (errorMsg.includes('maximum')) {
-           errorMsg = `You can only add a maximum of ${MAX_LIMIT} units for this product.`;
-         }
-         
-         Swal.fire({
-           icon: 'error',
-           title: 'Cart Update Failed',
-           html: `
-             <p>${errorMsg}</p>
-             <small>Please check product availability or try again later.</small>
-           `,
-           confirmButtonText: 'OK',
-           confirmButtonColor: '#d33'
-         });
-       }
-     });
-   });
-   </script>
- 
-   <%- include("../../views/partials/user/footer") %>
- </body>
- </html>
+
+<body>
+  <section class="section">
+    <div class="container">
+      <h2 class="title">Shopping Cart</h2>
+      
+      <div class="cart-container">
+        <div class="cart-items">
+          <div class="cart-items-list" id="cart-items-list">
+          
+          </div>
+
+          <div class="related-products">
+            <h3 class="related-title">People also bought</h3>
+            <div class="related-grid" id="related-products-grid">
+              
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-section">
+          <div class="order-summary" id="order-summary">
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+  const MAX_LIMIT = 10;
+  
+  function renderCartItems(cart) {
+    const cartItemsList = $('#cart-items-list');
+    cartItemsList.empty();
+    
+    if (cart.items && cart.items.length > 0) {
+      cart.items.forEach(item => {
+        const itemHtml = `
+          <div class="cart-item">
+            <div class="cart-item-content">
+              <a href="#" class="product-image-link">
+                <img class="product-image" src="${item.productId.productImages?.[0] || 'https://via.placeholder.com/80'}" alt="${item.productId.productName} image" />
+              </a>
+              <div class="quantity-section">
+                <label for="counter-input-${item._id}" class="sr-only">Choose quantity:</label>
+                <div class="quantity-controls">
+                  <button type="button" id="decrement-button-${item._id}" data-input-counter-decrement="counter-input-${item._id}" class="quantity-button">
+                    <svg class="h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
+                    </svg>
+                  </button>
+                  <input type="text" id="counter-input-${item._id}" data-input-counter class="quantity-input" value="${item.quantity}" required />
+                  <button type="button" id="increment-button-${item._id}" data-input-counter-increment="counter-input-${item._id}" class="quantity-button">
+                    <svg class="h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="price-display">
+                  <p class="price">RS:${item.price}</p>
+                </div>
+              </div>
+              <div class="product-details">
+                <a href="#" class="product-name">${item.productId.productName}</a>
+                <div class="action-buttons">
+                  <button type="button" class="action-button remove" data-id="${item._id}">
+                    <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6" />
+                    </svg>
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        cartItemsList.append(itemHtml);
+      });
+    } else {
+      cartItemsList.append('<p>Your cart is empty.</p>');
+    }
+  }
+  
+  function renderOrderSummary(summary) {
+    const orderSummary = $('#order-summary');
+    orderSummary.html(`
+      <p class="summary-title">Order summary</p>
+      <div class="summary-list">
+        <div class="summary-item">
+          <dt class="summary-label">Original price</dt>
+          <dd class="summary-value">RS:${summary.originalPrice.toFixed(2)}</dd>
+        </div>
+        <div class="summary-item">
+          <dt class="summary-label">Savings</dt>
+          <dd class="summary-value summary-savings">-RS:${summary.savings.toFixed(2)}</dd>
+        </div>
+        <div class="summary-item">
+          <dt class="summary-label">Store Pickup</dt>
+          <dd class="summary-value">RS:${summary.storePickup.toFixed(2)}</dd>
+        </div>
+        <div class="summary-item">
+          <dt class="summary-label">Tax</dt>
+          <dd class="summary-value">RS:${summary.tax.toFixed(2)}</dd>
+        </div>
+        <div class="summary-total">
+          <dt class="summary-label">Total</dt>
+          <dd class="summary-value">RS:${summary.total.toFixed(2)}</dd>
+        </div>
+      </div>
+      <a href="/checkout" class="button button-primary">Proceed to Checkout</a>
+      <div class="continue-shopping-section">
+        <span class="continue-shopping-text">or</span>
+        <a href="/shop" class="continue-shopping-link">
+          Continue Shopping
+          <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4" />
+          </svg>
+        </a>
+      </div>
+    `);
+  }
+  
+  function renderRelatedProducts(relatedProducts) {
+    const relatedGrid = $('#related-products-grid');
+    relatedGrid.empty();
+    
+    if (relatedProducts && relatedProducts.length > 0) {
+      relatedProducts.forEach(product => {
+        const productHtml = `
+          <div class="product-card">
+            <a href="/productdetails?id=${product._id}" class="product-card-image">
+              <img src="${product.productImages?.[0] || 'https://via.placeholder.com/176'}" alt="${product.productName} image" onerror="this.onerror=null; this.src='https://via.placeholder.com/176'" />
+            </a>
+            <div class="product-card-details">
+              <a href="/productdetails?id=${product._id}" class="product-card-title">${product.productName}</a>
+              <p class="product-card-description">${product.description}</p>
+            </div>
+            <div class="product-card-price">
+              ${product.salePrice && product.salePrice < product.regularPrice ? `
+                <p class="original-price">RS:${product.regularPrice.toLocaleString()}</p>
+                <p class="sale-price">RS:${product.salePrice.toLocaleString()}</p>
+              ` : `
+                <p class="price">RS:${product.regularPrice.toLocaleString()}</p>
+              `}
+            </div>
+            <div class="product-card-actions">
+              <button type="button" class="button button-primary" data-product-id="${product._id}">
+                <svg class="h-5 w-5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7h-1M8 7h-.688M13 5v4m-2-2h4" />
+                </svg>
+                Add to cart
+              </button>
+            </div>
+          </div>
+        `;
+        relatedGrid.append(productHtml);
+      });
+    } else {
+      relatedGrid.append('<p>No related products found.</p>');
+    }
+  }
+  
+  $.getJSON('/cart', (data) => {
+    renderCartItems(data.cart);
+    renderOrderSummary(data.summary);
+    renderRelatedProducts(data.relatedProduct);
+  });
+  
+  $(document).on('click', '[data-input-counter-increment]', function() {
+    const inputId = $(this).attr('data-input-counter-increment');
+    const input = $(`#${inputId}`);
+    let currentValue = parseInt(input.val(), 10);
+    
+    // Check for maximum limit
+    if (currentValue >= MAX_LIMIT) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Maximum Quantity Limit',
+        html: `
+          <p>You can only add a maximum of ${MAX_LIMIT} units for this product.</p>
+          <small>This helps us ensure availability for all customers.</small>
+        `,
+        confirmButtonText: 'Understood',
+        confirmButtonColor: '#3085d6',
+        customClass: {
+          popup: 'swal-wide',
+          title: 'swal-title',
+          content: 'swal-text'
+        }
+      });
+      return;
+    }
+    
+    const newValue = currentValue + 1;
+    updateCart(inputId.replace('counter-input-', ''), newValue, input);
+  });
+  
+  $(document).on('click', '[data-input-counter-decrement]', function() {
+    const inputId = $(this).attr('data-input-counter-decrement');
+    const input = $(`#${inputId}`);
+    const newValue = parseInt(input.val(), 10) - 1;
+    if (newValue > 0) {
+      updateCart(inputId.replace('counter-input-', ''), newValue, input);
+    } else {
+      Swal.fire({
+        icon: 'info',
+        title: 'Remove Item',
+        text: 'Would you like to remove this item from your cart?',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, remove it',
+        cancelButtonText: 'Keep in cart',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const itemId = inputId.replace('counter-input-', '');
+          $.ajax({
+            url: '/cart/remove',
+            type: 'POST',
+            data: { itemId },
+            success: (data) => {
+              renderCartItems(data.cart);
+              renderOrderSummary(data.summary);
+              Swal.fire({
+                icon: 'success',
+                title: 'Item Removed',
+                text: 'The item has been removed from your cart.',
+                timer: 1500,
+                showConfirmButton: false
+              });
+            },
+            error: (xhr) => {
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: xhr.responseJSON?.error || 'Error removing item'
+              });
+            }
+          });
+        }
+      });
+    }
+  });
+  
+  function updateCart(itemId, newQuantity, input) {
+    $.ajax({
+      url: '/cart/update-cart',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ itemId, quantity: newQuantity }),
+      success: (data) => {
+        input.val(newQuantity);
+        renderCartItems(data.cart);
+        renderOrderSummary(data.summary);
+        
+        // Add a subtle notification for quantity update
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Quantity updated',
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true
+        });
+      },
+      error: (xhr) => {
+        const errorMessage = xhr.responseJSON?.error || 'Error updating cart';
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Update Failed',
+          html: `
+            <p>${errorMessage}</p>
+            <small>Please try again or contact support.</small>
+          `,
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#d33'
+        });
+      }
+    });
+  }
+  
+  $(document).on('click', '.remove', function() {
+    const itemId = $(this).data('id');
+    Swal.fire({
+      title: 'Remove Item',
+      text: 'Are you sure you want to remove this item from your cart?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, remove it',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $.ajax({
+          url: '/cart/remove',
+          type: 'POST',
+          data: { itemId },
+          success: (data) => {
+            renderCartItems(data.cart);
+            renderOrderSummary(data.summary);
+            Swal.fire({
+              icon: 'success',
+              title: 'Removed',
+              text: data.message,
+              timer: 1500,
+              showConfirmButton: false
+            });
+          },
+          error: (xhr) => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: xhr.responseJSON?.error || 'Error removing item'
+            });
+          }
+        });
+      }
+    });
+  });
+  
+  $(document).on('click', '.button-primary[data-product-id]', function() {
+    const productId = $(this).data('product-id');
+    $.ajax({
+      url: '/cart/add',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ productId, quantity: 1 }),
+      success: (data) => {
+        renderCartItems(data.cart);
+        renderOrderSummary(data.summary);
+        Swal.fire({
+          icon: 'success',
+          title: 'Added to Cart',
+          html: `
+            <p>${data.message}</p>
+            <small>Item successfully added to your cart.</small>
+          `,
+          showConfirmButton: false,
+          timer: 1500
+        });
+      },
+      error: (xhr) => {
+        let errorMsg = xhr.responseJSON?.error || 'Failed to add product to cart.';
+        
+        if (errorMsg.includes('maximum')) {
+          errorMsg = `You can only add a maximum of ${MAX_LIMIT} units for this product.`;
+        }
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Cart Update Failed',
+          html: `
+            <p>${errorMsg}</p>
+            <small>Please check product availability or try again later.</small>
+          `,
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#d33'
+        });
+      }
+    });
+  });
+  </script>
+
+  <%- include("../../views/partials/user/footer") %>
+</body>
+</html>

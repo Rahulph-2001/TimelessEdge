@@ -43,7 +43,7 @@ router.get("/shop",userController.loadShopping)
 router.get("/logout",userController.logout)
 router.get('/filter',userController.filterProduct)
 router.get('/search',profileController.searchProducts)
-router.get('/userProfile',profileController.userProfile)
+router.get('/userProfile',userAuth,profileController.userProfile)
 
 router.get("/forgot-password",profileController.getForgotPassPage)
 router.post('/verify-email',profileController.verifyForgotOtp)
@@ -69,8 +69,8 @@ router.post('/profile/update', upload.single('profile_image'),profileController.
 
 router.get('/productDetails',productController.productDetails)
 router.post('/submit-review',productController.submitReview)
-router.post('/wishlist/add/:id',productController.addWhishlist)
-router.get('/wishlist',productController.wishListPage)
+router.post('/wishlist/add/:id',userAuth,productController.addWhishlist)
+router.get('/wishlist',userAuth,productController.wishListPage)
 router.delete('/wishlist/remove/:productId',productController.removeWishlist)
 router.post('/cart/add-from-wishlist',productController.addToCartFromWishlist)
 

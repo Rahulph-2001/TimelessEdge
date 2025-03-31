@@ -365,7 +365,6 @@ const exportSalesExcel = async (req, res) => {
       res.status(500).json({ success: false, message: 'Error generating Excel report' });
   }
 };
-
 const exportSalesPdf = async (req, res) => {
   try {
       const { start, end } = getDateRange(
@@ -408,6 +407,15 @@ const exportSalesPdf = async (req, res) => {
               month: 'short',
               day: 'numeric'
           });
+      };
+      
+      
+      const shortenOrderId = (orderId) => {
+          
+          if (orderId.length > 10) {
+              return orderId.substring(0, 7) + '...';
+          }
+          return orderId;
       };
       
       const customersMap = new Map();
@@ -480,7 +488,7 @@ const exportSalesPdf = async (req, res) => {
           ).join(', ');
           
           const rowData = [
-              order.orderId,
+              shortenOrderId(order.orderId), 
               formatDate(order.createdOn),
               customerName,
               products.length > 20 ? products.substring(0, 20) + '...' : products,
@@ -502,6 +510,6 @@ const exportSalesPdf = async (req, res) => {
       console.error('Error generating PDF:', error);
       res.status(500).json({ success: false, message: 'Error generating PDF report' });
   }
-};
+}
 
 module.exports={getSalesReport,exportSalesExcel,exportSalesPdf}

@@ -1,24 +1,38 @@
 const User=require("../models/userSchema")
-const userAuth=async(req,res,next)=>{
-    try {
-      const { user } = req.session;
-      if(!user){
-        return res.redirect('/login')
 
+const userAuth = async (req, res, next) => {
+  try {
+    if (!req.session.user) {
+      if (req.xhr || req.headers.accept?.includes('application/json') || 
+          req.headers['x-requested-with'] === 'XMLHttpRequest') {
+        return res.status(401).json({ message: 'User not authenticated' });
       }
-      const activeUser = await User.findById(user._id,{isBlocked:true});
-      if (activeUser.isBlocked==true) {
-        req.session.destroy()
-        res.redirect('/login')
-      }
-      return next()
-
-      
-    } catch (error) {
-      console.log(error);
-      
+      return res.redirect('/login');
     }
-}
+
+    const activeUser = await User.findById(req.session.user);
+    if (!activeUser || activeUser.isBlocked) {
+      req.session.destroy();
+      
+      if (req.xhr || req.headers.accept?.includes('application/json') || 
+          req.headers['x-requested-with'] === 'XMLHttpRequest') {
+        return res.status(403).json({ message: 'Your account has been blocked' });
+      }
+      return res.redirect('/login');
+    }
+    
+    next();
+  } catch (error) {
+    console.log("Auth middleware error:", error);
+    
+    if (req.xhr || req.headers.accept?.includes('application/json') || 
+        req.headers['x-requested-with'] === 'XMLHttpRequest') {
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    
+    return res.status(500).send("Internal Server Error");
+  }
+};
 const adminAuth = async (req, res, next) => {
     try {
       if (!req.session.admin) {

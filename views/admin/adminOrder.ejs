@@ -769,14 +769,14 @@
         });
     }
     
-    document.getElementById('searchOrder').addEventListener('keyup', function(e) {
-        if (e.key === 'Enter') {
-            const searchTerm = this.value.trim();
-            if (searchTerm) {
-                window.location.href = `/admin/orders?search=${searchTerm}`;
-            }
+document.getElementById('searchOrder').addEventListener('keyup', function(e) {
+    if (e.key === 'Enter') {
+        const searchTerm = this.value.trim();
+        if (searchTerm) {
+            window.location.href = `/admin/AdminOrder?search=${encodeURIComponent(searchTerm)}`;
         }
-    });
+    }
+});
     
     document.getElementById('applyFilters').addEventListener('click', function(){
         const status = document.getElementById('statusFilter').value;

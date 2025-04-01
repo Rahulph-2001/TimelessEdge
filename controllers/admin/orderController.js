@@ -17,22 +17,20 @@ app.use(session({
     saveUninitialized: true,
     cookie: { secure: false }
 }));
-
 const getAllOrders = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = 10; 
         const skip = (page - 1) * limit;
         
-
         let filter = {};
         
-  
+    
         if (req.query.status) {
             filter.status = req.query.status;
         }
         
- 
+       
         if (req.query.startDate && req.query.endDate) {
             filter.createdOn = {
                 $gte: new Date(req.query.startDate),
@@ -44,35 +42,58 @@ const getAllOrders = async (req, res) => {
             filter.createdOn = { $lte: new Date(new Date(req.query.endDate).setHours(23, 59, 59)) };
         }
         
+        
         if (req.query.search) {
             const searchTerm = req.query.search.trim();
             
-            const matchingAddresses = await Address.find({
-                "address.name": { $regex: searchTerm, $options: 'i' }
-            });
-            
-            const addressIds = matchingAddresses.flatMap(doc => 
-                doc.address.filter(addr => 
-                    addr.name.toLowerCase().includes(searchTerm.toLowerCase())
-                ).map(addr => addr._id)
-            );
-            
-            const matchingProducts = await Product.find({
-                productName: { $regex: searchTerm, $options: 'i' }
-            });
-            
-            const productIds = matchingProducts.map(product => product._id);
             
             filter.$or = [
-                { orderId: { $regex: searchTerm, $options: 'i' } }, 
-                { address: { $in: addressIds } }, 
-                { 'orderedItems.product': { $in: productIds } }, 
-                { finalAmount: isNaN(parseFloat(searchTerm)) ? undefined : parseFloat(searchTerm) } 
-            ].filter(Boolean);
+                { orderId: { $regex: searchTerm, $options: 'i' } }
+            ];
+            
+            
+            const isNumeric = !isNaN(parseFloat(searchTerm));
+            if (isNumeric) {
+                filter.$or.push({ finalAmount: parseFloat(searchTerm) });
+            }
+            
+            try {
+               
+                const matchingAddresses = await Address.find({
+                    "address.name": { $regex: searchTerm, $options: 'i' }
+                });
+                
+                if (matchingAddresses && matchingAddresses.length > 0) {
+                    const addressIds = matchingAddresses.flatMap(doc => 
+                        doc.address.filter(addr => 
+                            addr.name.toLowerCase().includes(searchTerm.toLowerCase())
+                        ).map(addr => addr._id)
+                    );
+                    
+                    if (addressIds.length > 0) {
+                        filter.$or.push({ address: { $in: addressIds } });
+                    }
+                }
+                
+               
+                const matchingProducts = await Product.find({
+                    productName: { $regex: searchTerm, $options: 'i' }
+                });
+                
+                if (matchingProducts && matchingProducts.length > 0) {
+                    const productIds = matchingProducts.map(product => product._id);
+                    filter.$or.push({ 'orderedItems.product': { $in: productIds } });
+                }
+            } catch (error) {
+                console.error("Error in search query:", error);
+               
+            }
         }
         
+       
         const totalOrders = await Order.countDocuments(filter);
         const totalPages = Math.ceil(totalOrders / limit);
+        
         
         const orders = await Order.find(filter)
             .populate({
@@ -82,10 +103,12 @@ const getAllOrders = async (req, res) => {
             .sort({ createdOn: -1 }) 
             .skip(skip)
             .limit(limit);
-
+        
+       
         const ordersWithAddressDetails = await Promise.all(
             orders.map(async (order) => {
                 try {
+                   
                     const addressDoc = await Address.findOne({
                         "address._id": order.address
                     });
@@ -93,15 +116,18 @@ const getAllOrders = async (req, res) => {
                     let addressDetails = null;
                     
                     if (addressDoc && addressDoc.address && addressDoc.address.length > 0) {
+                        
                         addressDetails = addressDoc.address.find(
                             addr => addr._id.toString() === order.address.toString()
                         );
                         
+                       
                         if (!addressDetails && addressDoc.address.length > 0) {
                             addressDetails = addressDoc.address[0];
                         }
                     }
                     
+                 
                     return {
                         ...order._doc,
                         addressDetails: addressDetails
@@ -116,13 +142,12 @@ const getAllOrders = async (req, res) => {
             })
         );
         
-        
         res.render('adminOrder', {
             orders: ordersWithAddressDetails,
             currentPage: page,
             totalPages,
             totalOrders,
-            filters: req.query 
+            filters: req.query
         });
         
     } catch (error) {
@@ -132,9 +157,7 @@ const getAllOrders = async (req, res) => {
             error 
         });
     }
-}
-
-
+};
 
 const updateStatus = async (req, res) => {
     try {

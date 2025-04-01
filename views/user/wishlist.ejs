@@ -147,6 +147,109 @@
                 margin-right: 6px;
             }
 
+            /* Pagination Styles */
+            .pagination-controls {
+                margin-top: 30px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .pagination {
+                display: flex;
+                align-items: center;
+                background-color: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                padding: 10px 16px;
+            }
+
+            .pagination-btn {
+                display: flex;
+                align-items: center;
+                padding: 8px 14px;
+                border-radius: 6px;
+                background-color: #f9fafb;
+                color: #4a5568;
+                font-size: 14px;
+                font-weight: 500;
+                text-decoration: none;
+                transition: all 0.2s;
+                margin: 0 6px;
+            }
+
+            .pagination-btn:hover {
+                background-color: #edf2f7;
+                color: #2d3748;
+            }
+
+            .pagination-btn svg {
+                margin: 0 4px;
+            }
+
+            .pagination-numbers {
+                display: flex;
+                align-items: center;
+                margin: 0 10px;
+            }
+
+            .pagination-number {
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 6px;
+                background-color: #f9fafb;
+                color: #4a5568;
+                font-size: 14px;
+                font-weight: 500;
+                text-decoration: none;
+                margin: 0 4px;
+                transition: all 0.2s;
+            }
+
+            .pagination-number:hover {
+                background-color: #edf2f7;
+            }
+
+            .pagination-number.active {
+                background-color: #f87171;
+                color: white;
+            }
+
+            .pagination-ellipsis {
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #718096;
+                font-size: 14px;
+            }
+
+            @media (max-width: 768px) {
+                .pagination {
+                    padding: 8px 10px;
+                }
+
+                .pagination-numbers {
+                    margin: 0 4px;
+                }
+
+                .pagination-number {
+                    width: 32px;
+                    height: 32px;
+                    margin: 0 2px;
+                    font-size: 13px;
+                }
+
+                .pagination-btn {
+                    padding: 6px 10px;
+                    font-size: 13px;
+                }
+            }
+
             .empty-state {
                 text-align: center;
                 background: white;
@@ -264,105 +367,169 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% wishlist.items.forEach(item => { 
+                        <% wishlist.items.forEach(item=> {
                             // Check if productId exists first
                             if (item.productId) {
-                                // Handle both data structures 
-                                let productImage = 'default-product.png';
-                                
-                                if (item.productId.productImage && item.productId.productImage.length > 0) {
-                                    productImage = item.productId.productImage[0];
-                                } else if (item.productId.productImages && item.productId.productImages.length > 0) {
-                                    productImage = item.productId.productImages[0];
-                                }
-                                
-                                // Get product availability
-                                let isAvailable = true;
-                                let statusText = "In Stock";
-                                
-                                if (item.productId.colorStock && item.productId.colorStock.length > 0) {
-                                    // If using colorStock structure
-                                    const currentColorStock = item.productId.colorStock.find(color =>
-                                        color.color === (item.color || '')) || item.productId.colorStock[0];
-                                    isAvailable = currentColorStock.status !== 'Out_of_Stock';
-                                    statusText = isAvailable ? "In Stock" : "Out of Stock";
-                                } else if (item.productId.status) {
-                                    // If using status field directly
-                                    isAvailable = item.productId.status !== 'Out_of_Stock';
-                                    statusText = item.productId.status === 'Available' ? "In Stock" : "Out of Stock";
-                                }
-                        %>
+                            // Handle both data structures
+                            let productImage = 'default-product.png';
 
-                                <tr>
-                                    <td>
-                                        <button class="remove-btn" data-product-id="<%= item.productId._id %>">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round">
-                                                <polyline points="3 6 5 6 21 6"></polyline>
-                                                <path
-                                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                                </path>
-                                            </svg>
-                                            Remove
-                                        </button>
-                                    </td>
-                                    <td>
-                                        <div style="display: flex; align-items: center;">
-                                            <img src="<%= productImage %>" alt="<%= item.productId.productName %>"
-                                                class="product-image">
-                                            <div style="margin-left: 15px;">
-                                                <div class="product-name">
-                                                    <%= item.productId.productName %>
-                                                </div>
-                                                <% if (item.color) { %>
-                                                    <div style="color: #718096; font-size: 14px;">Color: <%= item.color
-                                                            %>
-                                                    </div>
-                                                    <% } %>
+                            if (item.productId.productImage && item.productId.productImage.length > 0) {
+                            productImage = item.productId.productImage[0];
+                            } else if (item.productId.productImages && item.productId.productImages.length > 0) {
+                            productImage = item.productId.productImages[0];
+                            }
+
+                            // Get product availability
+                            let isAvailable = true;
+                            let statusText = "In Stock";
+
+                            if (item.productId.colorStock && item.productId.colorStock.length > 0) {
+                            // If using colorStock structure
+                            const currentColorStock = item.productId.colorStock.find(color =>
+                            color.color === (item.color || '')) || item.productId.colorStock[0];
+                            isAvailable = currentColorStock.status !== 'Out_of_Stock';
+                            statusText = isAvailable ? "In Stock" : "Out of Stock";
+                            } else if (item.productId.status) {
+                            // If using status field directly
+                            isAvailable = item.productId.status !== 'Out_of_Stock';
+                            statusText = item.productId.status === 'Available' ? "In Stock" : "Out of Stock";
+                            }
+                            %>
+
+                            <tr>
+                                <td>
+                                    <button class="remove-btn" data-product-id="<%= item.productId._id %>">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path
+                                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                            </path>
+                                        </svg>
+                                        Remove
+                                    </button>
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center;">
+                                        <img src="<%= productImage %>" alt="<%= item.productId.productName %>"
+                                            class="product-image">
+                                        <div style="margin-left: 15px;">
+                                            <div class="product-name">
+                                                <%= item.productId.productName %>
                                             </div>
+                                            <% if (item.color) { %>
+                                                <div style="color: #718096; font-size: 14px;">Color: <%= item.color %>
+                                                </div>
+                                                <% } %>
                                         </div>
-                                    </td>
-                                    <td>
-                                        <div class="product-price">
-                                            <% if (item.productId.offerPrice) { %>
-                                                Rs: <%= item.productId.offerPrice.toLocaleString() %>
-                                                <span style="text-decoration: line-through; color: #718096; font-size: 14px;">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="product-price">
+                                        <% if (item.productId.offerPrice) { %>
+                                            Rs: <%= item.productId.offerPrice.toLocaleString() %>
+                                                <span
+                                                    style="text-decoration: line-through; color: #718096; font-size: 14px;">
                                                     Rs: <%= item.productId.salePrice.toLocaleString() %>
                                                 </span>
                                                 <span style="color: #38a169; font-size: 14px;">
                                                     (Saved Rs: <%= item.productId.savedAmount.toLocaleString() %>)
                                                 </span>
-                                            <% } else { %>
-                                                Rs: <%= item.productId.salePrice.toLocaleString() %>
-                                            <% } %>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="<%= isAvailable ? 'in-stock' : 'out-of-stock' %>">
-                                            <%= statusText %>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn-view-product"
-                                                onclick="window.location.href='/productDetails?id=<%= item.productId._id %>'">
-                                                View Details
-                                            </button>
-                                            <button class="btn-add-to-cart" data-product-id="<%= item.productId._id %>"
-                                                data-product-name="<%= item.productId.productName %>" <% if
-                                                (!isAvailable) { %>disabled<% } %>
-                                                    >
-                                                    <% if (isAvailable) { %>Add to Cart<% } else { %>Out of Stock<% } %>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                        <% } %>
-                        <% }); %>
+                                                <% } else { %>
+                                                    Rs: <%= item.productId.salePrice.toLocaleString() %>
+                                                        <% } %>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="<%= isAvailable ? 'in-stock' : 'out-of-stock' %>">
+                                        <%= statusText %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-view-product"
+                                            onclick="window.location.href='/productDetails?id=<%= item.productId._id %>'">
+                                            View Details
+                                        </button>
+                                        <button class="btn-add-to-cart" data-product-id="<%= item.productId._id %>"
+                                            data-product-name="<%= item.productId.productName %>" <% if (!isAvailable) {
+                                            %>disabled<% } %>
+                                                >
+                                                <% if (isAvailable) { %>Add to Cart<% } else { %>Out of Stock<% } %>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% } %>
+                                <% }); %>
                     </tbody>
                 </table>
                 <% } %>
+                    <% if (wishlist && wishlist.items && wishlist.items.length> 0) { %>
+                        <!-- Pagination controls -->
+                        <div class="pagination-controls"
+                            style="margin-top: 30px; display: flex; justify-content: center; align-items: center;">
+                            <% if (pagination.totalPages> 1) { %>
+                                <div class="pagination">
+                                    <% if (pagination.hasPrevPage) { %>
+                                        <a href="/wishlist?page=<%= pagination.page - 1 %>" class="pagination-btn">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="15 18 9 12 15 6"></polyline>
+                                            </svg>
+                                            Previous
+                                        </a>
+                                        <% } %>
+
+                                            <div class="pagination-numbers">
+                                                <% if (pagination.page> 2) { %>
+                                                    <a href="/wishlist?page=1" class="pagination-number">1</a>
+                                                    <% } %>
+
+                                                        <% if (pagination.page> 3) { %>
+                                                            <span class="pagination-ellipsis">...</span>
+                                                            <% } %>
+
+                                                                <% for (let i=Math.max(1, pagination.page - 1); i
+                                                                    <=Math.min(pagination.totalPages, pagination.page +
+                                                                    1); i++) { %>
+                                                                    <a href="/wishlist?page=<%= i %>"
+                                                                        class="pagination-number <%= i === pagination.page ? 'active' : '' %>">
+                                                                        <%= i %>
+                                                                    </a>
+                                                                    <% } %>
+
+                                                                        <% if (pagination.page < pagination.totalPages -
+                                                                            2) { %>
+                                                                            <span class="pagination-ellipsis">...</span>
+                                                                            <% } %>
+
+                                                                                <% if (pagination.page <
+                                                                                    pagination.totalPages - 1) { %>
+                                                                                    <a href="/wishlist?page=<%= pagination.totalPages %>"
+                                                                                        class="pagination-number">
+                                                                                        <%= pagination.totalPages %>
+                                                                                    </a>
+                                                                                    <% } %>
+                                            </div>
+
+                                            <% if (pagination.hasNextPage) { %>
+                                                <a href="/wishlist?page=<%= pagination.page + 1 %>"
+                                                    class="pagination-btn">
+                                                    Next
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                                    </svg>
+                                                </a>
+                                                <% } %>
+                                </div>
+                                <% } %>
+                        </div>
+                        <% } %>
     </div>
 
     <%- include("../../views/partials/user/footer") %>
@@ -372,7 +539,7 @@
 
         <script>
             $(document).ready(function () {
-                
+
                 $('.remove-btn').click(function () {
                     const productId = $(this).data('product-id');
 
@@ -386,7 +553,7 @@
                         confirmButtonText: 'Yes, remove it!'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                           
+
                             $.ajax({
                                 url: `/wishlist/remove/${productId}`,
                                 type: 'DELETE',
@@ -411,7 +578,7 @@
                     });
                 });
 
-                
+
                 $('.btn-add-to-cart').click(function () {
                     if ($(this).prop('disabled')) {
                         return;
@@ -419,11 +586,11 @@
 
                     const productId = $(this).data('product-id');
                     const productName = $(this).data('product-name');
-                    const currentRow = $(this).closest('tr'); 
+                    const currentRow = $(this).closest('tr');
 
-                    
+
                     $.ajax({
-                        url: '/cart/add-from-wishlist', 
+                        url: '/cart/add-from-wishlist',
                         type: 'POST',
                         data: {
                             productId: productId,
@@ -481,41 +648,41 @@
 
 
             $('.remove-btn').click(function () {
-    const productId = $(this).data('product-id'); 
+                const productId = $(this).data('product-id');
 
-    Swal.fire({
-        title: 'Remove Item?',
-        text: "Are you sure you want to remove this item from your wishlist?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#718096',
-        confirmButtonText: 'Yes, remove it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: `/wishlist/remove/${productId}`, 
-                type: 'DELETE',
-                success: function (response) {
-                    Swal.fire(
-                        'Removed!',
-                        'Item has been removed from your wishlist.',
-                        'success'
-                    ).then(() => {
-                        location.reload();
-                    });
-                },
-                error: function (error) {
-                    Swal.fire(
-                        'Error!',
-                        'Something went wrong.',
-                        'error'
-                    );
-                }
+                Swal.fire({
+                    title: 'Remove Item?',
+                    text: "Are you sure you want to remove this item from your wishlist?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#718096',
+                    confirmButtonText: 'Yes, remove it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `/wishlist/remove/${productId}`,
+                            type: 'DELETE',
+                            success: function (response) {
+                                Swal.fire(
+                                    'Removed!',
+                                    'Item has been removed from your wishlist.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload();
+                                });
+                            },
+                            error: function (error) {
+                                Swal.fire(
+                                    'Error!',
+                                    'Something went wrong.',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
             });
-        }
-    });
-});
 
         </script>
 </body>

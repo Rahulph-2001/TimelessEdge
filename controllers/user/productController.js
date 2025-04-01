@@ -134,70 +134,106 @@ const addWhishlist = async (req, res) => {
     }
 };
 
-
 const wishListPage = async (req, res) => {
-  try {
+    try {
       const userId = req.session.user;
       if (!userId) {
-          return res.redirect("/login");
+        return res.redirect("/login");
       }
-
+  
+     
+      const page = parseInt(req.query.page) || 1; 
+      const limit = parseInt(req.query.limit) || 5; 
+      const skip = (page - 1) * limit;
+  
+      
       const wishlistData = await wishList.findOne({ userId })
-          .populate({
-              path: 'products.productId',
-              select: 'productName salePrice status productImage productImages colorStock category productOffer',
-              populate: {
-                  path: 'category',
-                  select: 'categoryOffer'
-              }
-          });
-
+        .populate({
+          path: 'products.productId',
+          select: 'productName salePrice status productImage productImages colorStock category productOffer',
+          populate: {
+            path: 'category',
+            select: 'categoryOffer'
+          }
+        });
+  
+      
+      const totalItems = wishlistData && wishlistData.products 
+        ? wishlistData.products.filter(item => item.productId).length 
+        : 0;
+      
+      const totalPages = Math.ceil(totalItems / limit);
+  
+      
+      const paginatedWishlistData = await wishList.findOne({ userId })
+        .populate({
+          path: 'products.productId',
+          select: 'productName salePrice status productImage productImages colorStock category productOffer',
+          populate: {
+            path: 'category',
+            select: 'categoryOffer'
+          }
+        });
+  
+      
+      const filteredProducts = paginatedWishlistData && paginatedWishlistData.products 
+        ? paginatedWishlistData.products.filter(item => item.productId) 
+        : [];
+      
+      const paginatedProducts = filteredProducts.slice(skip, skip + limit);
+  
       const formattedWishlist = {
-          items: wishlistData && wishlistData.products ?
-              wishlistData.products.filter(item => item.productId).map(item => {
-                  const product = item.productId;
-
-                  const categoryOffer = product.category ? product.category.categoryOffer || 0 : 0;
-
-                  const productOffer = product.productOffer || 0;
-
-                  const bestOffer = Math.max(categoryOffer, productOffer);
-
-                  let finalPrice = product.salePrice;
-                  let offerPrice = null;
-                  let savedAmount = null;
-                  let offerType = null;
-
-                  if (bestOffer > 0) {
-                      offerPrice = Math.round(product.salePrice * (1 - bestOffer / 100));
-                      savedAmount = product.salePrice - offerPrice;
-                      offerType = productOffer > categoryOffer ? 'product' : 'category';
-                  }
-
-                  return {
-                      ...item,
-                      productId: {
-                          ...product._doc,
-                          categoryOffer,
-                          productOffer,
-                          bestOffer,
-                          offerPrice,
-                          savedAmount,
-                          offerType
-                      }
-                  };
-              }) : []
+        items: paginatedProducts.map(item => {
+          const product = item.productId;
+          
+          const categoryOffer = product.category ? product.category.categoryOffer || 0 : 0;
+          const productOffer = product.productOffer || 0;
+          const bestOffer = Math.max(categoryOffer, productOffer);
+          
+          let finalPrice = product.salePrice;
+          let offerPrice = null;
+          let savedAmount = null;
+          let offerType = null;
+          
+          if (bestOffer > 0) {
+            offerPrice = Math.round(product.salePrice * (1 - bestOffer / 100));
+            savedAmount = product.salePrice - offerPrice;
+            offerType = productOffer > categoryOffer ? 'product' : 'category';
+          }
+          
+          return {
+            ...item,
+            productId: {
+              ...product._doc,
+              categoryOffer,
+              productOffer,
+              bestOffer,
+              offerPrice,
+              savedAmount,
+              offerType
+            }
+          };
+        })
       };
-
+  
       res.render('wishlist', {
-          wishlist: formattedWishlist,
-          user: req.user
+        wishlist: formattedWishlist,
+        user: req.user,
+        pagination: {
+          page,
+          limit,
+          totalItems,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
+        }
       });
-  } catch (error) {
+    } catch (error) {
       console.error("Error fetching wishList:", error);
       res.status(500).send("Internal Server error");
-  }
-};
+    }
+  };
+
 
 const addToCartFromWishlist = async (req, res) => {
   try {

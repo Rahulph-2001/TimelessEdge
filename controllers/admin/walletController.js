@@ -170,23 +170,38 @@ const getWalletManagement = async (req, res) => {
             .filter(t => t.transactionType === 'debit')
             .reduce((sum, t) => sum + t.transactionAmount, 0);
 
-        const currentMonthUsers = 1; 
-        const previousMonthUsers = 1;
-
+        // Calculate total credits and debits
+        const totalCredits = allTransactions
+            .filter(t => t.transactionType === 'credit')
+            .reduce((sum, t) => sum + t.transactionAmount, 0);
+            
+        const totalDebits = allTransactions
+            .filter(t => t.transactionType === 'debit')
+            .reduce((sum, t) => sum + t.transactionAmount, 0);
+        
+       
+        const walletBalance = totalCredits - totalDebits;
+        
+        
+        const currentMonthBalance = currentMonthCredits - currentMonthDebits;
+        const previousMonthBalance = previousMonthCredits - previousMonthDebits;
+        
         const calculatePercentChange = (current, previous) => {
             if (previous === 0) return current > 0 ? 100 : 0;
             return ((current - previous) / previous) * 100;
         };
+        
+        const balanceChangePercent = calculatePercentChange(
+            currentMonthBalance,
+            previousMonthBalance
+        );
 
         const stats = {
             transactionCount: allTransactions.length,
-            creditTotal: allTransactions
-                .filter(t => t.transactionType === 'credit')
-                .reduce((sum, t) => sum + t.transactionAmount, 0),
-            debitTotal: allTransactions
-                .filter(t => t.transactionType === 'debit')
-                .reduce((sum, t) => sum + t.transactionAmount, 0),
-            uniqueUsers: 1, 
+            creditTotal: totalCredits,
+            debitTotal: totalDebits,
+            walletBalance: walletBalance, 
+            balanceChangePercent: balanceChangePercent, 
             transactionChangePercent: calculatePercentChange(
                 currentMonthTransactions.length,
                 previousMonthTransactions.length
@@ -198,8 +213,7 @@ const getWalletManagement = async (req, res) => {
             debitChangePercent: calculatePercentChange(
                 currentMonthDebits,
                 previousMonthDebits
-            ),
-            userChangePercent: 0
+            )
         };
 
         const totalPages = Math.ceil(allTransactions.length / limit);
@@ -222,7 +236,5 @@ const getWalletManagement = async (req, res) => {
         });
     }
 };
-
-
 
 module.exports = { getWalletManagement };

@@ -449,11 +449,11 @@
             </p>
         </div>
         <div class="stat-card">
-            <p class="stat-title">Active Users</p>
-            <h2 class="stat-value" id="activeUsers">0</h2>
-            <p class="stat-trend <%= stats.userChangePercent >= 0 ? 'trend-up' : 'trend-down' %>">
-                <i class="fas fa-arrow-<%= stats.userChangePercent >= 0 ? 'up' : 'down' %>"></i> 
-                <%= Math.abs(stats.userChangePercent) %>% from last month
+            <p class="stat-title">Wallet Balance</p>
+            <h2 class="stat-value" id="walletBalance">Rs:0.00</h2>
+            <p class="stat-trend <%= stats.balanceChangePercent >= 0 ? 'trend-up' : 'trend-down' %>">
+                <i class="fas fa-arrow-<%= stats.balanceChangePercent >= 0 ? 'up' : 'down' %>"></i> 
+                <%= Math.abs(stats.balanceChangePercent.toFixed(2)) %>% from last month
             </p>
         </div>
     </div>
@@ -626,7 +626,7 @@
         document.getElementById('totalTransactions').textContent = '<%= stats.transactionCount %>';
         document.getElementById('totalCredits').textContent = 'Rs:<%= stats.creditTotal.toFixed(2) %>';
         document.getElementById('totalDebits').textContent = 'Rs:<%= stats.debitTotal.toFixed(2) %>';
-        document.getElementById('activeUsers').textContent = '<%= stats.uniqueUsers %>';
+        document.getElementById('walletBalance').textContent = 'Rs:<%= stats.walletBalance.toFixed(2) %>';
 
         const filterAll = document.getElementById('filterAll');
         const filterCredit = document.getElementById('filterCredit');

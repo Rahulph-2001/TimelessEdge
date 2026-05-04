@@ -258,7 +258,9 @@
             </button>
             <div class="navbar-nav">
                 <div class="nav-item">
-                    <a href="/admin/logout"><button class="logoutadmin">Logout</button></a>
+                    <form method="POST" action="/admin/logout" style="display:inline;">
+                        <button type="submit" class="logoutadmin">Logout</button>
+                    </form>
                 </div>
                 <div class="nav-item">
                     <a href="#" class="btn-user"><i class="fas fa-user"></i></a>

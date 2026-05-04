@@ -7,6 +7,8 @@ const userAuth = async (req, res, next) => {
           req.headers['x-requested-with'] === 'XMLHttpRequest') {
         return res.status(401).json({ message: 'User not authenticated' });
       }
+      // Save the intended URL so we can redirect back after login
+      req.session.returnTo = req.originalUrl;
       return res.redirect('/login');
     }
 

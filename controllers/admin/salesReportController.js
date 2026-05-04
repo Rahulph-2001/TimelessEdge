@@ -269,7 +269,8 @@ const exportSalesExcel = async (req, res) => {
       const totalSales = salesData.length > 0 ? salesData[0].totalSales : 0;
       const totalDiscount = salesData.length > 0 ? salesData[0].totalDiscount : 0;
       
-      const uniqueCustomers = await Order.distinct('address', dateFilter).length;
+      const distinctAddresses = await Order.distinct('address', dateFilter);
+      const uniqueCustomers = distinctAddresses.length;
 
       const formatDate = (date) => {
           return new Date(date).toLocaleDateString('en-US', {
@@ -399,7 +400,8 @@ const exportSalesPdf = async (req, res) => {
       const totalSales = salesData.length > 0 ? salesData[0].totalSales : 0;
       const totalDiscount = salesData.length > 0 ? salesData[0].totalDiscount : 0;
       
-      const uniqueCustomers = await Order.distinct('address', dateFilter).length;
+      const distinctAddresses = await Order.distinct('address', dateFilter);
+      const uniqueCustomers = distinctAddresses.length;
 
       const formatDate = (date) => {
           return new Date(date).toLocaleDateString('en-US', {
@@ -411,7 +413,7 @@ const exportSalesPdf = async (req, res) => {
       
       
       const shortenOrderId = (orderId) => {
-          
+          if (!orderId) return 'N/A';
           if (orderId.length > 10) {
               return orderId.substring(0, 7) + '...';
           }
@@ -492,8 +494,8 @@ const exportSalesPdf = async (req, res) => {
               formatDate(order.createdOn),
               customerName,
               products.length > 20 ? products.substring(0, 20) + '...' : products,
-              `₹${order.finalAmount.toLocaleString()}`,
-              order.status
+              `₹${(order.finalAmount || 0).toLocaleString()}`,
+              order.status || 'N/A'
           ];
           
           const rowTop = doc.y;

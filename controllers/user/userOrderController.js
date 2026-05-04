@@ -90,18 +90,15 @@ const getWalletPage = async (req, res) => {
       await wallet.save()
     }
 
+    // Show ALL transactions (debit + credit) sorted newest first
     const sortedTransactions = wallet.transactions.sort((a, b) => 
       b.transactionDate - a.transactionDate
     )
 
-    const creditTransactions = sortedTransactions.filter(transaction => 
-      transaction.transactionType === "credit"
-    )
-
-    const totalTransactions = creditTransactions.length
+    const totalTransactions = sortedTransactions.length
     const totalPages = Math.ceil(totalTransactions / limit)
 
-    const transactions = creditTransactions.slice(skip, skip + limit)
+    const transactions = sortedTransactions.slice(skip, skip + limit)
 
     res.render('Wallet', {
       title: 'My Wallet',

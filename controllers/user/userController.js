@@ -479,13 +479,15 @@ const loadLogin = async (req, res) => {
         console.log("Session data:", req.session.user);
 
         if (req.session.user) {
-            const userData = await User.findById(req.session.user._id);
+            const userData = await User.findById(req.session.user._id || req.session.user);
             if (userData) {
                 return res.redirect("/");
             }
         }
 
-        return res.render("login");
+        // Preserve returnTo in a hidden field so the page redirect works
+        const returnTo = req.session.returnTo || '/';
+        return res.render("login", { returnTo });
     } catch (error) {
         console.log("Error loading login:", error);
         res.redirect("/pageNotFound");
@@ -498,21 +500,24 @@ const login=async(req,res)=>{
        const{email,password}=req.body
        const findUser=await User.findOne({email:email.toLowerCase()})
        if(!findUser){
-        return res.render("login",{message:"User Not Found"})
+        return res.render("login",{message:"User Not Found", returnTo: req.body.returnTo || '/'})
        }
        if(findUser.isBlocked){
-        return res.render("login",{message:"User is Blocked by Admin"})
+        return res.render("login",{message:"User is Blocked by Admin", returnTo: req.body.returnTo || '/'})
        }
        const passwordMatch= await bcrypt.compare(password,findUser.password)
         if(!passwordMatch){
-            return res.render("login",{message:"Incorrect Password"})
+            return res.render("login",{message:"Incorrect Password", returnTo: req.body.returnTo || '/'})
         }
         req.session.user=findUser;
-        res.redirect("/")
+        // Redirect to the page the user originally tried to access
+        const returnTo = req.session.returnTo || req.body.returnTo || '/';
+        delete req.session.returnTo;
+        res.redirect(returnTo)
        
     } catch (error) {
       console.error("Login error")
-      res.render('login',{message:"login failed.  please try again later"})  
+      res.render('login',{message:"login failed.  please try again later", returnTo: '/'})  
     }
 }
 

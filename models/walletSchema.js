@@ -48,22 +48,7 @@ const walletSchema = new mongoose.Schema({
     }]
 }, { timestamps: true });
 
-walletSchema.pre('save', function(next) {
-    if (this.transactions.length > 0) {
-        const lastTransaction = this.transactions[this.transactions.length - 1];
-        if (lastTransaction.transactionDescription.includes('Wallet payment')) {
-            if (lastTransaction.transactionType === 'credit') {
-                this.walletBalance += lastTransaction.transactionAmount;
-            } else if (lastTransaction.transactionType === 'debit') {
-                if (this.walletBalance < lastTransaction.transactionAmount) {
-                    return next(new Error('Insufficient balance for this transaction'));
-                }
-                this.walletBalance -= lastTransaction.transactionAmount;
-            }
-        }
-    }
-    next();
-});
+// Balance is managed explicitly in controllers - no auto-adjustment in pre-save
 
 const Wallet = mongoose.model('Wallet', walletSchema);
 module.exports = Wallet;

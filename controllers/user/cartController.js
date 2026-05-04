@@ -465,66 +465,86 @@ const placeOrder = async (req, res) => {
       await newOrder.save();
 
       
-      let transactionDescription = '';
+      // --- Wallet Payment: validate & deduct ---
       if (paymentMethod === 'Wallet') {
-          transactionDescription = `Payment for order ${newOrder.orderId}`;
-      } else if (paymentMethod === 'COD') {
-          transactionDescription = `Cash on Delivery payment for order ${newOrder.orderId}`;
+          let userWallet = await Wallet.findOne({ userId });
+          if (!userWallet) {
+              return res.status(400).json({ error: "Wallet not found. Please add funds first." });
+          }
+          if (userWallet.walletBalance < newOrder.finalAmount) {
+              return res.status(400).json({ error: `Insufficient wallet balance. Available: ₹${userWallet.walletBalance.toFixed(2)}, Required: ₹${newOrder.finalAmount.toFixed(2)}` });
+          }
+          // Deduct from wallet
+          userWallet.walletBalance -= newOrder.finalAmount;
+          userWallet.transactions.push({
+              orderId: newOrder._id,
+              transactionType: 'debit',
+              transactionAmount: newOrder.finalAmount,
+              transactionDate: new Date(),
+              transactionStatus: 'completed',
+              transactionDescription: `Wallet payment for order #${newOrder.orderId}`
+          });
+          await userWallet.save();
+          // Keep User.wallet in sync
+          await User.findByIdAndUpdate(userId, { $set: { wallet: userWallet.walletBalance } }, { new: true });
+
+          // Credit admin wallet
+          const admin = await User.findOne({ isAdmin: true });
+          if (admin) {
+              let adminWallet = await Wallet.findOne({ userId: admin._id });
+              if (!adminWallet) {
+                  adminWallet = new Wallet({ userId: admin._id, walletBalance: 0, transactions: [] });
+              }
+              adminWallet.walletBalance += newOrder.finalAmount;
+              adminWallet.transactions.push({
+                  orderId: newOrder._id,
+                  transactionType: 'credit',
+                  transactionAmount: newOrder.finalAmount,
+                  transactionDate: new Date(),
+                  transactionStatus: 'completed',
+                  transactionDescription: `Wallet payment received for order #${newOrder.orderId}`
+              });
+              await adminWallet.save();
+              await User.findByIdAndUpdate(admin._id, { $set: { wallet: adminWallet.walletBalance } }, { new: true });
+          }
       } else {
-          transactionDescription = `Payment for order ${newOrder.orderId} using ${paymentMethod}`;
+      // --- Non-wallet transaction logging ---
+      let transactionDescription = '';
+      if (paymentMethod === 'COD') {
+          transactionDescription = `Cash on Delivery payment for order #${newOrder.orderId}`;
+      } else {
+          transactionDescription = `Payment for order #${newOrder.orderId} using ${paymentMethod}`;
       }
 
       await createWalletTransaction(
           userId,
           newOrder._id,
           newOrder.finalAmount,
-          'debit', 
+          'debit',
           transactionDescription,
           paymentMethod === 'COD' ? 'pending' : 'completed'
       );
 
-     
       const admin = await User.findOne({ isAdmin: true });
       if (admin) {
-          const adminTransactionDescription = `Payment received for order ${newOrder.orderId}`;
+          const adminTransactionDescription = `Payment received for order #${newOrder.orderId}`;
           await createWalletTransaction(
               admin._id,
-              newOrder._id, 
+              newOrder._id,
               newOrder.finalAmount,
-              'credit', 
+              'credit',
               adminTransactionDescription,
               paymentMethod === 'COD' ? 'pending' : 'completed'
           );
-      }
-      
-      if (admin) {
-          const userWallet = await Wallet.findOne({ userId });
+
           const adminWallet = await Wallet.findOne({ userId: admin._id });
-          
-          if (userWallet) {
-              if (paymentMethod === 'Wallet') {
-                  userWallet.walletBalance -= newOrder.finalAmount;
-                  await userWallet.save();
-                  
-                  await User.findByIdAndUpdate(
-                      userId,
-                      { $set: { wallet: userWallet.walletBalance } },
-                      { new: true }
-                  );
-              }
-          }
-          
           if (adminWallet && paymentMethod !== 'COD') {
               adminWallet.walletBalance += newOrder.finalAmount;
               await adminWallet.save();
-              
-              await User.findByIdAndUpdate(
-                  admin._id,
-                  { $set: { wallet: adminWallet.walletBalance } },
-                  { new: true }
-              );
+              await User.findByIdAndUpdate(admin._id, { $set: { wallet: adminWallet.walletBalance } }, { new: true });
           }
       }
+      } // end else (non-wallet)
 
       if (coupon && couponApplied && appliedCouponId) {
           await Coupon.findByIdAndUpdate(appliedCouponId, {

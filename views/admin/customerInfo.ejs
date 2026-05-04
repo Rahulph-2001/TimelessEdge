@@ -32,9 +32,9 @@
                         <td><%= data[i].phone %></td>
                         <td>
                             <% if (data[i].isBlocked === false) { %>
-                                <a href="/admin/blockCustomer?id=<%= data[i].id %>" class="btn btn-danger">Block</a>
+                                <button onclick="toggleCustomer('<%= data[i].id %>', 'block')" class="btn btn-danger">Block</button>
                             <% } else { %>
-                                <a href="/admin/unblockCustomer?id=<%= data[i].id %>" class="btn btn-success">Unblock</a>
+                                <button onclick="toggleCustomer('<%= data[i].id %>', 'unblock')" class="btn btn-success">Unblock</button>
                             <% } %>
                         </td>
                     </tr>
@@ -181,5 +181,23 @@
     }
     
 </style>
+
+<script>
+    function toggleCustomer(id, action) {
+        const url = action === 'block' ? `/admin/blockCustomer?id=${id}` : `/admin/unblockCustomer?id=${id}`;
+        fetch(url, { method: 'PATCH' })
+            .then(res => {
+                if (res.redirected || res.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Action failed. Please try again.');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Network error. Please try again.');
+            });
+    }
+</script>
 
 <%- include("../../views/partials/admin/footer") %>

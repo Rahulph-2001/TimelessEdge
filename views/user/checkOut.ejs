@@ -273,6 +273,21 @@
             <span><i class="fas fa-credit-card me-2"></i> Razorpay</span>
           </label>
         </div>
+        <div class="payment-option">
+          <label id="wallet-label">
+            <input type="radio" id="wallet" name="paymentMethod" value="Wallet"
+              <% if ((walletBalance || 0) <= 0) { %> disabled <% } %>>
+            <span>
+              <i class="fas fa-wallet me-2"></i> Wallet
+              <span class="badge bg-primary ms-2" style="font-size:0.85rem;">
+                Balance: ₹<%= (walletBalance || 0).toFixed(2) %>
+              </span>
+              <% if ((walletBalance || 0) <= 0) { %>
+                <small class="text-danger ms-2">(Insufficient balance)</small>
+              <% } %>
+            </span>
+          </label>
+        </div>
       </div>
 
       <button onclick="placeOrder()" id="placeOrderBtn" class="btn btn-primary btn-block">
@@ -414,9 +429,8 @@
         Swal.fire({
           icon: 'warning',
           title: 'Insufficient Wallet Balance',
-          text: `Your wallet balance (₹${walletBalance.toFixed(2)}) is less than the order amount (₹${finalAmount.toFixed(2)})`
+          text: `Your wallet balance (₹${walletBalance.toFixed(2)}) is less than the order amount (₹${finalAmount.toFixed(2)}). Please top up your wallet or choose another payment method.`
         });
-        
         $("#cod").prop("checked", true);
       }
     });
@@ -454,9 +468,22 @@
         totalPrice: originalTotal,
         discount: discount,
         finalAmount: finalAmount,
-        status: paymentMethod === "COD" ? "Pending" : "Processing",
+        status: paymentMethod === "COD" ? "Pending" : (paymentMethod === "Wallet" ? "Paid" : "Processing"),
         couponApplied: discount > 0
       };
+      
+      // Wallet: validate balance client-side before submitting
+      if (paymentMethod === "Wallet") {
+        const walletBalance = parseFloat("<%= walletBalance || 0 %>");
+        if (walletBalance < finalAmount) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Insufficient Wallet Balance',
+            text: `Your wallet balance (₹${walletBalance.toFixed(2)}) is not enough to cover the order total (₹${finalAmount.toFixed(2)}).`
+          });
+          return;
+        }
+      }
       
       $("#placeOrderBtn").prop("disabled", true).html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...');
       

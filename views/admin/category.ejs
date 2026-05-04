@@ -641,9 +641,9 @@
                           <button class="btn btn-warning" onclick="showAddOfferModal('<%= category._id %>', '<%= category.name %>')">Add Offer</button>
                         <% } %>
                         <% if(category.isListed) { %>
-                          <a href="/admin/listCategory?id=<%= category._id %>" class="btn btn-danger">Unlist</a>
+                          <button class="btn btn-danger" onclick="toggleCategory('<%= category._id %>', 'unlist')">Unlist</button>
                         <% } else { %>
-                          <a href="/admin/unlistCategory?id=<%= category._id %>" class="btn btn-success">List</a>
+                          <button class="btn btn-success" onclick="toggleCategory('<%= category._id %>', 'list')">List</button>
                         <% } %>
                         <a href="/admin/editCategory?id=<%= category._id %>" class="btn btn-info">Edit</a>
                       </div>
@@ -924,6 +924,24 @@
           });
         }
       });
+    }
+
+    function toggleCategory(id, action) {
+      const url = action === 'unlist'
+        ? `/admin/listCategory?id=${id}`
+        : `/admin/unlistCategory?id=${id}`;
+      fetch(url, { method: 'PATCH' })
+        .then(res => {
+          if (res.redirected || res.ok) {
+            window.location.reload();
+          } else {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Action failed. Please try again.' });
+          }
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          Swal.fire({ icon: 'error', title: 'Error', text: 'Network error. Please try again.' });
+        });
     }
   </script>
 </body>

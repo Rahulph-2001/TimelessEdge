@@ -31,7 +31,10 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
             return res.redirect("/login")
         }
         req.session.user=req.user
-        res.redirect("/")
+        // Redirect to the page user originally tried to access
+        const returnTo = req.session.returnTo || '/';
+        delete req.session.returnTo;
+        res.redirect(returnTo)
     }
 );
 
@@ -40,7 +43,7 @@ router.post("/login",userController.login)
 
 router.get("/",userController.loadHomepage)
 router.get("/shop",userController.loadShopping)
-router.get("/logout",userController.logout)
+router.post("/logout",userController.logout)
 router.get('/filter',userController.filterProduct)
 router.get('/search',profileController.searchProducts)
 router.get('/userProfile',userAuth,profileController.userProfile)

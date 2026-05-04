@@ -287,6 +287,7 @@
           </div>
           
           <form id="loginform" method="post" action="/login">
+            <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '/' %>">
             <div class="form-group">
               <label class="form-label" for="email">Email Address</label>
               <input

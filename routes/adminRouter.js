@@ -18,18 +18,18 @@ router.get("/pageerror", adminController.pageerror);
 router.get("/login", adminController.loadLogin);
 router.post("/login", redirectIfadminLoggedIn,adminController.login);
 router.get("/dashboard", adminAuth, adminController.loadDashboard);
-router.get("/logout", adminController.logout);
+router.post("/logout", adminController.logout);
 router.get('/api/orders-data', adminController.getOrdersDataAPI);
 router.get('/api/ledger-data', adminController.getLedgerDataAPI);
 
 router.get("/users", adminAuth, customerController.customerInfo);
-router.get("/blockCustomer", adminAuth, customerController.customerBlocked);
-router.get("/unblockCustomer", adminAuth, customerController.customerunBlocked);
+router.patch("/blockCustomer", adminAuth, customerController.customerBlocked);
+router.patch("/unblockCustomer", adminAuth, customerController.customerunBlocked);
 
 router.get("/category", adminAuth, categoryController.categoryInfo);
 router.post("/addcategory", adminAuth, categoryController.addCategory);
-router.get("/listCategory", adminAuth, categoryController.getListCategory);
-router.get("/unlistCategory", adminAuth, categoryController.getUnlistCategory);
+router.patch("/listCategory", adminAuth, categoryController.getListCategory);
+router.patch("/unlistCategory", adminAuth, categoryController.getUnlistCategory);
 router.get("/editcategory", adminAuth, categoryController.geteditCategory);
 router.post("/editCategory/:id", adminAuth, categoryController.editCategory);
 router.put('/addCategoryOffer',adminAuth,categoryController.addOfferCat)
@@ -37,8 +37,8 @@ router.put('/removeCategoryOffer',adminAuth,categoryController.removeOfferCat)
 
 router.get("/brands", adminAuth, brandController.getBrandPage);
 router.post("/addbrand", adminAuth, upload.single("image"), brandController.addBrand); 
-router.get('/blockBrand', adminAuth, brandController.blockBrand);
-router.get('/unblockBrand', adminAuth, brandController.unblockBrand);
+router.patch('/blockBrand', adminAuth, brandController.blockBrand);
+router.patch('/unblockBrand', adminAuth, brandController.unblockBrand);
 router.put('/deleteBrand',adminAuth,brandController.deleteBrand)
 router.get("/editBrand/:id", adminAuth, brandController.editBrand)
 router.post("/updateBrand/:id", adminAuth, upload.single('image'), brandController.updateBrand)

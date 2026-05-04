@@ -426,9 +426,10 @@ const cancelOrderItem = async (req, res) => {
       }
       
 
-      if (order.paymentMethod === 'Razorpay' && order.finalAmount > 0) {
+      // Refund for both Razorpay AND Wallet payments
+      if ((order.paymentMethod === 'Razorpay' || order.paymentMethod === 'Wallet') && order.finalAmount > 0) {
         const itemAmount = item.price * item.quantity;
-        const refundAmount = itemAmount - (itemAmount / order.totalPrice * order.discount);
+        const refundAmount = itemAmount - (itemAmount / order.totalPrice * (order.discount || 0));
         
         let userWallet = await Wallet.findOne({ userId: req.user._id });
         if (!userWallet) {
@@ -443,11 +444,13 @@ const cancelOrderItem = async (req, res) => {
           orderId: order._id,
           transactionType: 'credit',
           transactionAmount: refundAmount,
-          transactionDescription: `Refund for cancelled item in order #${order.orderId}`
+          transactionDate: new Date(),
+          transactionStatus: 'completed',
+          transactionDescription: `Refund for cancelled item in order #${order.orderId} (${order.paymentMethod})`
         };
           
-        userWallet.transactions.push(refundTransaction);
         userWallet.walletBalance += refundAmount;
+        userWallet.transactions.push(refundTransaction);
         await userWallet.save();
       
         await User.findByIdAndUpdate(
@@ -456,7 +459,8 @@ const cancelOrderItem = async (req, res) => {
           { new: true }
         );
           
-        const admin = await User.findOne({ isAdmin: true }); 
+        const admin = await User.findOne({ isAdmin: true });
+        if (admin) {
           let adminWallet = await Wallet.findOne({ userId: admin._id });
           if (!adminWallet) {
             adminWallet = new Wallet({
@@ -469,18 +473,19 @@ const cancelOrderItem = async (req, res) => {
             orderId: order._id,
             transactionType: 'debit',
             transactionAmount: refundAmount,
+            transactionDate: new Date(),
+            transactionStatus: 'completed',
             transactionDescription: `Refund issued for cancelled item in order #${order.orderId}`
           };
-          adminWallet.transactions.push(adminDebitTransaction);
           adminWallet.walletBalance -= refundAmount;
+          adminWallet.transactions.push(adminDebitTransaction);
           await adminWallet.save();
-
-
           await User.findByIdAndUpdate(
             admin._id,
-            {$set:{wallet:adminWallet.walletBalance}},
-            {new:true}
-          )
+            { $set: { wallet: adminWallet.walletBalance } },
+            { new: true }
+          );
+        }
       }
     
       

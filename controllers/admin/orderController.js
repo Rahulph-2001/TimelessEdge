@@ -208,6 +208,7 @@ const updateStatus = async (req, res) => {
                 
                 const userId = addressDoc.userId;
                 
+                // Restore product stock
                 for (const item of order.orderedItems) {
                     await Product.findByIdAndUpdate(
                         item.product,
@@ -216,36 +217,42 @@ const updateStatus = async (req, res) => {
                     );
                 }
                 
-                let wallet = await Wallet.findOne({ userId: userId });
-                
-                if (!wallet) {
-                    wallet = new Wallet({
-                        userId: userId,
-                        walletBalance: 0,
-                        transactions: []
+                // Only refund online payments — COD orders have no online payment to refund
+                if (order.paymentMethod === 'Razorpay' || order.paymentMethod === 'Wallet') {
+                    let wallet = await Wallet.findOne({ userId: userId });
+                    if (!wallet) {
+                        wallet = new Wallet({
+                            userId: userId,
+                            walletBalance: 0,
+                            transactions: []
+                        });
+                    }
+                    
+                    const refundAmount = order.finalAmount;
+                    
+                    // Bug fix: increment walletBalance BEFORE saving
+                    wallet.walletBalance += refundAmount;
+                    wallet.transactions.push({
+                        orderId: order._id,
+                        transactionType: 'credit',
+                        transactionAmount: refundAmount,
+                        transactionDate: new Date(),
+                        transactionStatus: 'completed',
+                        transactionDescription: `Refund for returned order #${order.orderId} (${order.paymentMethod})`
                     });
+                    await wallet.save();
+                    
+                    // Sync User.wallet with $set (not $inc to avoid double-count)
+                    await User.findByIdAndUpdate(
+                        userId,
+                        { $set: { wallet: wallet.walletBalance } },
+                        { new: true }
+                    );
+                    
+                    console.log(`Order ${orderId} returned, wallet credited with ${refundAmount}`);
+                } else {
+                    console.log(`Order ${orderId} returned (COD) — no wallet refund issued`);
                 }
-                
-                const refundAmount = order.finalAmount;
-                
-                wallet.transactions.push({
-                    orderId: order._id,
-                    transactionType: 'credit',
-                    transactionAmount: refundAmount,
-                    transactionDate: new Date(),
-                    transactionStatus: 'completed',
-                    transactionDescription: `Refund for returned order #${order.orderId}`
-                });
-                
-                await wallet.save();
-                
-                await User.findByIdAndUpdate(
-                    userId,
-                    { $inc: { wallet: refundAmount } },
-                    { new: true }
-                );
-                
-                console.log(`Order ${orderId} returned, wallet credited with ${refundAmount}`);
             } catch (updateError) {
                 console.error("Error processing return:", updateError);
                 return res.status(500).json({
@@ -337,101 +344,104 @@ const viewOrderDetails = async (req, res) => {
 }
 
 
-const approveReturn=async(req,res)=>{
+const approveReturn = async (req, res) => {
     try {
-        const{orderId}=req.body
-        if(!orderId){
-            return res.status(400).json({success:false,message:"Order ID is required"})
-        }
-        const order=await Order.findById(orderId)
-
-        if(!order){
-            return res.status(404).json({
-                success:false,
-                message:'Order not found'
-            })
+        const { orderId } = req.body;
+        if (!orderId) {
+            return res.status(400).json({ success: false, message: "Order ID is required" });
         }
 
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
 
-        order.status='Returned';
-        await order.save()
+        order.status = 'Returned';
+        // Mark all returnable items as Returned
+        order.orderedItems.forEach(item => {
+            if (item.status === 'Return Request' || item.status === 'Delivered') {
+                item.status = 'Returned';
+                item.returnedOn = new Date();
+            }
+        });
+        await order.save();
 
-        try{
-            const addressDoc=await Address.findOne({
-                'address._id':order.address
-            })
-
-            if(!addressDoc){
-                return res.status(404).json({
-                    success:false,
-                    message:'User address not found'
-                })
+        try {
+            const addressDoc = await Address.findOne({ 'address._id': order.address });
+            if (!addressDoc) {
+                return res.status(404).json({ success: false, message: 'User address not found' });
             }
 
-            const userId=addressDoc.userId;
+            const userId = addressDoc.userId;
 
-
-            for(const item of order.orderedItems){
-                await Product.findByIdAndUpdate(item.product,
-                    {$inc:{quantity:item.quantity}},
-                    {new:true}
-                )
+            // Restore product stock for all returned items
+            for (const item of order.orderedItems) {
+                if (item.status === 'Returned') {
+                    await Product.findByIdAndUpdate(
+                        item.product,
+                        { $inc: { quantity: item.quantity } },
+                        { new: true }
+                    );
+                }
             }
 
-            let wallet=await Wallet.findOne({userId:userId})
+            // Only refund online payments — COD has no online payment to refund
+            if (order.paymentMethod === 'Razorpay' || order.paymentMethod === 'Wallet') {
+                let wallet = await Wallet.findOne({ userId: userId });
+                if (!wallet) {
+                    wallet = new Wallet({ userId: userId, walletBalance: 0, transactions: [] });
+                }
 
+                const refundAmount = order.finalAmount;
 
-            if(!wallet){
-                wallet=new Wallet({
-                    userId:userId,
-                    walletBalance:0,
-                    transactions:[]
-                })
+                // Bug fix: increment walletBalance BEFORE saving (was missing before)
+                wallet.walletBalance += refundAmount;
+                wallet.transactions.push({
+                    orderId: order._id,
+                    transactionType: 'credit',
+                    transactionAmount: refundAmount,
+                    transactionDate: new Date(),
+                    transactionStatus: 'completed',
+                    transactionDescription: `Refund for returned order #${order.orderId} (${order.paymentMethod})`
+                });
+                await wallet.save();
+
+                // Sync User.wallet with $set (not $inc to avoid double-counting)
+                await User.findByIdAndUpdate(
+                    userId,
+                    { $set: { wallet: wallet.walletBalance } },
+                    { new: true }
+                );
+
+                console.log(`Return approved for order ${order.orderId}, wallet credited with ${refundAmount}`);
+            } else {
+                console.log(`Return approved for COD order ${order.orderId} — no wallet refund issued`);
             }
-
-            const refundAmount=order.finalAmount
-
-            wallet.transactions.push({
-                orderId:order._id,
-                transactionType:'credit',
-                transactionAmount:refundAmount,
-                transactionDate:new Date(),
-                transactionStatus:'completed',
-                transactionDescription:`Refund for order #${order.orderId}`
-            })
-
-            await wallet.save()
-            await User.findByIdAndUpdate(userId,{$inc:{wallet:refundAmount}},
-                {new:true}
-            )
 
             return res.json({
-                success:true,
-                message:'Return request approved and refund processed successfully',
-                order:order
-            })
+                success: true,
+                message: 'Return request approved and refund processed successfully',
+                order: order
+            });
 
-
-
-        }catch(updateError){
-            console.error("Error processing return ",updateError)
+        } catch (updateError) {
+            console.error("Error processing return:", updateError);
             return res.status(500).json({
-                success:false,
-                message:'Error processing return',
-                error:updateError.message
-            })
+                success: false,
+                message: 'Error processing return',
+                error: updateError.message
+            });
         }
 
     } catch (error) {
-        console.error('Error approving return:',error)
+        console.error('Error approving return:', error);
         res.status(500).json({
-            success:false,
-            message:'Error approving return ',
-            error:error.message
-        })
-        
+            success: false,
+            message: 'Error approving return',
+            error: error.message
+        });
     }
-}
+};
 
 const rejectReturn=async(req,res)=>{
     try {

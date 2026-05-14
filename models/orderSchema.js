@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const orderSchema = new Schema({
     orderId: {
         type: String,
-        default: () => uuidv4(),
+        default: () => "TE-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
         unique: true
     },
     orderedItems: [{

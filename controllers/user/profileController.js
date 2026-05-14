@@ -431,7 +431,7 @@ const getAddAddress = async (req, res) => {
             return res.status(401).json({ message: 'Please login to continue' });
         }
 
-        const { 
+        let { 
             addressType, 
             name, 
             city, 
@@ -442,6 +442,15 @@ const getAddAddress = async (req, res) => {
             altPhone,
             isDefault
         } = req.body;
+
+        addressType = addressType?.trim();
+        name = name?.trim();
+        city = city?.trim();
+        landMark = landMark?.trim();
+        state = state?.trim();
+        phone = phone?.trim();
+        altPhone = altPhone?.trim();
+        pincode = pincode?.toString().trim();
 
         if (!addressType) {
             return res.status(400).json({ message: 'Address type is required' });
@@ -563,7 +572,7 @@ const updateAddress = async (req, res) => {
 
         const { id } = req.params;
 
-        const { 
+        let { 
             addressType,  
             name, 
             city, 
@@ -574,6 +583,15 @@ const updateAddress = async (req, res) => {
             altPhone,
             isDefault
         } = req.body;
+
+        addressType = addressType?.trim();
+        name = name?.trim();
+        city = city?.trim();
+        landMark = landMark?.trim();
+        state = state?.trim();
+        phone = phone?.trim();
+        altPhone = altPhone?.trim();
+        pincode = pincode?.toString().trim();
 
         if (!addressType) {
             return res.status(400).json({ message: 'Address type is required' });

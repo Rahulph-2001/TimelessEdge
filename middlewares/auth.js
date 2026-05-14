@@ -68,7 +68,8 @@ const redirectIfUserLoggedIn = async (req, res, next) => {
         return next();
       }
   
-      const activeUser = await User.findById(user._id);
+      const userId = user._id || user;
+      const activeUser = await User.findById(userId);
       if (!activeUser) {
         return next();
       }

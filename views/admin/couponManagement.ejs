@@ -300,9 +300,8 @@
       <div class="card-body">
         <div class="row">
           <div class="col-md-3">
-            <form method="post" action="/admin/createCoupon">
+            <form id="createCouponForm">
 
-              <body onload="setDefaultStartdate()"></body>
               <div class="mb-4">
                 <label for="coupon-name" class="form-label">Coupon Name</label>
                 <input type="text" id="coupon-name" name="couponName" placeholder="Type here" class="form-control" />
@@ -339,8 +338,7 @@
                 </button>
               </div>
               <div id="err-msg" class="error-message"></div>
-              </body>
-            </form>
+              </form>
           </div>
           <div class="col-md-7 ml-105">
             <div class="table-responsive">
@@ -569,9 +567,9 @@
         document.getElementById("error-coupon-name").innerHTML = "Coupon name must be alphanumeric and 1-50 characters long";
       }
 
-      if (sDateObj <= todayDateObj) {
-        errors.push("Starting date should be greater than or equal to today's date");
-        document.getElementById("error-start-date").innerHTML = "Starting date should be greater than or equal to today's date";
+      if (sDateObj < todayDateObj) {
+        errors.push("Starting date should be today or a future date");
+        document.getElementById("error-start-date").innerHTML = "Starting date should be today or a future date";
       }
 
       if (sDateObj >= eDateObj) {
@@ -594,7 +592,7 @@
         return false;
       }
 
-      const form = document.querySelector("form");
+      const form = document.getElementById("createCouponForm");
       const formData = new FormData(form);
       let jsonData = {};
       formData.forEach((value, key) => (jsonData[key] = value));
@@ -607,7 +605,6 @@
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-
             Swal.fire({
               icon: "success",
               title: "Success!",
@@ -617,6 +614,21 @@
               window.location.href = "/admin/coupon";
             });
           } else {
+            // Paint server field-level errors inline
+            if (data.errors && typeof data.errors === 'object') {
+              const errorFieldMap = {
+                couponName: 'error-coupon-name',
+                startDate:  'error-start-date',
+                endDate:    'error-end-date',
+                offerPrice: 'error-offer-price',
+                minimumPrice: 'error-minimum-price'
+              };
+              Object.entries(data.errors).forEach(([field, msg]) => {
+                if (errorFieldMap[field]) {
+                  document.getElementById(errorFieldMap[field]).innerHTML = msg;
+                }
+              });
+            }
             Swal.fire({
               icon: "error",
               title: "Error!",

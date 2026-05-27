@@ -16,6 +16,23 @@
       margin-bottom: 20px;
   }
 
+  .error-box {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      display: inline-block;
+      padding: 30px 40px;
+      margin-top: 30px;
+      max-width: 500px;
+  }
+
+  .error-code {
+      font-size: 4rem;
+      font-weight: bold;
+      color: #dc3545;
+      margin-bottom: 0;
+  }
+
   button {
       background-color: #007bff;
       color: #fff;
@@ -24,6 +41,7 @@
       border-radius: 5px;
       cursor: pointer;
       transition: background-color 0.3s;
+      margin-top: 15px;
   }
 
   button:hover {
@@ -31,14 +49,16 @@
   }
 </style>
 
-
-  <h1>Error Page Admin</h1>
-  <p>An error occurred.</p>
-  <button onclick="godashboard()">Go to Home Page</button>
+  <div class="error-box">
+    <p class="error-code">&#9888;</p>
+    <h1>Something went wrong</h1>
+    <p><%= message || 'An unexpected error occurred. Please try again.' %></p>
+    <button onclick="godashboard()">Go to Dashboard</button>
+  </div>
 
   <script>
       function godashboard() {
-          window.location.href = "/admin";
+          window.location.href = "/admin/dashboard";
       }
   </script>
 

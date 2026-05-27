@@ -13,8 +13,9 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
 
-const pageerror=async (req,res)=>{
-    res.render("admin-error")
+const pageerror = async (req, res) => {
+    const message = req.query.message || "An unexpected error occurred. Please try again.";
+    res.render("pageerror", { message });
 }
 
 const loadLogin =(req,res)=>{

@@ -243,44 +243,51 @@ const updateCoupon = async (req, res) => {
     }
 };
 
-const blockCoupon=async(req,res)=>{
+const blockCoupon = async (req, res) => {
     try {
-        const couponId=req.params.couponId
+        const couponId = req.params.couponId;
         if (!mongoose.Types.ObjectId.isValid(couponId)) {
             return res.status(400).json({ success: false, message: "Invalid Coupon ID" });
         }
-        const updatedCoupon=await Coupon.findByIdAndUpdate(couponId,{isList:false},{new:true}) 
-        if(!updatedCoupon){
-            return res.status(404).json({success:false,message:"Coupon Not Found"})
+        const updatedCoupon = await Coupon.findByIdAndUpdate(
+            couponId,
+            { isList: false },
+            { new: true }
+        );
+        if (!updatedCoupon) {
+            return res.status(404).json({ success: false, message: "Coupon Not Found" });
         }
-        res.status(200).json({success:true,message:"Coupon Blocked SuccessFully ",coupon:updateCoupon})
-        
+        // Fixed: was `coupon: updateCoupon` (function reference) — now `coupon: updatedCoupon` (variable)
+        res.status(200).json({ success: true, message: "Coupon Blocked Successfully", coupon: updatedCoupon });
     } catch (error) {
         console.error("Error blocking coupon:", error);
         res.status(500).json({ success: false, message: "Failed to block coupon", error: error.message });
     }
-        
-    }
+};
 
-    const unblockCoupon=async(req,res)=>{
-        try {
-            const couponId=req.params.couponId
-            if (!mongoose.Types.ObjectId.isValid(couponId)) {
-                return res.status(400).json({ success: false, message: "Invalid Coupon ID" });
-            }
-            const updatedCoupon=await Coupon.findByIdAndUpdate(couponId,{isList:true},{ne:true})
-            if(!updatedCoupon){
-                return res.status(404).json({success:false,message:"Coupon Not Found"})
-            }
-            res.status(200).json({success:true,message:"Coupon Unblocked SuccessFully",coupon:updatedCoupon})
 
-            
-        } catch (error) {
-            console.error('Error unblocking Coupon',error)
-            res.status(500).json({success:false,message:"Failed to Unblock coupon",error:error.message})
-            
+const unblockCoupon = async (req, res) => {
+    try {
+        const couponId = req.params.couponId;
+        if (!mongoose.Types.ObjectId.isValid(couponId)) {
+            return res.status(400).json({ success: false, message: "Invalid Coupon ID" });
         }
+        // Fixed: was `{ne:true}` (invalid option) — now `{new:true}` (returns updated document)
+        const updatedCoupon = await Coupon.findByIdAndUpdate(
+            couponId,
+            { isList: true },
+            { new: true }
+        );
+        if (!updatedCoupon) {
+            return res.status(404).json({ success: false, message: "Coupon Not Found" });
+        }
+        res.status(200).json({ success: true, message: "Coupon Unblocked Successfully", coupon: updatedCoupon });
+    } catch (error) {
+        console.error('Error unblocking Coupon', error);
+        res.status(500).json({ success: false, message: "Failed to Unblock coupon", error: error.message });
     }
+};
+
 
 
 

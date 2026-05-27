@@ -38,22 +38,24 @@ const userAuth = async (req, res, next) => {
 const adminAuth = async (req, res, next) => {
     try {
       if (!req.session.admin) {
-        
         return res.redirect('/admin/login');
       }
-      const activeAdmin = await User.findOne({ isAdmin: true });
-      if (!activeAdmin) {
-        return next();
+
+      // Validate the SPECIFIC session admin, not just any admin in the DB
+      const activeAdmin = await User.findById(req.session.admin);
+      if (!activeAdmin || !activeAdmin.isAdmin) {
+        req.session.destroy();
+        return res.redirect('/admin/login');
       }
       req.admin = activeAdmin;
-  
+
       if (req.originalUrl === '/admin/login') {
-        return res.redirect('/admin');
+        return res.redirect('/admin/dashboard');
       }
-      
+
       return next();
     } catch (error) {
-      console.log(error);
+      console.log('adminAuth error:', error);
       res.status(500).send("Internal Server Error");
     }
   };

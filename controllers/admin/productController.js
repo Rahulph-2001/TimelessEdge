@@ -32,14 +32,23 @@ const addProduct = async (req, res) => {
     try {
         const { productName, brand, description, regularPrice, salePrice, quantity, color, category } = req.body;
         
-       
-        if (!productName || !brand || !description || !regularPrice || !quantity || !category) {
+        // Validate all required fields including color
+        if (!productName || !brand || !description || !regularPrice || !quantity || !category || !color) {
             return res.status(400).json({
                 success: false,
-                message: "All required fields must be provided"
+                message: "All required fields must be provided",
+                fields: {
+                    productName: !productName ? "Product name is required" : null,
+                    brand: !brand ? "Please select a brand" : null,
+                    description: !description ? "Description is required" : null,
+                    regularPrice: !regularPrice ? "Regular price is required" : null,
+                    quantity: !quantity ? "Quantity is required" : null,
+                    category: !category ? "Please select a category" : null,
+                    color: !color ? "Color is required" : null,
+                }
             });
         }
-        
+
      
         const regPrice = parseFloat(regularPrice);
         if (isNaN(regPrice) || regPrice <= 0) {

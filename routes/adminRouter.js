@@ -49,8 +49,9 @@ router.get("/products", adminAuth, productController.getAllproduct);
 router.put("/blockProduct/:id", adminAuth, productController.blockProduct);
 router.get("/editProduct/:id", adminAuth, productController.getEditProduct);
 router.put("/editProduct/:id", adminAuth, upload.array("images", 4), productController.submittProduct);
-router.put('/addProductOffer/:id',productController.addOffer)
-router.put('/removeProductOffer/:id',productController.removeProductOffer)
+router.put('/addProductOffer/:id', adminAuth, productController.addOffer);
+router.put('/removeProductOffer/:id', adminAuth, productController.removeProductOffer);
+
 
 
 router.get('/AdminOrder',adminAuth,orderController.getAllOrders)

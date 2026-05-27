@@ -69,13 +69,25 @@
 
            <div>
              <label for="startingDate" class="form-label">Start Date</label>
-             <input type="date" name="startDate" class="form-control" id="startingDate" required />
+             <%
+               const startVal = findCoupon.createdOn
+                 ? new Date(findCoupon.createdOn).toISOString().split('T')[0]
+                 : '';
+             %>
+             <input type="date" name="startDate" class="form-control" id="startingDate"
+               value="<%= startVal %>" required />
              <div id="error-start-date" class="error-message"></div>
            </div>
 
            <div>
              <label for="expiringDate" class="form-label">End Date</label>
-             <input type="date" name="endDate" class="form-control" id="expiringDate" required />
+             <%
+               const endVal = findCoupon.expireOn
+                 ? new Date(findCoupon.expireOn).toISOString().split('T')[0]
+                 : '';
+             %>
+             <input type="date" name="endDate" class="form-control" id="expiringDate"
+               value="<%= endVal %>" required />
              <div id="error-end-date" class="error-message"></div>
            </div>
 
@@ -105,94 +117,78 @@
 </section>
 
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script><script>
- function setDefaultStartDate() {
-   const today = new Date();
-   const year = today.getFullYear();
-   let month = (today.getMonth() + 1).toString().padStart(2, "0");
-   let day = today.getDate().toString().padStart(2, "0");
-   document.getElementById("startingDate").value = `${year}-${month}-${day}`;
- }
+<<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  // NOTE: setDefaultStartDate / setDefaultEndDate have been removed.
+  // Start and end date inputs are now pre-populated directly from the
+  // database via EJS value attributes, so we no longer override them.
 
- function setDefaultEndDate() {
-   const today = new Date();
-   const tomorrow = new Date(today);
-   tomorrow.setDate(today.getDate() + 1);
+  document.getElementById("coupon-form").addEventListener("submit", function(event) {
+    event.preventDefault();
+    if (validateForm()) {
+      updateCoupon();
+    }
+  });
 
-   const year = tomorrow.getFullYear();
-   let month = (tomorrow.getMonth() + 1).toString().padStart(2, "0");
-   let day = tomorrow.getDate().toString().padStart(2, "0");
-   document.getElementById("expiringDate").value = `${year}-${month}-${day}`;
- }
+  function validateForm() {
+    document.querySelectorAll(".error-message").forEach((el) => (el.innerHTML = ""));
 
- document.getElementById("coupon-form").addEventListener("submit", function(event) {
-   event.preventDefault();
-   if (validateForm()) {
-     updateCoupon();
-   }
- });
+    const sDate = document.getElementById("startingDate").value;
+    const eDate = document.getElementById("expiringDate").value;
+    const sDateObj = new Date(sDate);
+    const eDateObj = new Date(eDate);
+    const todayDateObj = new Date();
+    todayDateObj.setHours(0, 0, 0, 0);
 
- function validateForm() {
-   document.querySelectorAll(".error-message").forEach((el) => (el.innerHTML = ""));
+    if (sDateObj < todayDateObj) {
+      document.getElementById("error-start-date").innerHTML = "Start date cannot be in the past.";
+      return false;
+    }
 
-   const sDate = document.getElementById("startingDate").value;
-   const eDate = document.getElementById("expiringDate").value;
-   const sDateObj = new Date(sDate);
-   const eDateObj = new Date(eDate);
-   const todayDateObj = new Date();
-   todayDateObj.setHours(0, 0, 0, 0);
+    if (sDateObj > eDateObj) {
+      document.getElementById("error-end-date").innerHTML = "End date should be after start date.";
+      return false;
+    }
 
-   if (sDateObj < todayDateObj) {
-     document.getElementById("error-start-date").innerHTML = "Start date cannot be in the past.";
-     return false;
-   }
+    let name = document.getElementById("coupon-name").value.trim();
+    const nameRegex = /^[A-Za-z0-9 ]{1,50}$/;
 
-   if (sDateObj > eDateObj) {
-     document.getElementById("error-end-date").innerHTML = "End date should be after start date.";
-     return false;
-   }
+    if (!nameRegex.test(name)) {
+      document.getElementById("error-coupon-name").innerHTML = "Coupon Name should be 1-50 characters and alphanumeric.";
+      return false;
+    }
 
-   let name = document.getElementById("coupon-name").value.trim();
-   const nameRegex = /^[A-Za-z0-9 ]{1,50}$/;
+    const offerPrice = Number(document.getElementById("offer-price").value);
+    const minimumPrice = Number(document.getElementById("minimum-price").value);
 
-   if (!nameRegex.test(name)) {
-     document.getElementById("error-coupon-name").innerHTML = "Coupon Name should be 1-50 characters and alphanumeric.";
-     return false;
-   }
+    if (isNaN(offerPrice) || offerPrice <= 0) {
+      document.getElementById("error-offer-price").innerHTML = "Offer Price must be a positive number.";
+      return false;
+    }
 
-   const offerPrice = Number(document.getElementById("offer-price").value);
-   const minimumPrice = Number(document.getElementById("minimum-price").value);
+    if (isNaN(minimumPrice) || minimumPrice <= 0) {
+      document.getElementById("error-minimum-price").innerHTML = "Minimum Price must be a positive number.";
+      return false;
+    }
 
-   if (isNaN(offerPrice) || offerPrice <= 0) {
-     document.getElementById("error-offer-price").innerHTML = "Offer Price must be a positive number.";
-     return false;
-   }
+    if (offerPrice >= minimumPrice) {
+      document.getElementById("error-offer-price").innerHTML = "Offer Price must be less than Minimum Price.";
+      return false;
+    }
 
-   if (isNaN(minimumPrice) || minimumPrice <= 0) {
-     document.getElementById("error-minimum-price").innerHTML = "Minimum Price must be a positive number.";
-     return false;
-   }
+    return true;
+  }
 
-   if (offerPrice >= minimumPrice) {
-     document.getElementById("error-offer-price").innerHTML = "Offer Price must be less than Minimum Price.";
-     return false;
-   }
-
-   return true;
- }
-
- function updateCoupon() {
+  function updateCoupon() {
     const requestData = {
-        couponId: document.getElementById("coupon-id").value,
-        couponName: document.getElementById("coupon-name").value,
-        startDate: document.getElementById("startingDate").value,
-        endDate: document.getElementById("expiringDate").value,
-        offerPrice: Number(document.getElementById("offer-price").value),
+        couponId:     document.getElementById("coupon-id").value,
+        couponName:   document.getElementById("coupon-name").value,
+        startDate:    document.getElementById("startingDate").value,
+        endDate:      document.getElementById("expiringDate").value,
+        offerPrice:   Number(document.getElementById("offer-price").value),
         minimumPrice: Number(document.getElementById("minimum-price").value),
     };
-
-    console.log("Sending update request:", requestData);
 
     $.ajax({
         url: "/admin/updatecoupon",
@@ -200,7 +196,6 @@
         contentType: "application/json",
         data: JSON.stringify(requestData),
         success: function(response) {
-            console.log("Success response:", response);
             Swal.fire({
                 icon: "success",
                 title: "Success",
@@ -210,20 +205,33 @@
                 window.location.href = "/admin/coupon";
             });
         },
-        error: function(xhr, status, error) {
-            console.error("Error details:", {
-                status: xhr.status,
-                responseText: xhr.responseText,
-                error: error
-            });
+        error: function(xhr) {
+            const resp = xhr.responseJSON;
+            // Paint server field-level errors inline next to each field
+            if (resp && resp.errors && typeof resp.errors === 'object') {
+                const errMap = {
+                    couponName:   'error-coupon-name',
+                    startDate:    'error-start-date',
+                    endDate:      'error-end-date',
+                    offerPrice:   'error-offer-price',
+                    minimumPrice: 'error-minimum-price'
+                };
+                document.querySelectorAll(".error-message").forEach(el => el.innerHTML = "");
+                Object.entries(resp.errors).forEach(([field, msg]) => {
+                    if (errMap[field]) {
+                        document.getElementById(errMap[field]).innerHTML = msg;
+                    }
+                });
+            }
             Swal.fire({
                 icon: "error",
                 title: "Error",
-                text: xhr.responseJSON?.error || "Failed to update the coupon. Please try again!",
+                text: (resp && resp.message) || "Failed to update the coupon. Please try again!",
             });
         },
     });
-}
+  }
 </script>
+
 
 <%- include("../../views/partials/admin/footer") %>

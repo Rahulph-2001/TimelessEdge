@@ -1,104 +1,120 @@
 
-const express=require('express')
-const router=express.Router()
-const userController=require('../controllers/user/userController')
+const express = require('express')
+const router = express.Router()
+const userController = require('../controllers/user/userController')
 const passport = require('passport')
-const  {userAuth} = require("../middlewares/auth");
-const {redirectIfUserLoggedIn,redirectIfadminLoggedIn} = require('../middlewares/auth')
-const profileController=require('../controllers/user/profileController')
-const productController=require('../controllers/user/productController')
-const cartController=require('../controllers/user/cartController')
-const userOrderController=require('../controllers/user/userOrderController');
-const {validateAddress}=require('../helpers/validators')
+const { userAuth } = require("../middlewares/auth");
+const { redirectIfUserLoggedIn, redirectIfadminLoggedIn } = require('../middlewares/auth')
+const profileController = require('../controllers/user/profileController')
+const productController = require('../controllers/user/productController')
+const cartController = require('../controllers/user/cartController')
+const userOrderController = require('../controllers/user/userOrderController');
+const { validateAddress } = require('../helpers/validators')
 const { upload } = require('../helpers/multer');
 
+// NOTE: Global router.use(redirectIfUserLoggedIn) and router.use(redirectIfadminLoggedIn)
+// have been REMOVED. They were applied to ALL routes including public ones (/shop, /filter etc.)
+// causing broken redirects for logged-in users. They are now applied per-route below.
 
-router.use(redirectIfUserLoggedIn)
+router.get("/pageNotFound", userController.pageNotFound)
+router.get('/', userController.loadHomepage)
 
-router.use(redirectIfadminLoggedIn)
+// ── Auth routes ── apply redirect guards only here ────────────────────────────
+router.get("/signup", redirectIfUserLoggedIn, userController.loadSignup)
+router.post('/signup', redirectIfUserLoggedIn, userController.signup)
+router.post("/verify-otp", userController.verifyOtp)
+router.post("/resend-otp", userController.resendOtp)
 
-
-router.get("/pageNotFound",userController.pageNotFound)
-router.get('/',userController.loadHomepage)
-router.get("/signup",userController.loadSignup)
-router.post('/signup',userController.signup)
-router.post("/verify-otp",userController.verifyOtp)
-router.post("/resend-otp",userController.resendOtp)
-router.get("/auth/google",passport.authenticate("google",{scope:['profile','email']}))
+router.get("/auth/google", passport.authenticate("google", { scope: ['profile', 'email'] }))
 router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/signup' }),
     (req, res) => {
-        if(!req.user){
+        if (!req.user) {
             return res.redirect("/login")
         }
-        req.session.user=req.user
-        // Redirect to the page user originally tried to access
+        req.session.user = req.user
         const returnTo = req.session.returnTo || '/';
         delete req.session.returnTo;
         res.redirect(returnTo)
     }
 );
 
-router.get("/login",userController.loadLogin)
-router.post("/login",userController.login)
+router.get("/login", redirectIfUserLoggedIn, redirectIfadminLoggedIn, userController.loadLogin)
+router.post("/login", redirectIfUserLoggedIn, userController.login)
 
-router.get("/",userController.loadHomepage)
-router.get("/shop",userController.loadShopping)
-router.post("/logout",userController.logout)
-router.get('/filter',userController.filterProduct)
-router.get('/search',profileController.searchProducts)
-router.get('/userProfile',userAuth,profileController.userProfile)
+// ── Public routes ─────────────────────────────────────────────────────────────
+router.get("/", userController.loadHomepage)
+router.get("/shop", userController.loadShopping)
+router.post("/logout", userController.logout)
+router.get('/filter', userController.filterProduct)
+router.get('/search', profileController.searchProducts)
 
-router.get("/forgot-password",profileController.getForgotPassPage)
-router.post('/verify-email',profileController.verifyForgotOtp)
-router.post('/verify-passForgot-otp',profileController.verifyForgotPassOtp)
-router.get('/reset-password',profileController.getResetPasspage)
-router.post('/resend-forgot-otp',profileController.resendOtp)
-router.post('/reset-password',profileController.postNewPassword)
-router.get("/profile/address/add",userAuth,profileController.getAddAddress)
-router.post("/profile/address/add",profileController.createAddress)
-router.get('/profile/address/edit/:id',profileController.getEditAddress);
-router.put('/profile/address/edit/:id',profileController.updateAddress)
-router.put('/address/block/:docId/:addressId', profileController.blockAddress);
-router.put('/address/unblock/:docId/:addressId', profileController.unblockAddress);
-router.get('/change-Email',userAuth,profileController.changeEmail)
-router.post('/change-Email',userAuth,profileController.changeEmailValid)
-router.post('/verify-email-otp',userAuth,profileController.verifyEmailOtp)
-router.post('/update-email',userAuth,profileController.changingEmail)
-router.get('/change-password',userAuth,profileController.getChangePasswordPage)
-router.post('/change-password',userAuth,profileController.changePassword)
-router.get('/profile/edit',profileController.editProfile)
-router.post('/profile/update', upload.single('profile_image'),profileController.updateProfile)
+// ── User profile ──────────────────────────────────────────────────────────────
+router.get('/userProfile', userAuth, profileController.userProfile)
 
+// ── Forgot password (public) ──────────────────────────────────────────────────
+router.get("/forgot-password", profileController.getForgotPassPage)
+router.post('/verify-email', profileController.verifyForgotOtp)
+router.post('/verify-passForgot-otp', profileController.verifyForgotPassOtp)
+router.get('/reset-password', profileController.getResetPasspage)
+router.post('/resend-forgot-otp', profileController.resendOtp)
+router.post('/reset-password', profileController.postNewPassword)
 
-router.get('/productDetails',productController.productDetails)
-router.post('/submit-review',productController.submitReview)
-router.post('/wishlist/add/:id',userAuth,productController.addWhishlist)
-router.get('/wishlist',userAuth,productController.wishListPage)
-router.delete('/wishlist/remove/:productId',productController.removeWishlist)
-router.post('/cart/add-from-wishlist',productController.addToCartFromWishlist)
+// ── Address routes — all protected; validateAddress applied on mutating routes ─
+router.get("/profile/address/add", userAuth, profileController.getAddAddress)
+router.post("/profile/address/add", userAuth, validateAddress, profileController.createAddress)
+router.get('/profile/address/edit/:id', userAuth, profileController.getEditAddress)
+router.put('/profile/address/edit/:id', userAuth, validateAddress, profileController.updateAddress)
+router.put('/address/block/:docId/:addressId', userAuth, profileController.blockAddress)
+router.put('/address/unblock/:docId/:addressId', userAuth, profileController.unblockAddress)
 
-router.get('/cart',userAuth,cartController.getCart)
-router.post('/cart/add',cartController.addToCart)
-router.post("/cart/update-cart",cartController.updateCart)
-router.post("/cart/remove",cartController.removeItem)
-router.get('/checkout',cartController.checkOut)
-router.post('/validate-coupon',cartController.validateCoupon)
-router.post('/order/place',cartController.placeOrder)
+// ── Email change — protected ──────────────────────────────────────────────────
+router.get('/change-Email', userAuth, profileController.changeEmail)
+router.post('/change-Email', userAuth, profileController.changeEmailValid)
+router.post('/verify-email-otp', userAuth, profileController.verifyEmailOtp)
+router.post('/update-email', userAuth, profileController.changingEmail)
 
-router.get('/order/confirmation/:orderId',userOrderController.confirmOrder)
+// ── Password change — protected ───────────────────────────────────────────────
+router.get('/change-password', userAuth, profileController.getChangePasswordPage)
+router.post('/change-password', userAuth, profileController.changePassword)
+
+// ── Profile edit — protected ──────────────────────────────────────────────────
+router.get('/profile/edit', userAuth, profileController.editProfile)
+router.post('/profile/update', userAuth, upload.single('profile_image'), profileController.updateProfile)
+
+// ── Product / Wishlist (public pages, auth on wishlist write) ─────────────────
+router.get('/productDetails', productController.productDetails)
+router.post('/submit-review', productController.submitReview)
+router.post('/wishlist/add/:id', userAuth, productController.addWhishlist)
+router.get('/wishlist', userAuth, productController.wishListPage)
+router.delete('/wishlist/remove/:productId', productController.removeWishlist)
+router.post('/cart/add-from-wishlist', productController.addToCartFromWishlist)
+
+// ── Cart & Checkout ───────────────────────────────────────────────────────────
+router.get('/cart', userAuth, cartController.getCart)
+router.post('/cart/add', cartController.addToCart)
+router.post("/cart/update-cart", cartController.updateCart)
+router.post("/cart/remove", cartController.removeItem)
+router.get('/checkout', cartController.checkOut)
+router.post('/validate-coupon', cartController.validateCoupon)
+router.post('/order/place', cartController.placeOrder)
+
+// ── Payment & Order confirmation ──────────────────────────────────────────────
+router.get('/order/confirmation/:orderId', userOrderController.confirmOrder)
 router.post('/order/create-razorpay-order', cartController.createRazorpayOrder)
 router.post('/order/verify-payment', cartController.verifyPayment)
-router.get('/order/payment-failed/:orderId',cartController.paymentFailed)
+router.get('/order/payment-failed/:orderId', cartController.paymentFailed)
 router.post('/order/retry-payment', cartController.retryPayment)
 router.get('/order/verify-retry-payment', cartController.verifyRetryPayment)
-router.get('/wallet',userOrderController.getWalletPage)
 
+// ── Wallet — protected ────────────────────────────────────────────────────────
+router.get('/wallet', userAuth, userOrderController.getWalletPage)
+router.post('/user/wallet/add-funds', userAuth, userOrderController.addFunds)
 
+// ── Orders — protected ────────────────────────────────────────────────────────
+router.get('/orders/:orderId', userAuth, userOrderController.getOrderDetails)
+router.post('/api/orders/:orderId/cancel', userAuth, userOrderController.cancelOrder)
+router.post('/api/orders/:orderId/items/:itemId/cancel', userAuth, userOrderController.cancelOrderItem)
+router.post('/api/orders/:orderId/items/:itemId/return', userAuth, userOrderController.returnOrderItem)
+router.get('/api/orders/:orderId/items/:itemId/invoice', userAuth, userOrderController.downloadInvoice)
 
-router.post('/user/wallet/add-funds',userOrderController.addFunds);
-router.get('/orders/:orderId',userOrderController.getOrderDetails)
-router.post('/api/orders/:orderId/cancel', userAuth, userOrderController.cancelOrder);
-router.post('/api/orders/:orderId/items/:itemId/cancel', userAuth, userOrderController.cancelOrderItem);
-router.post('/api/orders/:orderId/items/:itemId/return', userAuth, userOrderController.returnOrderItem);
-router.get('/api/orders/:orderId/items/:itemId/invoice', userAuth, userOrderController.downloadInvoice);
-module.exports= router 
+module.exports = router

@@ -174,8 +174,7 @@
             <div class="col-lg-6">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <form method="post" action="/admin/addProducts" enctype="multipart/form-data"
-                            onsubmit="return validateForm()">
+                        <form id="addProductForm" method="post" action="/admin/addProducts" enctype="multipart/form-data">
                             
                             <div class="mb-4">
                                 <label for="product_name" class="form-label">Product Name</label>
@@ -357,7 +356,7 @@ let croppers = [];
 let croppedImageBlobs = [];
 
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
+    const form = document.getElementById('addProductForm');
     initializeFormValidation(form);
     initializeImageHandlers();
 });
@@ -482,6 +481,12 @@ function validateFormInputs() {
         isValid = false;
     }
 
+    const color = document.querySelector('input[name="color"]').value.trim();
+    if (!color) {
+        showError("color-error", "Color is required");
+        isValid = false;
+    }
+
     if (!croppedImageBlobs.some(blob => blob)) {
         showError("images-error", "At least one product image is required");
         isValid = false;
@@ -521,10 +526,35 @@ function handleFormSubmission(form) {
                 text: 'Your product has been added successfully.',
                 confirmButtonText: 'OK'
             }).then(() => {
-                window.location.href = '/admin/addproducts';
+                // Fixed: was '/admin/addproducts' (404) — now '/admin/products' (product list)
+                window.location.href = '/admin/products';
             });
         } else {
-            throw new Error(data.message || 'Product submission failed');
+            // Paint field-level errors inline when server returns them
+            if (data.fields) {
+                const fieldMap = {
+                    productName: 'productName-error',
+                    brand: 'brand-error',
+                    description: 'description-error',
+                    regularPrice: 'regularPrice-error',
+                    salePrice: 'salePrice-error',
+                    quantity: 'quantity-error',
+                    category: 'category-error',
+                    color: 'color-error'
+                };
+                Object.entries(data.fields).forEach(([field, msg]) => {
+                    if (msg && fieldMap[field]) {
+                        showError(fieldMap[field], msg);
+                    }
+                });
+            }
+            // Also show a SweetAlert with the general message
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: data.message || 'Please fix the errors and try again.',
+                confirmButtonText: 'OK'
+            });
         }
     })
     .catch(error => {

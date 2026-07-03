@@ -296,7 +296,7 @@ This project is licensed under the [MIT License](LICENSE).
 - 🌐 [Portfolio](#)
 - 💼 [LinkedIn](#)
 - 🐙 [GitHub](https://github.com/Rahulph-2001)
-- ✉️ [Email](mailto:rahullph43@gmail.com)
+- ✉️ [Email](mailto:rahulph719@gmail.com)
 
 ---
 

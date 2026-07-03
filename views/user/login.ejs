@@ -162,6 +162,129 @@
         background-color: #d32f2f;
         transform: translateY(-2px);
       }
+
+      /* ── Demo Credentials Button ─────────────────────── */
+      .btn-demo {
+        width: 100%;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border: 2px solid var(--secondary-color);
+        border-radius: 8px;
+        background: transparent;
+        color: var(--secondary-color);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-demo::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--secondary-color);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.35s ease;
+        z-index: 0;
+      }
+
+      .btn-demo:hover::before {
+        transform: scaleX(1);
+      }
+
+      .btn-demo span {
+        position: relative;
+        z-index: 1;
+      }
+
+      .btn-demo:hover span {
+        color: #fff;
+      }
+
+      .btn-demo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(229, 54, 55, 0.35);
+      }
+
+      /* Sparkle icon spin on hover */
+      .btn-demo:hover .demo-icon {
+        animation: spin-once 0.5s ease;
+      }
+
+      @keyframes spin-once {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
+
+      /* Demo info card */
+      .demo-info-card {
+        background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+        border: 1px solid rgba(229, 54, 55, 0.2);
+        border-radius: 10px;
+        padding: 0.9rem 1.1rem;
+        margin-top: 0.75rem;
+        font-size: 0.82rem;
+        color: #555;
+        display: none;
+        animation: slideDown 0.3s ease;
+      }
+
+      .demo-info-card.visible {
+        display: block;
+      }
+
+      @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      .demo-info-card .demo-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.35rem;
+      }
+
+      .demo-info-card .demo-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .demo-label {
+        font-weight: 700;
+        color: var(--secondary-color);
+        min-width: 68px;
+      }
+
+      .demo-value {
+        font-family: 'Courier New', monospace;
+        background: rgba(229,54,55,0.07);
+        padding: 1px 6px;
+        border-radius: 4px;
+        color: #333;
+        letter-spacing: 0.5px;
+      }
+
+      .demo-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--secondary-color);
+        color: #fff;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.6rem;
+      }
       
       .divider {
         display: flex;
@@ -322,7 +445,29 @@
             </div>
             <%}%>
             
-            <button type="submit" class="btn-login">Log In</button>
+            <button type="submit" class="btn-login" id="loginBtn">Log In</button>
+
+            <!-- ✨ Demo Credentials Button -->
+            <button type="button" class="btn-demo" id="demoBtn" onclick="loadDemoCredentials()">
+              <span class="demo-icon">✨</span>
+              <span>Try Demo Account</span>
+            </button>
+
+            <!-- Demo Info Card (shown after clicking) -->
+            <div class="demo-info-card" id="demoInfoCard">
+              <div class="demo-badge">🎯 Portfolio Demo — HR Access</div>
+              <div class="demo-row">
+                <span class="demo-label">Email</span>
+                <span class="demo-value">demo@timelessedge.com</span>
+              </div>
+              <div class="demo-row">
+                <span class="demo-label">Password</span>
+                <span class="demo-value">Demo@1234</span>
+              </div>
+              <div class="demo-row" style="margin-top:0.5rem; color:#888; font-size:0.78rem;">
+                <span>⚡ Logging you in automatically...</span>
+              </div>
+            </div>
             
             <div class="divider">
               <span>or continue with</span>
@@ -351,6 +496,38 @@
     </div>
 
     <script>
+      /* ── Demo credential auto-fill ────────────────────────────── */
+      function loadDemoCredentials() {
+        const emailField    = document.getElementById('email');
+        const passwordField = document.getElementById('password');
+        const infoCard      = document.getElementById('demoInfoCard');
+        const demoBtn       = document.getElementById('demoBtn');
+
+        // Fill in demo credentials
+        emailField.value    = 'demo@timelessedge.com';
+        passwordField.value = 'Demo@1234';
+
+        // Trigger change events so validation listeners pick up values
+        emailField.dispatchEvent(new Event('input'));
+        passwordField.dispatchEvent(new Event('input'));
+
+        // Show info card with a smooth animation
+        infoCard.classList.add('visible');
+        demoBtn.innerHTML = '<span>⚡</span><span>Credentials Loaded — Signing In...</span>';
+        demoBtn.style.borderColor = '#27ae60';
+        demoBtn.style.color       = '#27ae60';
+        demoBtn.disabled          = true;
+
+        // Clear any stale validation errors
+        document.getElementById('error1').style.display = 'none';
+        document.getElementById('error2').style.display = 'none';
+
+        // Auto-submit after a short delay so user sees the card
+        setTimeout(() => {
+          document.getElementById('loginform').submit();
+        }, 1200);
+      }
+
       const emailid = document.getElementById("email");
       const passid = document.getElementById("password");
       const error1 = document.getElementById("error1");

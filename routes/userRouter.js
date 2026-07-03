@@ -83,28 +83,28 @@ router.post('/profile/update', userAuth, upload.single('profile_image'), profile
 
 // ── Product / Wishlist (public pages, auth on wishlist write) ─────────────────
 router.get('/productDetails', productController.productDetails)
-router.post('/submit-review', productController.submitReview)
+router.post('/submit-review', userAuth, productController.submitReview)
 router.post('/wishlist/add/:id', userAuth, productController.addWhishlist)
 router.get('/wishlist', userAuth, productController.wishListPage)
 router.delete('/wishlist/remove/:productId', productController.removeWishlist)
-router.post('/cart/add-from-wishlist', productController.addToCartFromWishlist)
+router.post('/cart/add-from-wishlist', userAuth, productController.addToCartFromWishlist)
 
 // ── Cart & Checkout ───────────────────────────────────────────────────────────
 router.get('/cart', userAuth, cartController.getCart)
-router.post('/cart/add', cartController.addToCart)
-router.post("/cart/update-cart", cartController.updateCart)
-router.post("/cart/remove", cartController.removeItem)
-router.get('/checkout', cartController.checkOut)
-router.post('/validate-coupon', cartController.validateCoupon)
-router.post('/order/place', cartController.placeOrder)
+router.post('/cart/add', userAuth, cartController.addToCart)
+router.post("/cart/update-cart", userAuth, cartController.updateCart)
+router.post("/cart/remove", userAuth, cartController.removeItem)
+router.get('/checkout', userAuth, cartController.checkOut)
+router.post('/validate-coupon', userAuth, cartController.validateCoupon)
+router.post('/order/place', userAuth, cartController.placeOrder)
 
 // ── Payment & Order confirmation ──────────────────────────────────────────────
-router.get('/order/confirmation/:orderId', userOrderController.confirmOrder)
-router.post('/order/create-razorpay-order', cartController.createRazorpayOrder)
-router.post('/order/verify-payment', cartController.verifyPayment)
-router.get('/order/payment-failed/:orderId', cartController.paymentFailed)
-router.post('/order/retry-payment', cartController.retryPayment)
-router.get('/order/verify-retry-payment', cartController.verifyRetryPayment)
+router.get('/order/confirmation/:orderId', userAuth, userOrderController.confirmOrder)
+router.post('/order/create-razorpay-order', userAuth, cartController.createRazorpayOrder)
+router.post('/order/verify-payment', userAuth, cartController.verifyPayment)
+router.get('/order/payment-failed/:orderId', userAuth, cartController.paymentFailed)
+router.post('/order/retry-payment', userAuth, cartController.retryPayment)
+router.get('/order/verify-retry-payment', userAuth, cartController.verifyRetryPayment)
 
 // ── Wallet — protected ────────────────────────────────────────────────────────
 router.get('/wallet', userAuth, userOrderController.getWalletPage)

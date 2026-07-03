@@ -131,6 +131,110 @@
             padding: 20px;
         }
     }
+
+    /* ── Admin Demo Credentials Button ────────────────── */
+    .btn-demo-admin {
+        width: 100%;
+        background: transparent;
+        border: 1px solid rgba(0, 255, 0, 0.5);
+        color: rgba(0, 255, 0, 0.8);
+        padding: 12px 20px;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border-radius: 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-demo-admin::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 255, 0, 0.08);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.35s ease;
+    }
+
+    .btn-demo-admin:hover::before {
+        transform: scaleX(1);
+    }
+
+    .btn-demo-admin:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        box-shadow: 0 0 15px rgba(0, 255, 0, 0.25);
+        transform: translateY(-2px);
+    }
+
+    /* Terminal-style credential reveal card */
+    .demo-terminal {
+        display: none;
+        margin-top: 14px;
+        background: rgba(0, 20, 0, 0.95);
+        border: 1px solid rgba(0, 255, 0, 0.4);
+        padding: 14px 16px;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 0.78rem;
+        color: #00ff00;
+        animation: terminal-reveal 0.4s ease;
+    }
+
+    .demo-terminal.visible {
+        display: block;
+    }
+
+    @keyframes terminal-reveal {
+        from { opacity: 0; transform: translateY(-6px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .terminal-line {
+        margin-bottom: 5px;
+        display: flex;
+        gap: 8px;
+    }
+
+    .terminal-line:last-child {
+        margin-bottom: 0;
+    }
+
+    .terminal-key {
+        color: rgba(0, 255, 0, 0.6);
+        min-width: 80px;
+    }
+
+    .terminal-val {
+        color: #fff;
+        letter-spacing: 0.5px;
+    }
+
+    .terminal-header {
+        color: rgba(0, 255, 0, 0.5);
+        font-size: 0.7rem;
+        margin-bottom: 8px;
+        border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+        padding-bottom: 6px;
+        letter-spacing: 1px;
+    }
+
+    .blink {
+        animation: blink-cursor 0.8s step-end infinite;
+    }
+
+    @keyframes blink-cursor {
+        50% { opacity: 0; }
+    }
   </style>
 </head>
 <body>
@@ -162,13 +266,58 @@
         />
         <div id="passwordError" class="error-message"></div>
       </div>
-      <button type="submit" class="btn btn-primary">Log In</button>
+      <button type="submit" class="btn btn-primary" id="adminLoginBtn">Log In</button>
+
+      <!-- ⚡ Admin Demo Credentials Button -->
+      <button type="button" class="btn-demo-admin" id="adminDemoBtn" onclick="loadAdminDemoCredentials()">
+        <span>⚡</span>
+        <span>Load Admin Demo Credentials</span>
+      </button>
+
+      <!-- Terminal-style credential reveal -->
+      <div class="demo-terminal" id="adminDemoTerminal">
+        <div class="terminal-header">// PORTFOLIO DEMO — ADMIN ACCESS CREDENTIALS</div>
+        <div class="terminal-line">
+          <span class="terminal-key">EMAIL</span>
+          <span class="terminal-val">&gt; rahullph43@gmail.com</span>
+        </div>
+        <div class="terminal-line">
+          <span class="terminal-key">PASSWORD</span>
+          <span class="terminal-val">&gt; Rahulph@2001</span>
+        </div>
+        <div class="terminal-line" style="margin-top:8px; color:rgba(0,255,0,0.5); font-size:0.72rem;">
+          <span>STATUS</span>
+          <span style="margin-left:8px;">Authenticating...<span class="blink">█</span></span>
+        </div>
+      </div>
     </form>
   </div>
   <script src="/js/jquery.min.js"></script>
   <script src="/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+  /* ── Admin Demo credential auto-fill ──────────────────────── */
+  function loadAdminDemoCredentials() {
+    const emailField    = document.getElementById('adminEmail');
+    const passwordField = document.getElementById('adminPassword');
+    const terminal      = document.getElementById('adminDemoTerminal');
+    const demoBtn       = document.getElementById('adminDemoBtn');
+
+    // Fill in demo admin credentials
+    emailField.value    = 'rahullph43@gmail.com';
+    passwordField.value = 'Rahulph@2001';
+
+    // Show the terminal card
+    terminal.classList.add('visible');
+    demoBtn.innerHTML   = '<span>✅</span><span>Credentials Loaded — Entering System...</span>';
+    demoBtn.disabled    = true;
+
+    // Auto-submit after user sees the credentials
+    setTimeout(() => {
+      document.getElementById('adminLoginForm').submit();
+    }, 1400);
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     const adminLoginForm = document.getElementById("adminLoginForm");
     const emailField = document.getElementById("adminEmail");

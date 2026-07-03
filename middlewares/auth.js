@@ -23,6 +23,7 @@ const userAuth = async (req, res, next) => {
       return res.redirect('/login');
     }
     
+    req.user = activeUser;
     next();
   } catch (error) {
     console.log("Auth middleware error:", error);
